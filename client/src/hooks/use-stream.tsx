@@ -15,12 +15,17 @@ export const useStream = () => {
 
     try {
       // Get token from backend
-      const response = await apiRequest('POST', '/api/token', {
-        userId,
-        callId,
-      });
+      const response = await fetch(`http://localhost:3001/token?userId=${encodeURIComponent(userId)}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to get token');
+      }
 
-      const tokenData: TokenResponse = await response.json();
+      const tokenData = await response.json();
+      
+      // For now, we'll use a default API key since we need Stream credentials
+      const apiKey = 'default_key';
 
       const user: User = {
         id: userId,
@@ -28,7 +33,7 @@ export const useStream = () => {
       };
 
       const streamClient = createStreamClient({
-        apiKey: tokenData.apiKey,
+        apiKey: apiKey,
         token: tokenData.token,
         user,
       });

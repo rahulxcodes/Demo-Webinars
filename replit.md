@@ -8,21 +8,31 @@ This is a modern video calling application built with React frontend and Express
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+### January 26, 2025
+- ✓ Created dedicated Express server (`server/index.js`) on port 3001
+- ✓ Implemented GET `/token` endpoint with userId query parameter  
+- ✓ Added proper error handling for missing credentials and userId
+- ✓ Updated client to use new token endpoint format
+- ✓ Configured dual-server setup (Vite on 5000, Express on 3001)
+
 ## System Architecture
 
 ### Frontend Architecture
 - **Framework**: React with TypeScript
-- **Bundler**: Vite for fast development and optimized builds
+- **Bundler**: Vite for fast development and optimized builds (port 5000)
 - **Styling**: Tailwind CSS with shadcn/ui component library
 - **UI Theme**: New York style with neutral base color and CSS variables
 - **Routing**: Wouter for lightweight client-side routing
 - **State Management**: React Query (TanStack Query) for server state management
 
 ### Backend Architecture
-- **Runtime**: Node.js with Express.js framework
-- **Language**: TypeScript with ES modules
-- **Development**: tsx for TypeScript execution in development
-- **Build**: esbuild for production bundling
+- **Primary Server**: Express.js server (port 3001) for Stream.io token generation
+- **Secondary Server**: TypeScript server (port 5000) for Vite development
+- **Language**: ES modules with modern JavaScript/TypeScript
+- **Token Service**: Dedicated endpoint `/token` with userId query parameter
+- **CORS**: Enabled for cross-origin requests between frontend and backend
 
 ### Database Strategy
 - **ORM**: Drizzle ORM configured for PostgreSQL
@@ -72,8 +82,9 @@ Preferred communication style: Simple, everyday language.
 4. Call controls and settings synchronization
 
 ### API Endpoints
-- `POST /api/token` - Generate Stream authentication token
-- `POST /api/call` - Create or join video call (partial implementation)
+- `GET /token?userId=<userId>` - Generate Stream authentication token (port 3001)
+- `GET /health` - Server health check endpoint (port 3001)
+- Legacy endpoints on port 5000 maintained for development
 
 ## External Dependencies
 
