@@ -67,13 +67,16 @@ export class AuthService {
       throw new Error('Invalid email or password');
     }
 
-    // Create or update user in Stream
+    // Create or update user in Stream (without role - Stream doesn't use predefined roles)
     try {
       await this.streamClient.upsertUsers([
         {
           id: user.id.toString(),
           name: user.name,
-          role: user.role.toLowerCase(),
+          custom: {
+            role: user.role.toLowerCase(),
+            email: user.email,
+          }
         }
       ]);
     } catch (error) {

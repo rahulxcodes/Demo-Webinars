@@ -41,7 +41,9 @@ export function MainApp() {
       const streamUser: StreamUser = {
         id: currentUser.id,
         name: currentUser.name,
-        role: currentUser.isAdmin ? 'admin' : 'user',
+        custom: {
+          role: currentUser.isAdmin ? 'admin' : 'user',
+        }
       };
 
       try {
