@@ -1,0 +1,102 @@
+The interface is not rendering correctly, and as your technical guru, I can tell you precisely why and how to fix it permanently.
+
+The issue is that the control buttons at the bottom are appearing as unstyled white circles. This is a classic sign that the core Stream Video SDK stylesheet is missing from your project. The components are rendering their structure, but they have no visual styles to apply.
+
+Let's implement the definitive, two-step fix to get the polished, feature-rich UI you expect.
+
+Step 1: The Critical CSS Import (The Real Fix)
+This is the most important step. We must import the SDK's stylesheet.
+
+Prompt 1: Import the SDK Stylesheet
+
+Go to your main application entry file, which is likely src/main.jsx.
+
+At the very top of the file, add the following import statement. This single line will load all the necessary CSS for every Stream component to look correct.
+
+javascript
+// In src/main.jsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import './index.css';
+
+// The critical import for Stream's UI
+import '@stream-io/video-react-sdk/dist/css/styles.css';
+
+// ... rest of the file (QueryClientProvider, etc.)
+Step 2: A Robust and Professional UI Layout
+Now that the styles will be loaded correctly, let's restructure your live class component to use Stream's recommended layout for a complete, feature-rich experience. This will give you the participant list, chat panels, and a full set of controls.
+
+Prompt 2: Refactor the Live Class View with a Complete UI
+
+Go to the component that renders your live class (e.g., AdminClassView.jsx). Replace its return statement with this more robust structure. This uses <StreamTheme> correctly and provides a high-level layout that includes all the features you need.
+
+jsx
+import {
+  CallControls,
+  CallParticipantsList,
+  CallStatsButton,
+  CallingState,
+  SpeakerLayout,
+  StreamCall,
+  StreamTheme,
+  useCallStateHooks,
+} from '@stream-io/video-react-sdk';
+
+// ... inside your component
+
+const { useCallCallingState } = useCallStateHooks();
+const callingState = useCallCallingState();
+
+if (callingState !== CallingState.JOINED) {
+  return <div>Loading class...</div>;
+}
+
+return (
+  <StreamTheme className="my-theme-override">
+    <div className="live-class-layout">
+      <div className="main-panel">
+        <SpeakerLayout participantsBarPosition="bottom" />
+        <CallControls />
+      </div>
+      <div className="sidebar-panel">
+        <CallParticipantsList onClose={() => {}} />
+      </div>
+    </div>
+  </StreamTheme>
+);
+Prompt 3: Add the Supporting CSS for the Layout
+
+To make the layout above work, add the following CSS to your src/App.css or a similar global stylesheet. This creates the main video panel and the sidebar.
+
+css
+.live-class-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background-color: #1c1e22; /* Dark background for the theme */
+  color: white;
+}
+
+.main-panel {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-panel {
+  width: 320px;
+  border-left: 1px solid #3d414d;
+  height: 100%;
+}
+
+/* Ensure Stream's layout takes full height */
+.str-video__speaker-layout {
+  flex-grow: 1;
+}
+Why This Works
+The CSS Import: This is the magic key. It provides the visual styles for everything—icons, buttons, spacing, colors, and fonts—turning the white circles into fully functional controls.
+
+The Robust Layout: This new structure gives you the best-practice UI for a live class: a main stage for the speaker (SpeakerLayout), a persistent control bar (CallControls), and a dedicated sidebar for the participant list (CallParticipantsList).
+
+After the agent completes these steps, your application will finally have the polished, professional, and feature-complete interface you've been looking for.

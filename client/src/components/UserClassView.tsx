@@ -1,6 +1,16 @@
 import { useState, useEffect } from 'react';
-import { StreamVideo, StreamCall, StreamTheme, SpeakerLayout, CallControls, StreamVideoClient } from '@stream-io/video-react-sdk';
-import type { Call } from '@stream-io/video-react-sdk';
+import {
+  StreamVideo,
+  StreamCall,
+  StreamTheme,
+  CallControls,
+  CallParticipantsList,
+  SpeakerLayout,
+  CallingState,
+  useCallStateHooks,
+  type StreamVideoClient,
+  type Call,
+} from '@stream-io/video-react-sdk';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +22,66 @@ interface UserClassViewProps {
     name: string;
     isAdmin: boolean;
   };
+}
+
+// Student Live Class Layout Component (similar to instructor but different styling)
+function StudentLiveClassLayout({ 
+  currentUser, 
+  onLeaveClass 
+}: { 
+  currentUser: any;
+  onLeaveClass: () => void;
+}) {
+  const { useCallCallingState } = useCallStateHooks();
+  const callingState = useCallCallingState();
+
+  if (callingState !== CallingState.JOINED) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-2"></div>
+          <p className="text-white">Joining class...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="live-class-layout">
+      {/* Header Bar */}
+      <div className="class-header">
+        <div className="flex items-center space-x-4">
+          <Badge variant="default" className="bg-green-600">
+            🟢 ATTENDING
+          </Badge>
+          <span className="text-white font-medium">
+            {currentUser.name} (Student)
+          </span>
+        </div>
+        <Button
+          onClick={onLeaveClass}
+          variant="outline"
+          size="sm"
+        >
+          Leave Class
+        </Button>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="main-content">
+        <div className="main-panel">
+          <SpeakerLayout participantsBarPosition="bottom" />
+          <div className="controls-container">
+            <CallControls />
+          </div>
+        </div>
+        
+        <div className="sidebar-panel">
+          <CallParticipantsList onClose={() => {}} />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function UserClassView({ videoClient, currentUser }: UserClassViewProps) {
@@ -91,35 +161,11 @@ export function UserClassView({ videoClient, currentUser }: UserClassViewProps) 
     return (
       <StreamVideo client={videoClient}>
         <StreamCall call={call}>
-          <StreamTheme>
-            <div className="h-full flex flex-col">
-              {/* Header with class info */}
-              <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <h2 className="text-lg font-semibold">Live Class Session</h2>
-                    <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                      🟢 JOINED
-                    </Badge>
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Student: {currentUser.name}
-                  </div>
-                </div>
-              </div>
-
-              {/* Video area */}
-              <div className="flex-1">
-                <SpeakerLayout />
-              </div>
-
-              {/* Controls */}
-              <div className="p-4 bg-gray-50 dark:bg-gray-900">
-                <div className="flex justify-center">
-                  <CallControls onLeave={handleLeaveClass} />
-                </div>
-              </div>
-            </div>
+          <StreamTheme className="student-theme">
+            <StudentLiveClassLayout 
+              currentUser={currentUser} 
+              onLeaveClass={handleLeaveClass}
+            />
           </StreamTheme>
         </StreamCall>
       </StreamVideo>

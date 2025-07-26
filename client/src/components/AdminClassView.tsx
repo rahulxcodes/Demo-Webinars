@@ -4,7 +4,9 @@ import {
   StreamCall,
   StreamTheme,
   CallControls,
-  ParticipantView,
+  CallParticipantsList,
+  SpeakerLayout,
+  CallingState,
   useCallStateHooks,
   type StreamVideoClient,
   type Call,
@@ -22,56 +24,65 @@ interface AdminClassViewProps {
   };
 }
 
-// Custom components for the comprehensive UI
-function StreamCallContent() {
-  const { useParticipants } = useCallStateHooks();
-  const participants = useParticipants();
-  
-  const speaker = participants.find(p => p.isDominantSpeaker) || participants[0];
-  
-  return (
-    <div className="h-full flex items-center justify-center">
-      {speaker ? (
-        <ParticipantView
-          participant={speaker}
-          className="w-full h-full"
-        />
-      ) : (
-        <div className="text-white text-center">
-          <div className="text-6xl mb-4">🎓</div>
-          <div className="text-xl">Waiting for participants...</div>
-        </div>
-      )}
-    </div>
-  );
-}
+// Professional Live Class Layout Component
+function LiveClassLayout({ 
+  currentUser, 
+  onEndClass, 
+  isInstructor 
+}: { 
+  currentUser: any;
+  onEndClass: () => void;
+  isInstructor: boolean;
+}) {
+  const { useCallCallingState } = useCallStateHooks();
+  const callingState = useCallCallingState();
 
-function ParticipantsSidebar() {
-  const { useParticipants } = useCallStateHooks();
-  const participants = useParticipants();
-  
+  if (callingState !== CallingState.JOINED) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+          <p className="text-white">Joining class...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="h-full p-4">
-      <h3 className="text-white font-semibold mb-4">
-        Participants ({participants.length})
-      </h3>
-      <div className="space-y-2">
-        {participants.map((participant) => (
-          <div
-            key={participant.sessionId}
-            className="flex items-center space-x-2 p-2 bg-gray-700 rounded"
+    <div className="live-class-layout">
+      {/* Header Bar */}
+      <div className="class-header">
+        <div className="flex items-center space-x-4">
+          <Badge variant="default" className="bg-red-600">
+            {isInstructor ? '🔴 LIVE CLASS' : '🟢 ATTENDING'}
+          </Badge>
+          <span className="text-white font-medium">
+            {currentUser.name} ({isInstructor ? 'Instructor' : 'Student'})
+          </span>
+        </div>
+        {isInstructor && (
+          <Button
+            onClick={onEndClass}
+            variant="destructive"
+            size="sm"
           >
-            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-              {participant.name?.[0] || '?'}
-            </div>
-            <div className="flex-1 text-white text-sm">
-              {participant.name || 'Anonymous'}
-            </div>
-            {participant.isDominantSpeaker && (
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            )}
+            End Class
+          </Button>
+        )}
+      </div>
+
+      {/* Main Content Area */}
+      <div className="main-content">
+        <div className="main-panel">
+          <SpeakerLayout participantsBarPosition="bottom" />
+          <div className="controls-container">
+            <CallControls />
           </div>
-        ))}
+        </div>
+        
+        <div className="sidebar-panel">
+          <CallParticipantsList onClose={() => {}} />
+        </div>
       </div>
     </div>
   );
@@ -133,48 +144,17 @@ export function AdminClassView({ videoClient, currentUser }: AdminClassViewProps
   };
 
   if (isClassStarted && call) {
+    const { useCallCallingState } = useCallStateHooks();
+    
     return (
       <StreamVideo client={videoClient}>
         <StreamCall call={call}>
-          <StreamTheme>
-            <div className="h-full flex flex-col bg-gray-900">
-              {/* Header */}
-              <div className="bg-gray-800 p-4 flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <Badge variant="default" className="bg-red-600">
-                    🔴 LIVE CLASS
-                  </Badge>
-                  <span className="text-white font-medium">
-                    Live Class - {currentUser.name} (Instructor)
-                  </span>
-                </div>
-                <Button
-                  onClick={handleEndClass}
-                  variant="destructive"
-                  size="sm"
-                >
-                  End Class
-                </Button>
-              </div>
-
-              {/* Main Video Area */}
-              <div className="flex-1 flex">
-                {/* Primary Video Container */}
-                <div className="flex-1 relative bg-black">
-                  <StreamCallContent />
-                </div>
-                
-                {/* Sidebar for Participants */}
-                <div className="w-64 bg-gray-800 border-l border-gray-700">
-                  <ParticipantsSidebar />
-                </div>
-              </div>
-
-              {/* Controls */}
-              <div className="bg-gray-800 p-4 flex justify-center">
-                <CallControls />
-              </div>
-            </div>
+          <StreamTheme className="instructor-theme">
+            <LiveClassLayout 
+              currentUser={currentUser} 
+              onEndClass={handleEndClass}
+              isInstructor={true}
+            />
           </StreamTheme>
         </StreamCall>
       </StreamVideo>

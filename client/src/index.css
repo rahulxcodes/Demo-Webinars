@@ -2,6 +2,71 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Stream Video SDK Layout Styles */
+.live-class-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  background-color: #1c1e22;
+  color: white;
+}
+
+.class-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #2d3748;
+  border-bottom: 1px solid #3d414d;
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.main-panel {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.sidebar-panel {
+  width: 320px;
+  border-left: 1px solid #3d414d;
+  height: 100%;
+  background-color: #2d3748;
+}
+
+.controls-container {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+/* Ensure Stream's layout takes full height */
+.str-video__speaker-layout {
+  flex-grow: 1;
+}
+
+/* Stream theme customizations */
+.instructor-theme {
+  --str-video__primary-color: #ef4444;
+  --str-video__secondary-color: #64748b;
+  --str-video__accent-color: #3b82f6;
+}
+
+.student-theme {
+  --str-video__primary-color: #10b981;
+  --str-video__secondary-color: #64748b;
+  --str-video__accent-color: #3b82f6;
+}
+
 :root {
   --background: hsl(0, 0%, 100%);
   --foreground: hsl(20, 14.3%, 4.1%);
