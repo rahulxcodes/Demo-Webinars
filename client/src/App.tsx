@@ -4,12 +4,21 @@ import type { Call } from '@stream-io/video-react-sdk';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Layout } from '@/components/Layout';
+
+// Simulate current user
+const currentUser = { 
+  id: 'admin-instructor', 
+  name: 'Dr. Admin', 
+  isAdmin: true 
+};
 
 function App() {
   const [videoClient, setVideoClient] = useState<StreamVideoClient | null>(null);
   const [call, setCall] = useState<Call | null>(null);
   const [callId, setCallId] = useState('');
   const [isCallJoined, setIsCallJoined] = useState(false);
+  const [activeView, setActiveView] = useState('live');
 
   useEffect(() => {
     const initializeClient = async () => {
@@ -27,7 +36,7 @@ function App() {
         const { token, apiKey } = await response.json();
         
         if (!apiKey) {
-          throw new Error('VITE_STREAM_API_KEY is not set');
+          throw new Error('API key is not set');
         }
         
         // Create user object
@@ -72,19 +81,17 @@ function App() {
     }
   };
 
-  const handleLeaveCall = async () => {
+  const handleLeaveCall = () => {
     if (call) {
-      await call.leave();
+      call.leave();
       setCall(null);
       setIsCallJoined(false);
-      setCallId('');
     }
   };
 
-  // Show loading state while client is initializing
   if (!videoClient) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Initializing video client...</p>
@@ -93,53 +100,88 @@ function App() {
     );
   }
 
-  return (
-    <StreamVideo client={videoClient}>
-      <StreamTheme>
-        <div className="min-h-screen bg-gray-900">
-          {!isCallJoined ? (
-            // Join call form
-            <div className="min-h-screen flex items-center justify-center p-4">
-              <Card className="w-full max-w-md">
-                <CardHeader>
-                  <CardTitle className="text-center">Join Video Call</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Input
-                      type="text"
-                      placeholder="Enter Call ID"
-                      value={callId}
-                      onChange={(e) => setCallId(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleJoinCall()}
-                    />
-                  </div>
-                  <Button
-                    onClick={handleJoinCall}
-                    className="w-full bg-blue-600 hover:bg-blue-700"
-                    disabled={!callId.trim()}
-                  >
-                    Join Call
-                  </Button>
-                </CardContent>
-              </Card>
+  if (isCallJoined && call) {
+    return (
+      <StreamVideo client={videoClient}>
+        <StreamCall call={call}>
+          <StreamTheme>
+            <div className="h-screen flex flex-col">
+              <SpeakerLayout />
+              <div className="p-4">
+                <CallControls onLeave={handleLeaveCall} />
+              </div>
             </div>
-          ) : (
-            // Live video interface
-            call && (
-              <StreamCall call={call}>
-                <div className="h-screen relative">
-                  <SpeakerLayout />
-                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-                    <CallControls onLeave={handleLeaveCall} />
-                  </div>
-                </div>
-              </StreamCall>
-            )
-          )}
+          </StreamTheme>
+        </StreamCall>
+      </StreamVideo>
+    );
+  }
+
+  const renderMainContent = () => {
+    if (activeView === 'live') {
+      return (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold">Live Class View</h1>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Welcome, {currentUser.name} {currentUser.isAdmin && '(Admin)'}
+            </div>
+          </div>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Join Video Call</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label htmlFor="callId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Call ID
+                </label>
+                <Input
+                  id="callId"
+                  type="text"
+                  placeholder="Enter call ID"
+                  value={callId}
+                  onChange={(e) => setCallId(e.target.value)}
+                />
+              </div>
+              <Button 
+                onClick={handleJoinCall} 
+                className="w-full"
+                disabled={!callId.trim()}
+              >
+                Join Call
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-      </StreamTheme>
-    </StreamVideo>
+      );
+    }
+
+    if (activeView === 'recordings') {
+      return (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold">Recordings View</h1>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Welcome, {currentUser.name} {currentUser.isAdmin && '(Admin)'}
+            </div>
+          </div>
+          
+          <div className="text-center py-12">
+            <p className="text-gray-500">Recordings functionality coming soon...</p>
+          </div>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <Layout activeView={activeView} setActiveView={setActiveView}>
+      {renderMainContent()}
+    </Layout>
   );
 }
 
