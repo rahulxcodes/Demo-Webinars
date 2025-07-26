@@ -29,6 +29,10 @@ Preferred communication style: Simple, everyday language.
 - ✓ Implemented live class detection via Stream API queries
 - ✓ Added periodic status checking for students
 - ✓ Configured role-based rendering in main App component
+- ✓ Created RecordingsView component with Stream API integration
+- ✓ Implemented recordings query and display functionality
+- ✓ Added recording playback with external link opening
+- ✓ Enhanced UI with proper loading states and error handling
 
 ## System Architecture
 

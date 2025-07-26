@@ -34,7 +34,8 @@ export function UserClassView({ videoClient, currentUser }: UserClassViewProps) 
       // Check if call exists and has members
       if (result.calls && result.calls.length > 0) {
         const classCall = result.calls[0];
-        const hasMembers = classCall.session?.participants && classCall.session.participants.length > 0;
+        // Check if call has active participants by looking at the call state
+        const hasMembers = classCall.state?.members && Object.keys(classCall.state.members).length > 0;
         setIsClassLive(hasMembers);
       } else {
         setIsClassLive(false);

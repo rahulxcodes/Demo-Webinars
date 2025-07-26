@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Layout } from '@/components/Layout';
 import { AdminClassView } from '@/components/AdminClassView';
 import { UserClassView } from '@/components/UserClassView';
+import { RecordingsView } from '@/components/RecordingsView';
 
 // Simulate current user - change this to test different roles
 const currentUser = { 
@@ -143,17 +144,16 @@ function App() {
     }
 
     if (activeView === 'recordings') {
+      if (videoClient) {
+        return <RecordingsView videoClient={videoClient} />;
+      }
+      
+      // Fallback for when videoClient is not ready
       return (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">Recordings View</h1>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              Welcome, {currentUser.name} {currentUser.isAdmin && '(Admin)'}
-            </div>
-          </div>
-          
-          <div className="text-center py-12">
-            <p className="text-gray-500">Recordings functionality coming soon...</p>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+            <p className="text-gray-600">Loading...</p>
           </div>
         </div>
       );
