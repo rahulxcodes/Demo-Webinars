@@ -24,10 +24,7 @@ function App() {
           throw new Error('Failed to fetch token');
         }
         
-        const { token } = await response.json();
-        
-        // Get the API key from environment variables
-        const apiKey = import.meta.env.VITE_STREAM_API_KEY;
+        const { token, apiKey } = await response.json();
         
         if (!apiKey) {
           throw new Error('VITE_STREAM_API_KEY is not set');
