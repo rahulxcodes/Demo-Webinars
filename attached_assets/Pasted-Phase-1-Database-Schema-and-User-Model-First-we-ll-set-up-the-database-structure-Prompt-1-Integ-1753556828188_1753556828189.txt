@@ -1,0 +1,60 @@
+Phase 1: Database Schema and User Model
+First, we'll set up the database structure.
+
+Prompt 1: Integrate Prisma
+
+In the server directory, install Prisma as a dev dependency. Initialize Prisma with PostgreSQL as the provider.
+
+Prompt 2: Define the User Schema
+
+In the prisma/schema.prisma file, define the User model. It needs the following fields:
+
+id (autoincrementing integer, primary key)
+
+email (string, unique)
+
+name (string)
+
+password (string, for the hash)
+
+role (an enum Role with values ADMIN and STUDENT, with a default of STUDENT)
+
+createdAt and updatedAt timestamps.
+
+Prompt 3: Apply the Schema
+
+Generate the Prisma Client and run the database migration to create the new users table based on the schema.
+
+Phase 2: Backend Authentication Logic
+Now we'll build the API endpoints for registration and login.
+
+Prompt 4: Install Auth Dependencies
+
+In the server directory, install the necessary packages for authentication: bcrypt for password hashing and @nestjs/jwt along with passport-jwt for handling JSON Web Tokens.
+
+Prompt 5: Create Auth Module and Service
+
+In the NestJS backend, generate a new auth module. Within it, create an auth.service.ts that will contain the logic for registration and login. This service will need to import and use the Prisma Client.
+
+Prompt 6: Implement the Registration Endpoint
+
+In the auth module, implement the POST /auth/register endpoint. The logic in the service should:
+
+Accept name, email, and password from the request body.
+
+Check if a user with the email already exists.
+
+Hash the incoming password using bcrypt.
+
+Create and save the new user to the database with the hashed password.
+
+Prompt 7: Implement the Login Endpoint
+
+In the auth module, implement the POST /auth/login endpoint. The logic in the service should:
+
+Find the user by their email address.
+
+If the user exists, compare the provided password with the stored hash using bcrypt.
+
+If the password is correct, generate and return a signed JSON Web Token (JWT) that includes the user's id and role in the payload.
+

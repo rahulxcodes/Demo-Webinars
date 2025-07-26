@@ -30,21 +30,13 @@ export function RecordingsView({ videoClient }: RecordingsViewProps) {
       setError(null);
       
       try {
-        // Query recordings from Stream API
-        const result = await videoClient.queryRecordings({
-          // Filter by our class call ID
-          filter_conditions: { 'call.id': 'live-class-main-1' },
-          sort: [{ field: 'start_time', direction: -1 }], // Most recent first
-        });
-
-        if (result.recordings) {
-          setRecordings(result.recordings);
-        } else {
-          setRecordings([]);
-        }
+        // For now, show a message that recordings are not yet implemented
+        // The Stream API might require additional configuration for recordings
+        setError('Recording playback feature is coming soon. Recordings will be available once properly configured with Stream.io.');
+        setRecordings([]);
       } catch (err) {
         console.error('Failed to fetch recordings:', err);
-        setError('Failed to load recordings. You may not have permission to view recordings.');
+        setError('Failed to load recordings. Feature requires additional Stream.io configuration.');
         setRecordings([]);
       } finally {
         setIsLoading(false);

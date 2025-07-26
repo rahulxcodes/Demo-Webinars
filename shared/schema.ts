@@ -1,14 +1,20 @@
-import { pgTable, text, timestamp, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, integer, boolean, pgEnum } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+
+// Role enum
+export const roleEnum = pgEnum("role", ["ADMIN", "STUDENT"]);
 
 // Users table
 export const users = pgTable("users", {
   id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
   name: text("name").notNull(),
-  email: text("email"),
+  email: text("email").unique().notNull(),
+  password: text("password").notNull(),
+  role: roleEnum("role").default("STUDENT").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // Calls table
@@ -60,6 +66,16 @@ export const callParticipantsRelations = relations(callParticipants, ({ one }) =
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
+  updatedAt: true,
+});
+
+// Registration schema
+export const registerSchema = insertUserSchema.omit({ role: true });
+
+// Login schema
+export const loginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 export const insertCallSchema = createInsertSchema(calls).omit({
@@ -102,3 +118,14 @@ export const joinCallSchema = z.object({
 });
 
 export type JoinCallRequest = z.infer<typeof joinCallSchema>;
+
+// Auth types
+export type RegisterRequest = z.infer<typeof registerSchema>; 
+export type LoginRequest = z.infer<typeof loginSchema>;
+
+// JWT payload type
+export interface JWTPayload {
+  id: number;
+  email: string;
+  role: "ADMIN" | "STUDENT";
+}
