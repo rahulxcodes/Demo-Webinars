@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { StreamVideo, StreamCall, StreamTheme, SpeakerLayout, CallControls } from '@stream-io/video-react-sdk';
-import type { StreamVideoClient, Call } from '@stream-io/video-react-sdk';
+import { StreamVideo, StreamCall, StreamTheme, SpeakerLayout, CallControls, StreamVideoClient } from '@stream-io/video-react-sdk';
+import type { Call } from '@stream-io/video-react-sdk';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
