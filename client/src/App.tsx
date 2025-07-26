@@ -18,7 +18,7 @@ function App() {
         const userId = Math.random().toString(36).substring(2, 15);
         
         // Fetch a user token from the backend
-        const response = await fetch(`http://localhost:3001/token?userId=${encodeURIComponent(userId)}`);
+        const response = await fetch(`/api/token?userId=${encodeURIComponent(userId)}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch token');

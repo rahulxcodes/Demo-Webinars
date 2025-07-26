@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { StreamClient } from '@stream-io/node-sdk';
-import { tokenRequestSchema, joinCallSchema, insertUserSchema, insertCallSchema } from "@shared/schema";
+import { joinCallSchema, insertUserSchema, insertCallSchema } from "@shared/schema";
 import { storage } from "./storage";
 import { randomUUID } from "crypto";
 
@@ -12,17 +12,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const streamClient = new StreamClient(apiKey, apiSecret);
 
   // Generate Stream token for user authentication
-  app.post("/api/token", async (req, res) => {
+  app.get("/api/token", async (req, res) => {
     try {
-      const validation = tokenRequestSchema.safeParse(req.body);
-      if (!validation.success) {
+      const { userId } = req.query;
+      
+      if (!userId || typeof userId !== 'string') {
         return res.status(400).json({ 
-          message: "Invalid request", 
-          errors: validation.error.errors 
+          message: "userId is required" 
         });
       }
-
-      const { userId, callId } = validation.data;
 
       // Generate token for the user
       const token = streamClient.generateUserToken({ user_id: userId });
