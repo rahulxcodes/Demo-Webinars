@@ -41,8 +41,9 @@ function LiveClassLayout({
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-          <p className="text-white">Joining class...</p>
+          <div className="loading-spinner mx-auto mb-4"></div>
+          <p className="text-white text-lg font-medium">Joining class...</p>
+          <p className="text-gray-400 text-sm mt-2">Please wait while we connect you</p>
         </div>
       </div>
     );
@@ -53,17 +54,22 @@ function LiveClassLayout({
       {/* Header Bar */}
       <div className="class-header">
         <div className="flex items-center space-x-4">
-          <Badge variant="default" className="bg-red-600">
+          <div className={isInstructor ? 'live-status-badge' : 'attending-status-badge'}>
             {isInstructor ? '🔴 LIVE CLASS' : '🟢 ATTENDING'}
-          </Badge>
-          <span className="text-white font-medium">
-            {currentUser.name} ({isInstructor ? 'Instructor' : 'Student'})
-          </span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center font-semibold text-sm">
+              {currentUser.name[0]?.toUpperCase()}
+            </div>
+            <span className="text-white font-medium">
+              {currentUser.name} · {isInstructor ? 'Instructor' : 'Student'}
+            </span>
+          </div>
         </div>
         {isInstructor && (
           <Button
             onClick={onEndClass}
-            variant="destructive"
+            className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-medium px-4 py-2 rounded-lg border-none shadow-lg hover:shadow-xl transition-all duration-200"
             size="sm"
           >
             End Class
