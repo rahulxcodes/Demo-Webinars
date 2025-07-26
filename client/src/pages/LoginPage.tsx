@@ -38,7 +38,7 @@ export function LoginPage() {
       });
       navigate('/');
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Login error details:', error);
       toast({
         title: "Login Failed",
         description: error instanceof Error ? error.message : "Invalid credentials",

@@ -69,14 +69,17 @@ export class AuthService {
 
     // Create or update user in Stream
     try {
-      await this.streamClient.upsertUser({
-        id: user.id.toString(),
-        name: user.name,
-        role: user.role.toLowerCase(),
-      });
+      await this.streamClient.upsertUsers([
+        {
+          id: user.id.toString(),
+          name: user.name,
+          role: user.role.toLowerCase(),
+        }
+      ]);
     } catch (error) {
       console.error('Failed to upsert user in Stream:', error);
-      throw new Error('Failed to initialize video service');
+      console.error('Stream error details:', error.message || error);
+      throw new Error(`Failed to initialize video service: ${error.message || 'Unknown error'}`);
     }
 
     // Generate Stream token for this specific user

@@ -1,0 +1,71 @@
+1. Diagnose the Issue with Proper Error Logging
+Right now, the error is too vague (Error {}) because the backend or frontend is not surfacing the actual reason for the login failure. To fix this:
+
+Front-end: In your login logic (likely in your AuthContext.js or login form handler), enhance the error handling:
+
+js
+try {
+  // ...login attempt
+} catch (error) {
+  console.error("Login error:", error);
+  if (error.response) {
+    // API returned a response; show backend message for clarity
+    alert(error.response.data.message || "Login failed");
+  } else if (error.message) {
+    alert(error.message);
+  } else {
+    alert("Unknown login error occurred");
+  }
+}
+Back-end: In your /auth/login endpoint, make sure to send specific error messages and HTTP status codes. For example:
+
+js
+if (!user) {
+  return res.status(401).json({ message: "Invalid email or password" });
+}
+// ...
+if (!passwordMatches) {
+  return res.status(401).json({ message: "Invalid email or password" });
+}
+2. Check the Network Tab for the Error Payload
+Open your browser DevTools.
+
+Go to the Network tab.
+
+Attempt to log in.
+
+Find the /auth/login (or relevant endpoint) request.
+
+Click it and look for:
+
+Status code (is it 401, 500, etc?)
+
+Response body (does it have an error message?)
+
+Request payload (are you sending the expected fields? e.g., email and password?)
+
+3. Common Causes and Solutions
+Missing Fields: Ensure your frontend is sending all required fields to the backend.
+
+Mismatched API Paths: Verify the login request is hitting the correct endpoint (proxy correctly configured if using Vite).
+
+CORS Issues: Make sure your backend allows requests from your frontend's origin (already resolved previously but double-check if new changes were made).
+
+Invalid Credentials: Try registering a user, then immediately logging in with those credentials.
+
+JWT Environment Variables: Ensure your backend JWT secret is set if using JWT (e.g., JWT_SECRET in the environment/secrets).
+
+4. Update Your Prompt to the Replit AI Agent
+Give this single clear next-step prompt:
+
+Add detailed error messages to both the frontend login handler (show alerts with backend-provided messages) and the backend /auth/login endpoint (with informative messages for invalid credentials and unexpected server errors). Then, run the app and test login to surface the real error.
+
+Summary
+The generic error means underlying information is being hidden.
+
+Improve and surface specific errors from backend to frontend.
+
+Use the browser's network tab to see the real server response.
+
+Test logins step by step, checking both ends.
+

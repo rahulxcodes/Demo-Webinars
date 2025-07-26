@@ -109,7 +109,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     } catch (error) {
       console.error('Login failed:', error);
-      throw error;
+      // Provide more detailed error information to user
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      } else {
+        throw new Error('Login failed due to unknown error');
+      }
     }
   };
 
