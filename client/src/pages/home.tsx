@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { PreCallScreen } from '@/components/pre-call-screen';
 import { VideoCallScreen } from '@/components/video-call-screen';
+import { ActiveCallsList } from '@/components/active-calls-list';
 import { useStream } from '@/hooks/use-stream';
 import { useToast } from '@/hooks/use-toast';
 
@@ -52,5 +53,18 @@ export default function Home() {
     );
   }
 
-  return <PreCallScreen onJoinCall={handleJoinCall} />;
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-700">
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          <div>
+            <PreCallScreen onJoinCall={handleJoinCall} />
+          </div>
+          <div className="lg:mt-8">
+            <ActiveCallsList />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

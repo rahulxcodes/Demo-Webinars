@@ -44,8 +44,7 @@ export function PreCallScreen({ onJoinCall }: PreCallScreenProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-blue-700 p-4">
-      <Card className="w-full max-w-md shadow-2xl">
+    <Card className="w-full max-w-md shadow-2xl">
         <CardContent className="p-8">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
@@ -140,6 +139,5 @@ export function PreCallScreen({ onJoinCall }: PreCallScreenProps) {
           </div>
         </CardContent>
       </Card>
-    </div>
   );
 }

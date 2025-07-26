@@ -16,6 +16,10 @@ Preferred communication style: Simple, everyday language.
 - ✓ Added proper error handling for missing credentials and userId
 - ✓ Updated client to use new token endpoint format
 - ✓ Configured dual-server setup (Vite on 5000, Express on 3001)
+- ✓ Added PostgreSQL database with Drizzle ORM
+- ✓ Implemented database storage layer with Users, Calls, and CallParticipants tables
+- ✓ Created database endpoints for call management (join, list active calls)
+- ✓ Enhanced frontend with active calls list and improved layout
 
 ## System Architecture
 
@@ -38,7 +42,8 @@ Preferred communication style: Simple, everyday language.
 - **ORM**: Drizzle ORM configured for PostgreSQL
 - **Connection**: Neon Database serverless PostgreSQL
 - **Schema Location**: Shared schema definitions in `/shared/schema.ts`
-- **Migrations**: Stored in `/migrations` directory
+- **Tables**: Users, Calls, Call Participants with proper relations
+- **Storage Layer**: DatabaseStorage class implementing IStorage interface
 
 ## Key Components
 
@@ -83,6 +88,8 @@ Preferred communication style: Simple, everyday language.
 
 ### API Endpoints
 - `GET /token?userId=<userId>` - Generate Stream authentication token (port 3001)
+- `POST /join-call` - Join/create call and register user in database (port 3001)
+- `GET /calls` - Get list of active calls (port 3001)
 - `GET /health` - Server health check endpoint (port 3001)
 - Legacy endpoints on port 5000 maintained for development
 

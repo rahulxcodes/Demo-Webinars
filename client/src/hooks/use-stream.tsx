@@ -14,15 +14,35 @@ export const useStream = () => {
     setError(null);
 
     try {
+      // First, join the call to register in database
+      const joinResponse = await fetch('http://localhost:3001/join-call', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: userName,
+          callId: callId,
+        }),
+      });
+
+      if (!joinResponse.ok) {
+        const errorData = await joinResponse.json();
+        throw new Error(errorData.error || 'Failed to join call');
+      }
+
+      const joinData = await joinResponse.json();
+      console.log('Joined call:', joinData);
+
       // Get token from backend
-      const response = await fetch(`http://localhost:3001/token?userId=${encodeURIComponent(userId)}`);
+      const tokenResponse = await fetch(`http://localhost:3001/token?userId=${encodeURIComponent(userId)}`);
       
-      if (!response.ok) {
-        const errorData = await response.json();
+      if (!tokenResponse.ok) {
+        const errorData = await tokenResponse.json();
         throw new Error(errorData.error || 'Failed to get token');
       }
 
-      const tokenData = await response.json();
+      const tokenData = await tokenResponse.json();
       
       // For now, we'll use a default API key since we need Stream credentials
       const apiKey = 'default_key';
