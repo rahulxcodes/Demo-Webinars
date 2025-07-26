@@ -1,0 +1,46 @@
+Phase 3: Frontend UI and State Management
+First, we need a way to manage the user's login state globally across the entire application. We'll use React's Context API for this.
+
+Prompt 1: Create an Authentication Context
+
+In the src directory, create a new folder named context. Inside, create a file named AuthContext.jsx.
+
+In this file, create a new React context named AuthContext.
+
+Create a provider component AuthProvider that will wrap our application.
+
+This provider will manage the user's state (e.g., isAuthenticated, user, token). It should also contain functions for login and logout. The login function will take credentials, call our backend API, and on success, it will store the user data and JWT in state and local storage. The logout function will clear this data.
+
+Prompt 2: Implement Frontend Pages
+
+In the src directory, create a new folder named pages. Inside it, create two new components: LoginPage.jsx and SignupPage.jsx.
+
+Each component should contain a simple form to capture the necessary inputs (email/password for login; name/email/password for signup).
+
+When the forms are submitted, they should call the login or signup functions from our AuthContext.
+
+Phase 4: Protected Routes and Routing Setup
+Now, let's set up routing to handle different pages and protect our main application from unauthorized access.
+
+Prompt 3: Install React Router
+
+Install react-router-dom, the standard library for routing in React applications.
+
+Prompt 4: Create a Protected Route Component
+
+In the src/components folder, create a new component ProtectedRoute.jsx. This component will check the AuthContext to see if a user is authenticated. If they are, it will render its children. If not, it will redirect them to the /login page.
+
+Prompt 5: Configure the Main App Router
+
+Refactor src/App.jsx to act as the main router for the application.
+
+Wrap the entire app in the AuthProvider we created.
+
+Use react-router-dom to set up the following routes:
+
+/login routes to the LoginPage component.
+
+/signup routes to the SignupPage component.
+
+/ (the root path) should be wrapped in our ProtectedRoute component. Inside the protected route, render the main application layout we built previously (the one with the sidebar for "Live Class" and "Recordings").
+
