@@ -1,0 +1,39 @@
+Server-Driven User and Token Management
+Prompt 1: Refactor the Backend Token Endpoint
+
+We need to update the POST /auth/login endpoint in server/index.js (or auth.service.ts). Its new responsibility is not just to create a token, but to ensure the user exists in Stream first.
+
+After successfully authenticating the user against our database, use the serverClient to call streamClient.upsertUser(). The upsertUser function will create the user in Stream if they don't exist or update them if they do. Pass it the user's id, name, and role.
+
+Only after the upsertUser call is successful, proceed to create the token for that same user ID.
+
+Modify the endpoint's response. It should now return an object containing both the token and the user object (with id, name, role).
+
+Prompt 2: Refactor the Frontend Authentication Flow
+
+Now, we'll update the frontend to use this new, richer data from the backend. This will likely be in your AuthContext.jsx.
+
+Modify the login function. When it receives the successful response from the /auth/login endpoint, it should now store both the token and the user object in its state and in local storage.
+
+The currentUser object used throughout the app should now be sourced directly from this authenticated user data, not a hardcoded variable.
+
+Prompt 3: Refine the Video Client Initialization
+
+Finally, let's update the component where the StreamVideoClient is created (e.g., MainApp.jsx).
+
+This component should now get the full user object and the token from your AuthContext.
+
+When initializing the StreamVideoClient, pass the entire user object you received from the backend into the user property of the client's configuration.
+
+The dependency array for the client initialization useEffect should now depend on the token, ensuring it re-initializes if the user logs out and back in.
+
+Why This is the Definitive Fix
+This new architecture eliminates any possibility of a mismatch.
+
+The backend guarantees that the user (id: 'student-jane', role: 'user') exists on Stream's platform.
+
+The backend then creates a token that is cryptographically tied to that exact user.
+
+The frontend receives both the user object and the token together, ensuring it initializes the client with data that is guaranteed to be in perfect sync.
+
+This robust, server-authoritative pattern is the industry standard for building reliable real-time applications and will resolve the persistent WebSocket connection error.

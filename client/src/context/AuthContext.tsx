@@ -69,6 +69,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(null);
     setToken(null);
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('stream_token');
     localStorage.removeItem('auth_user');
   };
 
@@ -89,8 +90,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       const data = await response.json();
 
-      if (data.token && data.user) {
+      if (data.token && data.streamToken && data.user) {
         const authToken = data.token;
+        const streamToken = data.streamToken;
         const userData = data.user;
 
         // Update state
@@ -100,6 +102,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         // Store in localStorage
         localStorage.setItem('auth_token', authToken);
+        localStorage.setItem('stream_token', streamToken);
         localStorage.setItem('auth_user', JSON.stringify(userData));
       } else {
         throw new Error('Invalid response format');

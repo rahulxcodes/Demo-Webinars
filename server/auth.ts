@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { StreamClient } from '@stream-io/node-sdk';
 import { db } from './db';
 import { users } from '@shared/schema';
 import { eq } from 'drizzle-orm';
@@ -9,6 +10,13 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key';
 const SALT_ROUNDS = 12;
 
 export class AuthService {
+  private streamClient: StreamClient;
+
+  constructor() {
+    const apiKey = process.env.STREAM_API_KEY || process.env.VITE_STREAM_API_KEY || "";
+    const apiSecret = process.env.STREAM_API_SECRET || process.env.VITE_STREAM_API_SECRET || "";
+    this.streamClient = new StreamClient(apiKey, apiSecret);
+  }
   async register(data: RegisterRequest) {
     const { name, email, password } = data;
 
@@ -59,6 +67,23 @@ export class AuthService {
       throw new Error('Invalid email or password');
     }
 
+    // Create or update user in Stream
+    try {
+      await this.streamClient.upsertUser({
+        id: user.id.toString(),
+        name: user.name,
+        role: user.role.toLowerCase(),
+      });
+    } catch (error) {
+      console.error('Failed to upsert user in Stream:', error);
+      throw new Error('Failed to initialize video service');
+    }
+
+    // Generate Stream token for this specific user
+    const streamToken = this.streamClient.generateUserToken({
+      user_id: user.id.toString(),
+    });
+
     // Generate JWT token
     const payload: JWTPayload = {
       id: user.id,
@@ -66,12 +91,13 @@ export class AuthService {
       role: user.role,
     };
 
-    const token = jwt.sign(payload, JWT_SECRET, {
+    const authToken = jwt.sign(payload, JWT_SECRET, {
       expiresIn: '7d', // Token expires in 7 days
     });
 
     return {
-      token,
+      token: authToken,
+      streamToken,
       user: {
         id: user.id,
         name: user.name,

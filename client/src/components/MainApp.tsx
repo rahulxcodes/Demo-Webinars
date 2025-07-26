@@ -22,29 +22,16 @@ export function MainApp() {
     isAdmin: user.role === 'ADMIN'
   } : null;
 
-  // Fetch Stream token only when we have a valid user
-  const { data: tokenData, isLoading: tokenLoading, error: tokenError } = useQuery({
-    queryKey: ['/api/token', currentUser?.id],
-    enabled: !!currentUser?.id,
-    queryFn: async () => {
-      const response = await fetch(`/api/token?userId=${encodeURIComponent(currentUser?.id || '')}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch token');
-      }
-      return response.json();
-    },
-  });
+  // Get Stream token from localStorage (set during login)
+  const streamToken = localStorage.getItem('stream_token');
 
-  // Initialize Stream Video Client only after token is fetched
+  // Initialize Stream Video Client with user data and token from auth
   useEffect(() => {
-    // Cleanup existing client first
-    if (videoClient) {
-      videoClient.disconnectUser();
-      setVideoClient(null);
-    }
+    // Reset client state
+    setVideoClient(null);
 
     // Only create client if we have all required data
-    if (tokenData?.token && currentUser) {
+    if (streamToken && currentUser) {
       const apiKey = import.meta.env.VITE_STREAM_API_KEY;
       if (!apiKey) {
         console.error('Stream API key not found');
@@ -54,28 +41,27 @@ export function MainApp() {
       const streamUser: StreamUser = {
         id: currentUser.id,
         name: currentUser.name,
+        role: currentUser.isAdmin ? 'admin' : 'user',
       };
 
       try {
         const client = new StreamVideoClient({
           apiKey,
           user: streamUser,
-          token: tokenData.token,
+          token: streamToken,
         });
 
         setVideoClient(client);
+
+        // Cleanup function to disconnect when dependencies change
+        return () => {
+          client.disconnectUser();
+        };
       } catch (error) {
         console.error('Failed to create StreamVideoClient:', error);
       }
     }
-
-    // Cleanup function
-    return () => {
-      if (videoClient) {
-        videoClient.disconnectUser();
-      }
-    };
-  }, [tokenData, currentUser]); // Dependencies: only recreate when token or user changes
+  }, [streamToken, currentUser?.id, currentUser?.name, currentUser?.isAdmin]); // Dependencies: only recreate when token or user changes
 
   // Handle loading states
   if (!currentUser) {
@@ -89,29 +75,18 @@ export function MainApp() {
     );
   }
 
-  if (tokenLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-          <p className="text-gray-600">Fetching authentication token...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (tokenError) {
+  if (!streamToken) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-600 mb-4">
-            Failed to authenticate with video service
+            No video service token found. Please log in again.
           </div>
           <button 
-            onClick={() => window.location.reload()} 
+            onClick={() => logout()} 
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
-            Try Again
+            Re-authenticate
           </button>
         </div>
       </div>
