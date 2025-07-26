@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Layout } from '@/components/Layout';
+import { AdminClassView } from '@/components/AdminClassView';
 
 // Simulate current user
 const currentUser = { 
@@ -119,28 +120,34 @@ function App() {
 
   const renderMainContent = () => {
     if (activeView === 'live') {
+      // Show admin interface if user is admin
+      if (currentUser.isAdmin && videoClient) {
+        return <AdminClassView videoClient={videoClient} currentUser={currentUser} />;
+      }
+      
+      // Show student interface for non-admin users
       return (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">Live Class View</h1>
+            <h1 className="text-2xl font-bold">Join Live Class</h1>
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              Welcome, {currentUser.name} {currentUser.isAdmin && '(Admin)'}
+              Welcome, {currentUser.name}
             </div>
           </div>
           
           <Card>
             <CardHeader>
-              <CardTitle>Join Video Call</CardTitle>
+              <CardTitle>Student Access</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <label htmlFor="callId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Call ID
+                  Class ID
                 </label>
                 <Input
                   id="callId"
                   type="text"
-                  placeholder="Enter call ID"
+                  placeholder="Enter class ID (e.g., live-class-main-1)"
                   value={callId}
                   onChange={(e) => setCallId(e.target.value)}
                 />
@@ -150,7 +157,7 @@ function App() {
                 className="w-full"
                 disabled={!callId.trim()}
               >
-                Join Call
+                Join Class
               </Button>
             </CardContent>
           </Card>

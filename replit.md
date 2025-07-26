@@ -20,6 +20,11 @@ Preferred communication style: Simple, everyday language.
 - ✓ Implemented database storage layer with Users, Calls, and CallParticipants tables
 - ✓ Created database endpoints for call management (join, list active calls)
 - ✓ Enhanced frontend with active calls list and improved layout
+- ✓ Created shared Layout component with sidebar navigation
+- ✓ Implemented user role simulation (admin vs student interfaces)
+- ✓ Added AdminClassView component for instructor flow
+- ✓ Integrated automatic recording for admin-started classes
+- ✓ Fixed Stream.io API key consistency issues
 
 ## System Architecture
 
