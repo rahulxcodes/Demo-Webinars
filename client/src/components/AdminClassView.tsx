@@ -16,6 +16,17 @@ import {
   type StreamVideoClient,
   type Call,
 } from '@stream-io/video-react-sdk';
+import { 
+  HiMicrophone, 
+  HiMicrophoneSlash, 
+  HiVideoCamera, 
+  HiVideoCameraSlash,
+  HiDesktopComputer,
+  HiStop,
+  HiUsers,
+  HiCog,
+  HiPhone
+} from 'react-icons/hi2';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -111,9 +122,10 @@ function LiveClassLayout({
               <button 
                 className="participants-btn"
                 onClick={() => setShowSidebar(!showSidebar)}
+                aria-label={`Show participants panel (${participants.length} participants)`}
               >
-                <span>👥</span>
-                Participants ({participants.length})
+                <HiUsers className="w-5 h-5" />
+                <span>Participants ({participants.length})</span>
               </button>
             </div>
             <CancelCallButton onLeave={() => onEndClass()} />

@@ -261,8 +261,12 @@
   background-color: #3d3d42 !important;
   border: none !important;
   color: white !important;
-  font-size: 18px !important;
+  font-size: 20px !important;
   transition: all 0.2s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
 }
 
 .str-video__toggle-audio-publishing-button:hover,
@@ -273,7 +277,7 @@
   transform: scale(1.05) !important;
 }
 
-/* Cancel/End call button - red styling */
+/* Cancel/End call button - red styling with phone icon rotation */
 .str-video__cancel-call-button {
   background-color: #ff4757 !important;
 }
@@ -281,6 +285,10 @@
 .str-video__cancel-call-button:hover {
   background-color: #ff3742 !important;
   transform: scale(1.05) !important;
+}
+
+.str-video__cancel-call-button svg {
+  transform: rotate(135deg) !important;
 }
 
 /* Active state styling */
@@ -292,6 +300,27 @@
 .str-video__screen-share-button[data-testid*="active"],
 .str-video__record-call-button[data-testid*="recording"] {
   background-color: #005FFF !important;
+}
+
+/* Icon styling for control buttons */
+.custom-control-bar .str-video__toggle-audio-publishing-button svg,
+.custom-control-bar .str-video__toggle-video-publishing-button svg,
+.custom-control-bar .str-video__screen-share-button svg,
+.custom-control-bar .str-video__record-call-button svg,
+.custom-control-bar .str-video__cancel-call-button svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* Accessibility improvements */
+.custom-control-bar button:focus {
+  outline: 2px solid #005FFF !important;
+  outline-offset: 2px !important;
+}
+
+.custom-control-bar button:focus-visible {
+  outline: 2px solid #005FFF !important;
+  outline-offset: 2px !important;
 }
 
 /* Main speaker video container */
