@@ -8,6 +8,7 @@ import {
   SpeakerLayout,
   CallingState,
   useCallStateHooks,
+  useCall,
   type StreamVideoClient,
   type Call,
 } from '@stream-io/video-react-sdk';
@@ -28,7 +29,7 @@ interface AdminClassViewProps {
   isFullScreen?: boolean;
 }
 
-// Professional Live Class Layout Component - Hooks must be inside StreamCall
+// Professional Live Class Layout Component - Following Stream SDK best practices
 function LiveClassLayout({ 
   currentUser, 
   onEndClass, 
@@ -40,38 +41,32 @@ function LiveClassLayout({
   isInstructor: boolean;
   isFullScreen?: boolean;
 }) {
-  // All Stream hooks must be inside a component wrapped by StreamCall
+  // Use Stream hooks correctly within StreamCall context
   const call = useCall();
-  const { 
-    useCallCallingState,
-    useParticipants, 
-    useParticipantCount, 
-    useLocalParticipant 
-  } = useCallStateHooks();
-  
+  const { useCallCallingState, useParticipants } = useCallStateHooks();
   const callingState = useCallCallingState();
   const participants = useParticipants();
-  const participantCount = useParticipantCount();
-  const localParticipant = useLocalParticipant();
 
   console.log('[LiveClassLayout] Call object:', !!call, 'CID:', call?.cid);
   console.log('[LiveClassLayout] Calling state:', callingState);
-  console.log('[LiveClassLayout] Participants:', participants.length);
-  console.log('[LiveClassLayout] ParticipantCount:', participantCount);
-  console.log('[LiveClassLayout] LocalParticipant:', localParticipant?.sessionId);
+  console.log('[LiveClassLayout] Raw participants:', participants.length);
 
-  // Wait for call to be properly joined
-  if (callingState !== CallingState.JOINED && callingState !== CallingState.IDLE) {
+  // Check for the call object itself before proceeding
+  if (!call || callingState === CallingState.OFFLINE || callingState === CallingState.JOINING) {
     return (
       <div className="flex items-center justify-center h-full bg-gray-900">
         <div className="text-center">
           <div className="loading-spinner mx-auto mb-4"></div>
-          <p className="text-white text-lg font-medium">Joining class...</p>
+          <p className="text-white text-lg font-medium">Joining or Loading Class...</p>
           <p className="text-gray-400 text-sm mt-2">State: {callingState}</p>
         </div>
       </div>
     );
   }
+
+  // Filter out potential system/recording bots if needed for display count
+  const displayParticipants = participants.filter(p => p.type !== 'bot');
+  console.log('[LiveClassLayout] Display participants (filtered):', displayParticipants.length);
 
   return (
     <div className="live-class-container">
@@ -114,17 +109,19 @@ function LiveClassLayout({
       
       <div className="participants-sidebar">
         <div className="participants-header">
-          <h3>Participants ({participantCount || participants.length})</h3>
+          <h3>Participants ({displayParticipants.length})</h3>
           <button 
             onClick={() => {
               console.log('[Debug] Manual participant check:');
-              console.log('- Hook participants:', participants.length);
-              console.log('- Hook participantCount:', participantCount);
-              console.log('- Hook localParticipant:', localParticipant);
+              console.log('- Raw participants:', participants.length);
+              console.log('- Display participants:', displayParticipants.length);
+              console.log('- Call CID:', call?.cid);
+              console.log('- Calling state:', callingState);
               console.log('- Participants details:', participants.map(p => ({ 
                 sessionId: p.sessionId, 
                 userId: p.userId, 
-                name: p.name 
+                name: p.name,
+                type: p.type
               })));
             }}
             className="text-xs bg-blue-600 text-white px-2 py-1 rounded mt-2"

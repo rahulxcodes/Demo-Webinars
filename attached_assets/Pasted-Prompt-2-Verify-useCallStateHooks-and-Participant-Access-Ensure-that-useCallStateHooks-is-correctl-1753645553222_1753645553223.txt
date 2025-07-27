@@ -1,0 +1,59 @@
+Prompt 2: Verify useCallStateHooks and Participant Access
+
+Ensure that useCallStateHooks is correctly used within the StreamCall context to get real-time data like participants. This hook should be called directly inside the component that renders the call UI.
+
+jsx
+// Inside your AdminClassView or LiveClassView
+import {
+  // ... other imports
+  useCallStateHooks,
+  CallingState,
+  StreamVideo,
+  StreamCall,
+  StreamTheme,
+  SpeakerLayout,
+  CallControls,
+  CallParticipantsList,
+} from '@stream-io/video-react-sdk';
+
+// Assuming videoClient and call are passed as props or from state
+export default function LiveClassView({ videoClient, call, onLiveClassStart, onLiveClassEnd }) {
+  const { useCallCallingState, useParticipants } = useCallStateHooks();
+  const callingState = useCallCallingState();
+  const participants = useParticipants(); // This will give you the live list of participants
+
+  // Add a check for the call object itself before proceeding
+  if (!call || callingState === CallingState.OFFLINE || callingState === CallingState.JOINING) {
+    return <div>Joining or Loading Class...</div>; // Render a loading state
+  }
+
+  // Filter out potential system/recording bots if needed for display count
+  const displayParticipants = participants.filter(p => p.type !== 'bot');
+
+  return (
+    <StreamVideo client={videoClient}>
+      <StreamCall call={call}> {/* Ensure 'call' object is correctly passed here */}
+        <StreamTheme className="str-video__theme-default">
+          <div className="live-class-container">
+            <div className="main-video-area">
+              <SpeakerLayout 
+                participantsBarPosition="bottom"
+                participantsBarLimit={6}
+              />
+              <div className="call-controls-overlay">
+                <CallControls />
+              </div>
+            </div>
+            <div className="participants-sidebar">
+              <div className="participants-header">
+                <h3>Participants ({displayParticipants.length})</h3> {/* Use filtered count */}
+              </div>
+              <CallParticipantsList onClose={() => {}} />
+            </div>
+          </div>
+        </StreamTheme>
+      </StreamCall>
+    </StreamVideo>
+  );
+}
+Note: Your AdminClassView (or LiveClassView) likely receives videoClient and call as props from its parent (e.g., App.jsx). Ensure these are correctly passed down.
