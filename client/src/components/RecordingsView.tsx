@@ -21,6 +21,7 @@ export function RecordingsView({ videoClient }: RecordingsViewProps) {
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedRecording, setSelectedRecording] = useState<Recording | null>(null);
 
   useEffect(() => {
     const fetchRecordings = async () => {
@@ -81,9 +82,12 @@ export function RecordingsView({ videoClient }: RecordingsViewProps) {
     return `${mb.toFixed(1)} MB`;
   };
 
-  const handleOpenRecording = (url: string) => {
-    // Navigate to recording in same tab instead of opening new tab
-    window.location.href = url;
+  const handleWatchRecording = (recording: Recording) => {
+    setSelectedRecording(recording);
+  };
+
+  const handleBackToList = () => {
+    setSelectedRecording(null);
   };
 
   if (isLoading) {
@@ -99,6 +103,62 @@ export function RecordingsView({ videoClient }: RecordingsViewProps) {
             <p className="text-gray-600">Loading recordings...</p>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  // If a recording is selected, show the video player
+  if (selectedRecording) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button onClick={handleBackToList} variant="outline">
+              ← Back to Recordings
+            </Button>
+            <h1 className="text-2xl font-bold">
+              Recording from {new Date(selectedRecording.start_time).toLocaleDateString()}
+            </h1>
+          </div>
+        </div>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-4">
+              <video 
+                controls 
+                width="100%" 
+                height="100%"
+                src={selectedRecording.url}
+                preload="metadata"
+                className="w-full h-full object-contain"
+                autoPlay
+              >
+                Your browser doesn't support video playback.
+              </video>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-400">
+              <div>
+                <span className="font-medium">Started:</span>
+                <br />
+                {formatDate(selectedRecording.start_time)}
+              </div>
+              {selectedRecording.end_time && (
+                <div>
+                  <span className="font-medium">Ended:</span>
+                  <br />
+                  {formatDate(selectedRecording.end_time)}
+                </div>
+              )}
+              <div>
+                <span className="font-medium">Duration:</span>
+                <br />
+                {formatDuration(selectedRecording.duration)}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -190,20 +250,13 @@ export function RecordingsView({ videoClient }: RecordingsViewProps) {
                 </div>
                 
                 {recording.url ? (
-                  <div className="space-y-2">
-                    <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
-                      <video 
-                        controls 
-                        width="100%" 
-                        height="100%"
-                        src={recording.url}
-                        preload="metadata"
-                        className="w-full h-full object-contain"
-                      >
-                        Your browser doesn't support video playback.
-                      </video>
-                    </div>
-                  </div>
+                  <Button
+                    onClick={() => handleWatchRecording(recording)}
+                    className="w-full md:w-auto"
+                    variant="default"
+                  >
+                    🎬 Watch Recording
+                  </Button>
                 ) : (
                   <div className="text-sm text-gray-500">
                     Recording is still processing...
@@ -224,7 +277,7 @@ export function RecordingsView({ videoClient }: RecordingsViewProps) {
             <p>• Recordings are automatically created when instructors start live classes</p>
             <p>• All class participants can access recorded sessions</p>
             <p>• Recordings are available for replay at any time</p>
-            <p>• Videos play directly in the interface for easy viewing</p>
+            <p>• Click "Watch Recording" to view videos in an embedded player</p>
           </div>
         </CardContent>
       </Card>
