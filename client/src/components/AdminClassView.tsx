@@ -40,17 +40,30 @@ function LiveClassLayout({
   isInstructor: boolean;
   isFullScreen?: boolean;
 }) {
-  // Move hooks inside the component that's wrapped by StreamCall
-  const { useCallCallingState } = useCallStateHooks();
+  // All Stream hooks must be inside a component wrapped by StreamCall
+  const call = useCall();
+  const { 
+    useCallCallingState,
+    useParticipants, 
+    useParticipantCount, 
+    useLocalParticipant 
+  } = useCallStateHooks();
+  
   const callingState = useCallCallingState();
+  const participants = useParticipants();
+  const participantCount = useParticipantCount();
+  const localParticipant = useLocalParticipant();
 
+  console.log('[LiveClassLayout] Call object:', !!call, 'CID:', call?.cid);
   console.log('[LiveClassLayout] Calling state:', callingState);
+  console.log('[LiveClassLayout] Participants:', participants.length);
+  console.log('[LiveClassLayout] ParticipantCount:', participantCount);
+  console.log('[LiveClassLayout] LocalParticipant:', localParticipant?.sessionId);
 
-  // Allow both JOINED and IDLE states to show the interface
-  // IDLE is acceptable for the instructor who created the call
+  // Wait for call to be properly joined
   if (callingState !== CallingState.JOINED && callingState !== CallingState.IDLE) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex items-center justify-center h-full bg-gray-900">
         <div className="text-center">
           <div className="loading-spinner mx-auto mb-4"></div>
           <p className="text-white text-lg font-medium">Joining class...</p>
@@ -59,16 +72,6 @@ function LiveClassLayout({
       </div>
     );
   }
-
-  // Use the correct hooks according to Stream.io documentation
-  const { useParticipants, useParticipantCount, useLocalParticipant } = useCallStateHooks();
-  const participants = useParticipants();
-  const participantCount = useParticipantCount();
-  const localParticipant = useLocalParticipant();
-
-  console.log('[LiveClassLayout] Participants:', participants.length);
-  console.log('[LiveClassLayout] ParticipantCount:', participantCount);
-  console.log('[LiveClassLayout] LocalParticipant:', localParticipant?.sessionId);
 
   return (
     <div className="live-class-container">
@@ -236,10 +239,15 @@ export function AdminClassView({
       // Join the call with create: true to ensure it exists
       await newCall.join({ create: true });
       console.log('[AdminClassView] Successfully joined call, CID:', newCall.cid);
+      
+      // Wait a moment for call state to stabilize
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       console.log('[AdminClassView] Call state after join:', {
         participants: newCall.state.participants.length,
         members: newCall.state.members.length,
-        isJoined: newCall.state.callingState
+        callingState: newCall.state.callingState,
+        settings: newCall.state.settings
       });
       
       // Set the call and class state immediately after successful join
@@ -296,35 +304,22 @@ export function AdminClassView({
   
   // Show the live class interface if we have both call and class started
   if (call && isClassStarted) {
-    console.log('[AdminClassView] ✅ Rendering live class interface');
+    console.log('[AdminClassView] ✅ Rendering live class interface with call CID:', call.cid);
     
-    // Add null checks and error boundary
-    if (!call || !videoClient) {
-      return (
-        <div className="flex items-center justify-center h-full">
-          <div className="text-center">
-            <div className="loading-spinner mx-auto mb-4"></div>
-            <p className="text-white text-lg font-medium">Initializing call...</p>
-          </div>
-        </div>
-      );
-    }
-    
+    // Ensure proper Stream SDK component hierarchy
     return (
-      <ErrorBoundary>
-        <StreamVideo client={videoClient}>
-          <StreamCall call={call}>
-            <StreamTheme className="instructor-theme">
-              <LiveClassLayout 
-                currentUser={currentUser} 
-                onEndClass={handleEndClass}
-                isInstructor={true}
-                isFullScreen={isFullScreen}
-              />
-            </StreamTheme>
-          </StreamCall>
-        </StreamVideo>
-      </ErrorBoundary>
+      <StreamVideo client={videoClient}>
+        <StreamCall call={call}>
+          <StreamTheme className="str-video__theme-default">
+            <LiveClassLayout 
+              currentUser={currentUser} 
+              onEndClass={handleEndClass}
+              isInstructor={true}
+              isFullScreen={isFullScreen}
+            />
+          </StreamTheme>
+        </StreamCall>
+      </StreamVideo>
     );
   }
 
