@@ -134,11 +134,12 @@ export function AdminClassView({
       
       // Join the call and create it if it doesn't exist
       await newCall.join({ create: true });
+      console.log('[AdminClassView] Successfully joined call');
       
       // Set the call and class state immediately after successful join
       setCall(newCall);
       setIsClassStarted(true);
-      console.log('[AdminClassView] Class started, triggering full-screen mode');
+      console.log('[AdminClassView] State set - call:', !!newCall, 'isClassStarted:', true);
       onLiveClassStart?.(); // Trigger full-screen mode
       
       // Start recording automatically (after state is set)
@@ -181,9 +182,11 @@ export function AdminClassView({
     }
   };
 
+  console.log('[AdminClassView] RENDER CHECK - call:', !!call, 'isClassStarted:', isClassStarted, 'isLoading:', isLoading);
+  
   // Show the live class interface if we have both call and class started
   if (call && isClassStarted) {
-    console.log('[AdminClassView] Rendering live class interface');
+    console.log('[AdminClassView] ✅ Rendering live class interface');
     
     // Add null checks and error boundary
     if (!call || !videoClient) {
@@ -215,6 +218,8 @@ export function AdminClassView({
     );
   }
 
+  console.log('[AdminClassView] ❌ Rendering start interface instead');
+  
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
