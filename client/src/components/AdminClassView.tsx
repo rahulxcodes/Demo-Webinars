@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ErrorBoundary } from './ErrorBoundary';
 
 interface AdminClassViewProps {
   videoClient: StreamVideoClient;
@@ -24,7 +25,7 @@ interface AdminClassViewProps {
   };
 }
 
-// Professional Live Class Layout Component
+// Professional Live Class Layout Component - Hooks must be inside StreamCall
 function LiveClassLayout({ 
   currentUser, 
   onEndClass, 
@@ -34,6 +35,7 @@ function LiveClassLayout({
   onEndClass: () => void;
   isInstructor: boolean;
 }) {
+  // Move hooks inside the component that's wrapped by StreamCall
   const { useCallCallingState } = useCallStateHooks();
   const callingState = useCallCallingState();
 
@@ -150,20 +152,32 @@ export function AdminClassView({ videoClient, currentUser }: AdminClassViewProps
   };
 
   if (isClassStarted && call) {
-    const { useCallCallingState } = useCallStateHooks();
+    // Add null checks and error boundary
+    if (!call || !videoClient) {
+      return (
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="loading-spinner mx-auto mb-4"></div>
+            <p className="text-white text-lg font-medium">Initializing call...</p>
+          </div>
+        </div>
+      );
+    }
     
     return (
-      <StreamVideo client={videoClient}>
-        <StreamCall call={call}>
-          <StreamTheme className="instructor-theme">
-            <LiveClassLayout 
-              currentUser={currentUser} 
-              onEndClass={handleEndClass}
-              isInstructor={true}
-            />
-          </StreamTheme>
-        </StreamCall>
-      </StreamVideo>
+      <ErrorBoundary>
+        <StreamVideo client={videoClient}>
+          <StreamCall call={call}>
+            <StreamTheme className="instructor-theme">
+              <LiveClassLayout 
+                currentUser={currentUser} 
+                onEndClass={handleEndClass}
+                isInstructor={true}
+              />
+            </StreamTheme>
+          </StreamCall>
+        </StreamVideo>
+      </ErrorBoundary>
     );
   }
 

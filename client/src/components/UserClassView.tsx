@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ErrorBoundary } from './ErrorBoundary';
 
 interface UserClassViewProps {
   videoClient: StreamVideoClient;
@@ -24,7 +25,7 @@ interface UserClassViewProps {
   };
 }
 
-// Student Live Class Layout Component (similar to instructor but different styling)
+// Student Live Class Layout Component - Hooks must be inside StreamCall  
 function StudentLiveClassLayout({ 
   currentUser, 
   onLeaveClass 
@@ -32,6 +33,7 @@ function StudentLiveClassLayout({
   currentUser: any;
   onLeaveClass: () => void;
 }) {
+  // Hooks are now properly inside StreamCall wrapper
   const { useCallCallingState } = useCallStateHooks();
   const callingState = useCallCallingState();
 
@@ -164,17 +166,31 @@ export function UserClassView({ videoClient, currentUser }: UserClassViewProps) 
   };
 
   if (isInCall && call) {
+    // Add null checks and error boundary
+    if (!call || !videoClient) {
+      return (
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="loading-spinner mx-auto mb-4"></div>
+            <p className="text-white text-lg font-medium">Initializing call...</p>
+          </div>
+        </div>
+      );
+    }
+    
     return (
-      <StreamVideo client={videoClient}>
-        <StreamCall call={call}>
-          <StreamTheme className="student-theme">
-            <StudentLiveClassLayout 
-              currentUser={currentUser} 
-              onLeaveClass={handleLeaveClass}
-            />
-          </StreamTheme>
-        </StreamCall>
-      </StreamVideo>
+      <ErrorBoundary>
+        <StreamVideo client={videoClient}>
+          <StreamCall call={call}>
+            <StreamTheme className="student-theme">
+              <StudentLiveClassLayout 
+                currentUser={currentUser} 
+                onLeaveClass={handleLeaveClass}
+              />
+            </StreamTheme>
+          </StreamCall>
+        </StreamVideo>
+      </ErrorBoundary>
     );
   }
 

@@ -85,9 +85,10 @@ export class AuthService {
       throw new Error(`Failed to initialize video service: ${error.message || 'Unknown error'}`);
     }
 
-    // Generate Stream token for this specific user
+    // Generate Stream token for this specific user with longer expiration (24 hours)
     const streamToken = this.streamClient.generateUserToken({
       user_id: user.id.toString(),
+      exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours
     });
 
     // Generate JWT token
