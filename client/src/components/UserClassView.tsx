@@ -83,7 +83,7 @@ function StudentLiveClassLayout({
         <div className="main-panel">
           <SpeakerLayout participantsBarPosition="bottom" />
           <div className="controls-container">
-            <CallControls />
+            <CallControls onLeave={() => handleLeaveClass()} />
           </div>
         </div>
         
@@ -134,7 +134,6 @@ export function UserClassView({ videoClient, currentUser, onLiveClassStart, onLi
       await call.leave();
       setCall(null);
       setIsInCall(false);
-      onLiveClassEnd(); // Notify parent that student left live class
     } catch (error) {
       console.error('Failed to leave class:', error);
     }
@@ -160,7 +159,10 @@ export function UserClassView({ videoClient, currentUser, onLiveClassStart, onLi
             <StreamTheme className="student-theme">
               <StudentLiveClassLayout 
                 currentUser={currentUser} 
-                onLeaveClass={handleLeaveClass}
+                onLeaveClass={() => {
+                  handleLeaveClass();
+                  onLiveClassEnd();
+                }}
               />
             </StreamTheme>
           </StreamCall>

@@ -86,7 +86,7 @@ function LiveClassLayout({
         <div className="main-panel">
           <SpeakerLayout participantsBarPosition="bottom" />
           <div className="controls-container">
-            <CallControls />
+            <CallControls onLeave={() => onEndClass()} />
           </div>
         </div>
         
@@ -159,7 +159,6 @@ export function AdminClassView({ videoClient, currentUser, onLiveClassStart, onL
       await call.leave();
       setCall(null);
       setIsClassStarted(false);
-      onLiveClassEnd(); // Notify parent that class has ended
     } catch (error) {
       console.error('Failed to end class:', error);
     }
@@ -185,7 +184,10 @@ export function AdminClassView({ videoClient, currentUser, onLiveClassStart, onL
             <StreamTheme className="instructor-theme">
               <LiveClassLayout 
                 currentUser={currentUser} 
-                onEndClass={handleEndClass}
+                onEndClass={() => {
+                  handleEndClass();
+                  onLiveClassEnd();
+                }}
                 isInstructor={true}
               />
             </StreamTheme>
