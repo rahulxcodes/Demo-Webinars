@@ -45,7 +45,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
             });
 
             if (!response.ok) {
-              // Token is invalid, clear auth state
+              // Token is invalid, clear auth state including stream tokens
+              console.log('Auth token expired, clearing all tokens');
               clearAuthState();
             }
           } catch (error) {

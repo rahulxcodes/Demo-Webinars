@@ -9,6 +9,7 @@ import { AdminClassView } from '@/components/AdminClassView';
 import { UserClassView } from '@/components/UserClassView';
 import { RecordingsView } from '@/components/RecordingsView';
 import { useAuth } from '@/context/AuthContext';
+import { clearExpiredTokens } from '@/utils/tokenRefresh';
 
 export function MainApp() {
   const { user, logout } = useAuth();
@@ -38,6 +39,23 @@ export function MainApp() {
         return;
       }
 
+      // Check if token is expired before creating client
+      try {
+        // Parse JWT to check expiration
+        const payload = JSON.parse(atob(streamToken.split('.')[1]));
+        const currentTime = Math.floor(Date.now() / 1000);
+        
+        if (payload.exp && payload.exp < currentTime) {
+          console.log('Stream token is expired, forcing logout and re-login');
+          logout(); // Use the auth logout function instead
+          return;
+        }
+      } catch (error) {
+        console.log('Invalid token format, forcing logout and re-login');
+        logout(); // Use the auth logout function instead
+        return;
+      }
+
       const streamUser: StreamUser = {
         id: currentUser.id,
         name: currentUser.name,
@@ -55,12 +73,26 @@ export function MainApp() {
 
         setVideoClient(client);
 
+        // Handle client connection errors
+        client.on('connection.error', (error: any) => {
+          console.error('Stream connection error:', error);
+          if (error?.error?.code === 40 || error?.error?.message?.includes('expired')) {
+            console.log('Token expired during connection, forcing logout');
+            logout();
+          }
+        });
+
         // Cleanup function to disconnect when dependencies change
         return () => {
           client.disconnectUser();
         };
       } catch (error) {
         console.error('Failed to create StreamVideoClient:', error);
+        // If token creation fails, likely due to expired token
+        if (error.message?.includes('expired') || error.message?.includes('JWT')) {
+          console.log('Token expired, forcing logout');
+          logout();
+        }
       }
     }
   }, [streamToken, currentUser?.id, currentUser?.name, currentUser?.isAdmin]); // Dependencies: only recreate when token or user changes
@@ -78,6 +110,13 @@ export function MainApp() {
   }
 
   if (!streamToken) {
+    // Clear auth state and force re-login if no stream token
+    logout();
+    return null;
+  }
+
+  // Check for expired tokens by attempting to create the client
+  if (!videoClient && streamToken) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
