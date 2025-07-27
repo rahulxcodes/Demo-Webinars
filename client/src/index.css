@@ -13,52 +13,7 @@
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-.class-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.5rem;
-  background: rgba(15, 23, 42, 0.95);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
 
-.main-content {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-}
-
-.main-panel {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  background: #0f172a;
-}
-
-.sidebar-panel {
-  width: 320px;
-  border-left: 1px solid rgba(148, 163, 184, 0.1);
-  height: 100%;
-  background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
-}
-
-.controls-container {
-  position: absolute;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 50;
-  background: rgba(15, 23, 42, 0.9);
-  backdrop-filter: blur(16px);
-  border-radius: 16px;
-  padding: 12px 16px;
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-}
 
 /* Stream Layout Enhancements */
 .str-video__speaker-layout {
