@@ -35,17 +35,32 @@ export function RecordingsView({ videoClient }: RecordingsViewProps) {
         // Get the specific call we're using for live classes
         const call = videoClient.call('default', 'live-class-main-1');
         
-        // Try to query recordings via the video client instead of call method
-        const response = await videoClient.listRecordings({
-          call_cid: call.cid
+        // Query recordings using the correct Stream API approach
+        const response = await videoClient.queryCalls({
+          filter_conditions: {
+            id: 'live-class-main-1'
+          },
+          watch: false,
+          limit: 1
         });
-        console.log('[RecordingsView] Recordings response:', response);
         
-        if (response?.recordings && response.recordings.length > 0) {
-          setRecordings(response.recordings);
-          console.log(`[RecordingsView] Found ${response.recordings.length} recordings`);
+        console.log('[RecordingsView] Call query response:', response);
+        
+        if (response.calls && response.calls.length > 0) {
+          const callData = response.calls[0];
+          // Check if there are recordings in the call data
+          const recordings = callData.recordings || [];
+          console.log('[RecordingsView] Found recordings in call:', recordings);
+          
+          if (recordings && recordings.length > 0) {
+            setRecordings(recordings);
+            console.log(`[RecordingsView] Found ${recordings.length} recordings`);
+          } else {
+            console.log('[RecordingsView] No recordings found in call data');
+            setRecordings([]);
+          }
         } else {
-          console.log('[RecordingsView] No recordings found');
+          console.log('[RecordingsView] No call found, cannot fetch recordings');
           setRecordings([]);
         }
       } catch (err) {
