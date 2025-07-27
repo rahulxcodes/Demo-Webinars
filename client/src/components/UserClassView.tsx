@@ -105,9 +105,18 @@ function StudentLiveClassLayout({
           <div className="custom-control-bar">
             {/* Primary Controls Group */}
             <div className="control-group primary-controls">
-              <ToggleAudioPublishingButton />
-              <ToggleVideoPublishingButton />
-              <ScreenShareButton />
+              <div className="control-button-wrapper">
+                <ToggleAudioPublishingButton title="Mute/Unmute microphone (Space)" />
+                <div className="control-button-tooltip">Mute/Unmute (Space)</div>
+              </div>
+              <div className="control-button-wrapper">
+                <ToggleVideoPublishingButton title="Turn camera on/off" />
+                <div className="control-button-tooltip">Camera on/off</div>
+              </div>
+              <div className="control-button-wrapper">
+                <ScreenShareButton title="Share your screen" />
+                <div className="control-button-tooltip">Share screen</div>
+              </div>
             </div>
             
             {/* Separator */}
@@ -120,9 +129,18 @@ function StudentLiveClassLayout({
                   className="participants-btn"
                   onClick={() => setShowSidebar(!showSidebar)}
                   aria-label={`Show participants panel (${participants.length} participants)`}
+                  title="Show participants panel"
                 >
                   <HiUsers className="w-5 h-5" />
                   <span>Participants ({participants.length})</span>
+                  {participants.length > 1 && (
+                    <div 
+                      className="participant-count-badge"
+                      aria-label={`${participants.length} participants in call`}
+                    >
+                      {participants.length}
+                    </div>
+                  )}
                 </button>
               </div>
             </div>

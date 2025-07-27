@@ -275,11 +275,12 @@
   animation: haptic-pulse 0.1s ease-out !important;
 }
 
-/* Participants counter styling */
+/* Interactive Participants Counter with Badge */
 .participants-counter {
   display: flex;
   align-items: center;
   margin: 0 8px;
+  position: relative;
 }
 
 .participants-btn {
@@ -287,7 +288,7 @@
   align-items: center !important;
   gap: 8px !important;
   background-color: transparent !important;
-  border: 1px solid #3d3d42 !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
   border-radius: 24px !important;
   padding: 8px 16px !important;
   color: white !important;
@@ -295,24 +296,74 @@
   font-weight: 500 !important;
   width: auto !important;
   height: auto !important;
-  transition: all 0.2s ease !important;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative;
 }
 
 .participants-btn:hover {
-  background-color: rgba(93, 93, 95, 0.2) !important;
-  border-color: #5a5a5f !important;
-  transform: scale(1.02) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  transform: scale(1.05) !important;
+  filter: brightness(1.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
 }
 
 .participants-btn:active {
-  transform: scale(0.98) !important;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+  transform: scale(0.95) !important;
+  transition: transform 100ms ease-out !important;
 }
 
 .participants-btn:focus {
   outline: 2px solid #005FFF !important;
   outline-offset: 2px !important;
+}
+
+/* Dynamic Participant Count Badge */
+.participant-count-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  background: #00D4AA;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  border: 2px solid rgba(28, 30, 34, 0.85);
+  z-index: 10;
+  
+  /* Entrance animation */
+  animation: badge-entrance 300ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.participant-count-badge.pulse {
+  animation: badge-pulse 400ms ease-out;
+}
+
+@keyframes badge-entrance {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes badge-pulse {
+  0% { transform: scale(1); background: #00D4AA; }
+  50% { transform: scale(1.2); background: #00E6B8; }
+  100% { transform: scale(1); background: #00D4AA; }
+}
+
+/* Hide badge when count <= 1 */
+.participant-count-badge.hidden {
+  display: none;
 }
 
 /* Stream Component Button Variants */
@@ -342,48 +393,142 @@
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* Primary button hover states */
+/* Professional Hover Effects with Enhanced Feedback */
 .str-video__toggle-audio-publishing-button:hover,
 .str-video__toggle-video-publishing-button:hover,
 .str-video__screen-share-button:hover,
 .str-video__record-call-button:hover {
   background-color: #3A3A3D !important;
   transform: scale(1.05) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+  filter: brightness(1.1) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
 }
 
-/* Active/pressed states for primary buttons */
+/* Professional Button Press Animations */
 .str-video__toggle-audio-publishing-button:active,
 .str-video__toggle-video-publishing-button:active,
 .str-video__screen-share-button:active,
 .str-video__record-call-button:active {
-  transform: scale(0.98) !important;
+  transform: scale(0.95) !important;
+  transition: transform 100ms ease-out !important;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
-  animation: haptic-pulse 0.1s ease-out !important;
 }
 
-/* Toggle States */
+/* Release animation with overshoot */
+.str-video__toggle-audio-publishing-button:not(:active),
+.str-video__toggle-video-publishing-button:not(:active),
+.str-video__screen-share-button:not(:active),
+.str-video__record-call-button:not(:active) {
+  animation: button-release 200ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
 
-/* Inactive state (muted/off) - Danger styling */
-.str-video__toggle-audio-publishing-button[data-testid*="muted"],
-.str-video__toggle-video-publishing-button[data-testid*="off"] {
+@keyframes button-release {
+  0% { transform: scale(0.95); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1.0); }
+}
+
+/* Professional State Indicators */
+
+/* Mute Button States */
+.str-video__toggle-audio-publishing-button:not([data-testid*="muted"]) {
+  /* Unmuted: Green background with microphone icon */
+  background-color: #00D4AA !important;
+  position: relative;
+}
+
+.str-video__toggle-audio-publishing-button:not([data-testid*="muted"]):hover {
+  background-color: #00C4A0 !important;
+}
+
+.str-video__toggle-audio-publishing-button[data-testid*="muted"] {
+  /* Muted: Red background with pulsing indicator */
   background-color: #FF4757 !important;
+  position: relative;
 }
 
-.str-video__toggle-audio-publishing-button[data-testid*="muted"]:hover,
-.str-video__toggle-video-publishing-button[data-testid*="off"]:hover {
+.str-video__toggle-audio-publishing-button[data-testid*="muted"]:hover {
   background-color: #FF3742 !important;
 }
 
-/* Active state (sharing/recording) - Success styling */
-.str-video__screen-share-button[data-testid*="active"],
-.str-video__record-call-button[data-testid*="recording"] {
+/* Pulsing red dot for muted state */
+.str-video__toggle-audio-publishing-button[data-testid*="muted"]::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  background: #FF1744;
+  border-radius: 50%;
+  animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.2); }
+}
+
+/* Camera Button States */
+.str-video__toggle-video-publishing-button:not([data-testid*="off"]) {
+  /* Camera On: Green background */
   background-color: #00D4AA !important;
 }
 
-.str-video__screen-share-button[data-testid*="active"]:hover,
-.str-video__record-call-button[data-testid*="recording"]:hover {
+.str-video__toggle-video-publishing-button:not([data-testid*="off"]):hover {
   background-color: #00C4A0 !important;
+}
+
+.str-video__toggle-video-publishing-button[data-testid*="off"] {
+  /* Camera Off: Gray background */
+  background-color: #6B7280 !important;
+}
+
+.str-video__toggle-video-publishing-button[data-testid*="off"]:hover {
+  background-color: #5B6270 !important;
+}
+
+/* Screen Share States */
+.str-video__screen-share-button:not([data-testid*="active"]) {
+  /* Not sharing: Default gray */
+  background-color: #2D2D30 !important;
+}
+
+.str-video__screen-share-button[data-testid*="active"] {
+  /* Sharing: Blue background with indicator dot */
+  background-color: #005FFF !important;
+  position: relative;
+}
+
+.str-video__screen-share-button[data-testid*="active"]:hover {
+  background-color: #0056E6 !important;
+}
+
+/* Screen share indicator dot */
+.str-video__screen-share-button[data-testid*="active"]::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 6px;
+  height: 6px;
+  background: #00D4AA;
+  border-radius: 50%;
+  border: 1px solid white;
+}
+
+/* State Change Animations */
+.str-video__toggle-audio-publishing-button,
+.str-video__toggle-video-publishing-button,
+.str-video__screen-share-button {
+  transition: background-color 200ms ease-in-out, transform 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Icon Cross-fade Animation */
+.str-video__toggle-audio-publishing-button svg,
+.str-video__toggle-video-publishing-button svg,
+.str-video__screen-share-button svg {
+  transition: opacity 150ms ease-in-out !important;
 }
 
 /* Danger Button (End Call) */
@@ -409,13 +554,14 @@
 .str-video__cancel-call-button:hover {
   background-color: #FF3742 !important;
   transform: scale(1.05) !important;
-  box-shadow: 0 4px 16px rgba(255, 71, 87, 0.4) !important;
+  filter: brightness(1.1) !important;
+  box-shadow: 0 4px 20px rgba(255, 71, 87, 0.4) !important;
 }
 
 .str-video__cancel-call-button:active {
-  transform: scale(0.98) !important;
+  transform: scale(0.95) !important;
+  transition: transform 100ms ease-out !important;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
-  animation: haptic-pulse 0.1s ease-out !important;
 }
 
 /* Icon styling and rotation for end call */
@@ -433,7 +579,7 @@
   height: 20px !important;
 }
 
-/* Disabled state styling */
+/* Loading and Disabled States */
 .str-video__toggle-audio-publishing-button:disabled,
 .str-video__toggle-video-publishing-button:disabled,
 .str-video__screen-share-button:disabled,
@@ -442,6 +588,8 @@
   background-color: #374151 !important;
   cursor: not-allowed !important;
   opacity: 0.6 !important;
+  filter: none !important;
+  transition: opacity 200ms ease-in-out !important;
 }
 
 .str-video__toggle-audio-publishing-button:disabled:hover,
@@ -452,9 +600,35 @@
   transform: none !important;
   background-color: #374151 !important;
   box-shadow: none !important;
+  filter: none !important;
 }
 
-/* Focus states for accessibility */
+/* Loading spinner for async actions */
+.str-video__button--loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.str-video__button--loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Enhanced Keyboard Navigation and Accessibility */
 .str-video__toggle-audio-publishing-button:focus,
 .str-video__toggle-video-publishing-button:focus,
 .str-video__screen-share-button:focus,
@@ -463,6 +637,7 @@
   outline: 2px solid #005FFF !important;
   outline-offset: 2px !important;
   box-shadow: 0 0 0 4px rgba(0, 95, 255, 0.2) !important;
+  z-index: 10 !important;
 }
 
 .str-video__toggle-audio-publishing-button:focus-visible,
@@ -472,6 +647,54 @@
 .str-video__cancel-call-button:focus-visible {
   outline: 2px solid #005FFF !important;
   outline-offset: 2px !important;
+}
+
+/* Keyboard shortcuts indicators */
+.control-button-tooltip {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease-in-out;
+  z-index: 1000;
+}
+
+.control-button-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.9);
+}
+
+.str-video__toggle-audio-publishing-button:hover .control-button-tooltip,
+.str-video__toggle-video-publishing-button:hover .control-button-tooltip,
+.str-video__screen-share-button:hover .control-button-tooltip,
+.str-video__record-call-button:hover .control-button-tooltip,
+.str-video__cancel-call-button:hover .control-button-tooltip {
+  opacity: 1;
+}
+
+/* Tab navigation order */
+.custom-control-bar {
+  /* Ensure proper tab order: left to right */
+  display: flex;
+  gap: 12px;
+}
+
+.custom-control-bar button {
+  /* Maintain tab order */
+  position: relative;
 }
 
 /* Main speaker video container */
@@ -509,6 +732,13 @@
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.control-button-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .control-separator {
