@@ -17,7 +17,10 @@ export function useCallStatus(callId: string, videoClient: StreamVideoClient | n
   });
 
   useEffect(() => {
+    console.log('[useCallStatus] Effect triggered with:', { callId, hasVideoClient: !!videoClient });
+    
     if (!videoClient || !callId) {
+      console.log('[useCallStatus] Missing videoClient or callId, stopping');
       setStatus(prev => ({ ...prev, loading: false }));
       return;
     }
@@ -43,10 +46,8 @@ export function useCallStatus(callId: string, videoClient: StreamVideoClient | n
           console.log(`[useCallStatus] Found call:`, call);
           console.log(`[useCallStatus] Call state:`, call.state);
           console.log(`[useCallStatus] Call members:`, call.state?.members);
-          console.log(`[useCallStatus] Call session:`, call.session);
           console.log(`[useCallStatus] Call participants:`, call.state?.participants);
           console.log(`[useCallStatus] Call recording:`, call.state?.recording);
-          console.log(`[useCallStatus] Call backstage:`, call.backstage);
           
           // Check multiple indicators for an active call
           const hasMembers = call.state?.members && Object.keys(call.state.members).length > 0;

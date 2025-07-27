@@ -109,6 +109,16 @@ export function AdminClassView({ videoClient, currentUser }: AdminClassViewProps
       // Create a new Stream call object with a fixed ID
       const newCall = videoClient.call('default', 'live-class-main-1');
       
+      // Update call settings to enable recording
+      await newCall.update({
+        settings_override: {
+          recording: {
+            mode: 'available',
+            quality: '720p'
+          }
+        }
+      });
+      
       // Join the call and create it if it doesn't exist
       await newCall.join({ create: true });
       

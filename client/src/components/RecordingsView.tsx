@@ -30,13 +30,27 @@ export function RecordingsView({ videoClient }: RecordingsViewProps) {
       setError(null);
       
       try {
-        // For now, show a message that recordings are not yet implemented
-        // The Stream API might require additional configuration for recordings
-        setError('Recording playback feature is coming soon. Recordings will be available once properly configured with Stream.io.');
-        setRecordings([]);
+        console.log('[RecordingsView] Fetching recordings for live-class-main-1');
+        
+        // Get the specific call we're using for live classes
+        const call = videoClient.call('default', 'live-class-main-1');
+        
+        // Try to query recordings via the video client instead of call method
+        const response = await videoClient.listRecordings({
+          call_cid: call.cid
+        });
+        console.log('[RecordingsView] Recordings response:', response);
+        
+        if (response?.recordings && response.recordings.length > 0) {
+          setRecordings(response.recordings);
+          console.log(`[RecordingsView] Found ${response.recordings.length} recordings`);
+        } else {
+          console.log('[RecordingsView] No recordings found');
+          setRecordings([]);
+        }
       } catch (err) {
         console.error('Failed to fetch recordings:', err);
-        setError('Failed to load recordings. Feature requires additional Stream.io configuration.');
+        setError(err instanceof Error ? err.message : 'Failed to load recordings');
         setRecordings([]);
       } finally {
         setIsLoading(false);
@@ -127,7 +141,7 @@ export function RecordingsView({ videoClient }: RecordingsViewProps) {
                 No Recordings Yet
               </h3>
               <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-                Recordings of live classes will appear here once instructors start recording their sessions.
+                Recordings will appear here after instructors finish their recorded live classes. Make sure recording is enabled in the admin interface.
               </p>
             </div>
           </CardContent>
@@ -176,13 +190,19 @@ export function RecordingsView({ videoClient }: RecordingsViewProps) {
                   )}
                 </div>
                 
-                <Button
-                  onClick={() => handleOpenRecording(recording.url)}
-                  className="w-full md:w-auto"
-                  variant="default"
-                >
-                  🎬 Watch Recording
-                </Button>
+                {recording.url ? (
+                  <Button
+                    onClick={() => handleOpenRecording(recording.url)}
+                    className="w-full md:w-auto"
+                    variant="default"
+                  >
+                    🎬 Watch Recording
+                  </Button>
+                ) : (
+                  <div className="text-sm text-gray-500">
+                    Recording is still processing...
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}

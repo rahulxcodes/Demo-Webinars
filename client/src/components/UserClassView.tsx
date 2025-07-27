@@ -100,6 +100,9 @@ export function UserClassView({ videoClient, currentUser }: UserClassViewProps) 
   
   // Use the call status hook to monitor live classes in real-time
   const { isLive, participantCount, loading, error } = useCallStatus('live-class-main-1', videoClient);
+  
+  console.log('[UserClassView] Render - videoClient exists:', !!videoClient);
+  console.log('[UserClassView] Current status:', { isLive, participantCount, loading, error });
 
   // No longer need manual status checking - using the hook instead
 
