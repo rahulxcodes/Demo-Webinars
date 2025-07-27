@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   StreamVideo,
   StreamCall,
@@ -111,6 +111,21 @@ export function AdminClassView({
   const [call, setCall] = useState<Call | null>(null);
   const [isClassStarted, setIsClassStarted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Use useEffect to detect when we're in full-screen but don't have a call
+  // This indicates the component was re-mounted, so we need to recreate the call
+  useEffect(() => {
+    console.log('[AdminClassView] useEffect - isFullScreen:', isFullScreen, 'call:', !!call, 'isClassStarted:', isClassStarted);
+    
+    if (isFullScreen && !call && !isClassStarted && videoClient) {
+      console.log('[AdminClassView] Full-screen mode detected but no call - recreating call');
+      
+      // Recreate the call that should exist in full-screen mode
+      const existingCall = videoClient.call('default', 'live-class-main-1');
+      setCall(existingCall);
+      setIsClassStarted(true);
+    }
+  }, [isFullScreen, call, isClassStarted, videoClient]);
 
   const handleStartClass = async () => {
     if (!videoClient) return;

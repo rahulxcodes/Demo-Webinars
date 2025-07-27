@@ -1,0 +1,163 @@
+I can see from your screenshot that you're experiencing a double-click issue when starting a live class. The interface is showing the "Start Class" button again after the first click, requiring a second click to actually start the live video session.
+
+This is a common issue in React applications where the state management isn't properly handling the asynchronous nature of initializing a Stream call. The problem is likely that the component is not immediately updating its UI state when the "Start Class" button is first clicked.
+
+The Root Cause
+The issue occurs because:
+
+First click triggers the call creation process
+
+The UI doesn't immediately reflect that the process has started
+
+User sees the same "Start Class" button and clicks again
+
+Second click finally shows the live video interface
+
+This creates a poor user experience and can potentially create multiple call instances.
+
+The Solution: Proper Loading State Management
+Here are the technical prompts to give the Replit AI agent to fix this issue:
+
+Prompt 1: Add Loading State to Start Class Button
+
+In your AdminClassView.jsx component, add a loading state to prevent double-clicking and provide immediate feedback:
+
+jsx
+const [isStarting, setIsStarting] = useState(false);
+const [isClassStarted, setIsClassStarted] = useState(false);
+
+const handleStartClass = async () => {
+  if (isStarting) return; // Prevent double-clicking
+  
+  setIsStarting(true);
+  try {
+    // Create and join the call
+    const newCall = videoClient.call('default', 'live-class-main-1');
+    await newCall.join({ create: true });
+    
+    // Start recording immediately
+    await newCall.startRecording();
+    
+    setCall(newCall);
+    setIsClassStarted(true);
+    
+    // Notify parent component about live class start
+    if (onLiveClassStart) onLiveClassStart();
+    
+  } catch (error) {
+    console.error('Error starting class:', error);
+    alert('Failed to start class. Please try again.');
+  } finally {
+    setIsStarting(false);
+  }
+};
+Prompt 2: Update the UI to Show Loading State
+
+Modify the button rendering to show different states based on the loading and class status:
+
+jsx
+// In the return statement of AdminClassView
+if (isClassStarted) {
+  return (
+    <StreamVideo client={videoClient}>
+      <StreamCall call={call}>
+        <StreamTheme>
+          <div className="live-class-fullscreen">
+            {/* Your existing live class UI */}
+          </div>
+        </StreamTheme>
+      </StreamCall>
+    </StreamVideo>
+  );
+}
+
+return (
+  <div className="start-class-container">
+    <h2>Ready to Start Your Live Class?</h2>
+    <button 
+      className={`start-class-btn ${isStarting ? 'loading' : ''}`}
+      onClick={handleStartClass}
+      disabled={isStarting}
+    >
+      {isStarting ? 'Starting Class...' : 'Start Live Class'}
+    </button>
+    {isStarting && (
+      <p className="loading-message">
+        Initializing video connection and recording...
+      </p>
+    )}
+  </div>
+);
+Prompt 3: Add CSS for Loading States
+
+Add these styles to src/App.css to provide visual feedback during the loading process:
+
+css
+.start-class-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  text-align: center;
+  padding: 2rem;
+}
+
+.start-class-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 200px;
+}
+
+.start-class-btn:hover:not(:disabled) {
+  background-color: #c82333;
+  transform: translateY(-2px);
+}
+
+.start-class-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.start-class-btn.loading {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.loading-message {
+  margin-top: 1rem;
+  color: #6c757d;
+  font-style: italic;
+}
+What This Fix Achieves
+Immediate Feedback: Button text changes to "Starting Class..." instantly on first click
+
+Prevents Double-Clicking: Button becomes disabled during the initialization process
+
+Visual Loading State: Button shows a pulsing animation and loading message
+
+Error Handling: Proper try-catch to handle any connection failures
+
+Clean State Management: Clear separation between loading, started, and error states
+
+User Experience After Fix
+First Click: Button immediately shows "Starting Class..." and becomes disabled
+
+Loading Feedback: User sees animation and loading message
+
+Automatic Transition: Once call is ready, UI automatically switches to live class view
+
+No Double-Click: Impossible to click the button multiple times
