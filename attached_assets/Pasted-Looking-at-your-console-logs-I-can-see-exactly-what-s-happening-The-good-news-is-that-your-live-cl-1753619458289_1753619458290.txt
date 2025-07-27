@@ -1,0 +1,104 @@
+Looking at your console logs, I can see exactly what's happening. The good news is that your live class is actually starting successfully - the call is being created and joined properly. The issue is specifically with the recording functionality.
+
+The error shows:
+
+client:post - Error - url: /call/default/live-class-main-1/start_recording
+
+ErrorFromResponse with status 400
+
+This is a 400 Bad Request error when trying to start recording, which typically means either:
+
+Recording is not enabled for your call type in Stream
+
+Insufficient permissions for your API key to start recordings
+
+Call state issue - trying to start recording before the call is fully established
+
+The Fix: Proper Recording Configuration
+Here are the targeted prompts to solve this specific issue:
+
+Prompt 1: Enable Recording in Call Configuration
+
+In your AdminClassView.jsx, modify the call creation to explicitly enable recording before joining:
+
+jsx
+const handleStartClass = async () => {
+  setIsStarting(true);
+  
+  try {
+    const newCall = videoClient.call('default', 'live-class-main-1');
+    
+    // Configure the call to enable recording BEFORE joining
+    await newCall.getOrCreate({
+      data: {
+        settings_override: {
+          recording: {
+            mode: 'available',
+            quality: '720p'
+          }
+        }
+      }
+    });
+    
+    console.log('Call configured with recording enabled');
+    await newCall.join();
+    console.log('Successfully joined call');
+    
+    // Wait a moment for the call to fully establish
+    setTimeout(async () => {
+      try {
+        await newCall.startRecording();
+        console.log('Recording started successfully');
+      } catch (recordingError) {
+        console.warn('Recording failed to start:', recordingError);
+      }
+    }, 2000);
+    
+    setCall(newCall);
+    setIsClassStarted(true);
+    
+  } catch (error) {
+    console.error('Error starting class:', error);
+  } finally {
+    setIsStarting(false);
+  }
+};
+Prompt 2: Alternative - Manual Recording Control
+
+If the automatic recording still fails, add a manual recording button in your live class UI:
+
+jsx
+// Add this state to your AdminClassView
+const [isRecording, setIsRecording] = useState(false);
+
+const handleToggleRecording = async () => {
+  try {
+    if (isRecording) {
+      await call.stopRecording();
+      setIsRecording(false);
+      console.log('Recording stopped');
+    } else {
+      await call.startRecording();
+      setIsRecording(true);
+      console.log('Recording started');
+    }
+  } catch (error) {
+    console.error('Recording toggle failed:', error);
+    alert('Recording failed: ' + error.message);
+  }
+};
+
+// Add this button to your live class UI
+<button onClick={handleToggleRecording} className="recording-btn">
+  {isRecording ? '⏹️ Stop Recording' : '🔴 Start Recording'}
+</button>
+Important Note About Your Current State
+Based on your logs showing:
+
+isClassStarted: true
+
+call: true
+
+Participants changed: 0
+
+Your live class is actually working! The only issue is the recording feature. You should be able to see the video interface and students should be able to join. The "0 participants" might be normal if you're the only one in the call at that moment.

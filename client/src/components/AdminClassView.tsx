@@ -46,7 +46,9 @@ function LiveClassLayout({
 
   console.log('[LiveClassLayout] Calling state:', callingState);
 
-  if (callingState !== CallingState.JOINED) {
+  // Allow both JOINED and IDLE states to show the interface
+  // IDLE is acceptable for the instructor who created the call
+  if (callingState !== CallingState.JOINED && callingState !== CallingState.IDLE) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
@@ -172,20 +174,22 @@ export function AdminClassView({
       // Create a new Stream call object with a fixed ID
       const newCall = videoClient.call('default', 'live-class-main-1');
       
-      // Simplified approach - just join or create the call
-      // Update call settings to enable recording
-      await newCall.update({
-        settings_override: {
-          recording: {
-            mode: 'available',
-            quality: '720p'
+      // Configure the call to enable recording BEFORE joining
+      await newCall.getOrCreate({
+        data: {
+          settings_override: {
+            recording: {
+              mode: 'available',
+              quality: '720p'
+            }
           }
         }
       });
+      console.log('[AdminClassView] Call configured with recording enabled');
       
-      // Join the call and create it if it doesn't exist
-      await newCall.join({ create: true });
-      console.log('[AdminClassView] Successfully joined/created call');
+      // Join the call
+      await newCall.join();
+      console.log('[AdminClassView] Successfully joined call');
       
       // Set the call and class state immediately after successful join
       setCall(newCall);
@@ -195,14 +199,16 @@ export function AdminClassView({
       onLiveClassStart?.(); // Trigger full-screen mode
       console.log('[AdminClassView] onLiveClassStart called');
       
-      // Start recording automatically (after state is set)
-      try {
-        await newCall.startRecording();
-        console.log('[AdminClassView] Recording started successfully');
-      } catch (recordingError) {
-        console.warn('[AdminClassView] Failed to start recording:', recordingError);
-        // Continue with the class even if recording fails
-      }
+      // Wait for call to fully establish before starting recording
+      setTimeout(async () => {
+        try {
+          await newCall.startRecording();
+          console.log('[AdminClassView] Recording started successfully');
+        } catch (recordingError) {
+          console.warn('[AdminClassView] Recording failed to start:', recordingError);
+          // Continue with the class even if recording fails
+        }
+      }, 2000);
     } catch (error) {
       console.error('[AdminClassView] Failed to start class:', error);
       // Reset states on error
