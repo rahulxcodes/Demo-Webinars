@@ -60,8 +60,11 @@ function LiveClassLayout({
     );
   }
 
+  const { useParticipants } = useCallStateHooks();
+  const participants = useParticipants();
+
   return (
-    <div className={isFullScreen ? "live-class-fullscreen" : "live-class-layout"}>
+    <div className="live-class-container">
       {/* Header Bar */}
       <div className="class-header">
         <div className="flex items-center space-x-4">
@@ -89,17 +92,21 @@ function LiveClassLayout({
       </div>
 
       {/* Main Content Area */}
-      <div className="main-content">
-        <div className="main-panel">
-          <SpeakerLayout participantsBarPosition="bottom" />
-          <div className="controls-container">
-            <CallControls />
-          </div>
+      <div className="main-video-area">
+        <SpeakerLayout 
+          participantsBarPosition="bottom"
+          participantsBarLimit={6}
+        />
+        <div className="call-controls-overlay">
+          <CallControls />
         </div>
-        
-        <div className="sidebar-panel">
-          <CallParticipantsList onClose={() => {}} />
+      </div>
+      
+      <div className="participants-sidebar">
+        <div className="participants-header">
+          <h3>Participants ({participants.length})</h3>
         </div>
+        <CallParticipantsList onClose={() => {}} />
       </div>
     </div>
   );
