@@ -15,7 +15,7 @@ export function MainApp() {
   const { user, logout } = useAuth();
   const [activeView, setActiveView] = useState<'live-class' | 'recordings'>('live-class');
   const [videoClient, setVideoClient] = useState<StreamVideoClient | null>(null);
-  const [isInLiveClass, setIsInLiveClass] = useState(false);
+
 
   // Simulate current user based on authenticated user
   const currentUser = user ? {
@@ -150,33 +150,6 @@ export function MainApp() {
 
   console.log('[MainApp] Rendering - activeView:', activeView, 'isAdmin:', currentUser?.isAdmin, 'hasVideoClient:', !!videoClient);
 
-  console.log('[MainApp] RENDERING - isInLiveClass:', isInLiveClass, 'activeView:', activeView);
-
-  if (isInLiveClass) {
-    console.log('[MainApp] 🎬 FULL-SCREEN MODE - Rendering live class');
-    return (
-      <div className="main-content-fullscreen">
-        {currentUser.isAdmin ? (
-          <AdminClassView 
-            videoClient={videoClient} 
-            currentUser={currentUser}
-            onLiveClassStart={() => setIsInLiveClass(true)}
-            onLiveClassEnd={() => setIsInLiveClass(false)}
-            isFullScreen={true}
-          />
-        ) : (
-          <UserClassView 
-            videoClient={videoClient} 
-            currentUser={currentUser}
-            onLiveClassStart={() => setIsInLiveClass(true)}
-            onLiveClassEnd={() => setIsInLiveClass(false)}
-            isFullScreen={true}
-          />
-        )}
-      </div>
-    );
-  }
-
   return (
     <div className="app-container">
       <Layout
@@ -191,27 +164,11 @@ export function MainApp() {
               <AdminClassView 
                 videoClient={videoClient} 
                 currentUser={currentUser}
-                onLiveClassStart={() => {
-                  console.log('[MainApp] onLiveClassStart called - setting isInLiveClass to true');
-                  setIsInLiveClass(true);
-                }}
-                onLiveClassEnd={() => {
-                  console.log('[MainApp] onLiveClassEnd called - setting isInLiveClass to false');
-                  setIsInLiveClass(false);
-                }}
               />
             ) : (
               <UserClassView 
                 videoClient={videoClient} 
                 currentUser={currentUser}
-                onLiveClassStart={() => {
-                  console.log('[MainApp] Student onLiveClassStart called');
-                  setIsInLiveClass(true);
-                }}
-                onLiveClassEnd={() => {
-                  console.log('[MainApp] Student onLiveClassEnd called');
-                  setIsInLiveClass(false);
-                }}
               />
             )}
           </>

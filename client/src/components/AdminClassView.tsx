@@ -24,9 +24,6 @@ interface AdminClassViewProps {
     name: string;
     isAdmin: boolean;
   };
-  onLiveClassStart?: () => void;
-  onLiveClassEnd?: () => void;
-  isFullScreen?: boolean;
 }
 
 // Professional Live Class Layout Component - Following Stream SDK best practices
@@ -34,13 +31,11 @@ function LiveClassLayout({
   currentUser, 
   onEndClass, 
   isInstructor,
-  isFullScreen = false,
   videoClient
 }: { 
   currentUser: any;
   onEndClass: () => void;
   isInstructor: boolean;
-  isFullScreen?: boolean;
   videoClient: StreamVideoClient;
 }) {
   // Use Stream hooks correctly within StreamCall context
@@ -161,39 +156,23 @@ function LiveClassLayout({
 
 export function AdminClassView({ 
   videoClient, 
-  currentUser, 
-  onLiveClassStart, 
-  onLiveClassEnd, 
-  isFullScreen = false 
+  currentUser
 }: AdminClassViewProps) {
   const [call, setCall] = useState<Call | null>(null);
   const [isClassStarted, setIsClassStarted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Use useEffect to detect when we're in full-screen but don't have a call
-  // This indicates the component was re-mounted, so we need to recreate the call
-  useEffect(() => {
-    console.log('[AdminClassView] useEffect - isFullScreen:', isFullScreen, 'call:', !!call, 'isClassStarted:', isClassStarted);
-    
-    if (isFullScreen && !call && !isClassStarted && videoClient) {
-      console.log('[AdminClassView] Full-screen mode detected but no call - recreating call');
-      
-      // Recreate the call that should exist in full-screen mode
-      const existingCall = videoClient.call('default', 'live-class-main-1');
-      setCall(existingCall);
-      setIsClassStarted(true);
-    }
-  }, [isFullScreen, call, isClassStarted, videoClient]);
+
 
   // Cleanup on component unmount
   useEffect(() => {
     return () => {
-      if (call && !isFullScreen) {
+      if (call) {
         console.log('[AdminClassView] Component unmounting, leaving call');
         call.leave().catch(console.error);
       }
     };
-  }, [call, isFullScreen]);
+  }, [call]);
 
   // Enhanced participant debugging with proper Stream state
   useEffect(() => {
@@ -272,7 +251,7 @@ export function AdminClassView({
       });
       
       // Additional debugging for user recognition
-      const currentUserId = videoClient.userId;
+      const currentUserId = videoClient.user?.id;
       if (videoClient && currentUserId) {
         console.log('[AdminClassView] VideoClient user after join:', {
           id: currentUserId,
@@ -288,9 +267,7 @@ export function AdminClassView({
       setCall(newCall);
       setIsClassStarted(true);
       console.log('[AdminClassView] State set - call:', !!newCall, 'isClassStarted:', true);
-      console.log('[AdminClassView] About to call onLiveClassStart');
-      onLiveClassStart?.(); // Trigger full-screen mode
-      console.log('[AdminClassView] onLiveClassStart called');
+      console.log('[AdminClassView] Live class started successfully');
       
       // Wait for call to fully establish before starting recording
       setTimeout(async () => {
@@ -328,7 +305,6 @@ export function AdminClassView({
       await call.leave();
       setCall(null);
       setIsClassStarted(false);
-      onLiveClassEnd?.(); // Exit full-screen mode
     } catch (error) {
       console.error('Failed to end class:', error);
     }
@@ -349,7 +325,6 @@ export function AdminClassView({
               currentUser={currentUser} 
               onEndClass={handleEndClass}
               isInstructor={true}
-              isFullScreen={isFullScreen}
               videoClient={videoClient}
             />
           </StreamTheme>
