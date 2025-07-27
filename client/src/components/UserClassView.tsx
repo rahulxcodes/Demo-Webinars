@@ -55,7 +55,10 @@ function StudentLiveClassLayout({
   return (
     <div className="zoom-layout-container">
       <div className="main-video-stage">
-        <SpeakerLayout />
+        <SpeakerLayout 
+          participantsBarPosition="none"
+          participantsBarLimit={0}
+        />
       </div>
       <div className="participants-bottom-strip">
         <CallParticipantsList onClose={() => {}} />

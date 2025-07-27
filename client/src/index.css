@@ -52,6 +52,14 @@
   background-color: #1f1f23 !important;
 }
 
+/* Stream theme overrides using CSS variables */
+.zoom-layout-container {
+  --str-video__primary-color: #00d4aa;
+  --str-video__secondary-color: #3d3d42;
+  --str-video__text-color1: #ffffff;
+  --str-video__border-radius-circle: 8px;
+}
+
 .str-video__participant-view {
   border-radius: 8px !important;
   border: 2px solid #3d3d42 !important;

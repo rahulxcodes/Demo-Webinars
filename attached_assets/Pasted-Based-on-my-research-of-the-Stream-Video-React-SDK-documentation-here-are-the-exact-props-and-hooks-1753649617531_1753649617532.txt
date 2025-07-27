@@ -1,0 +1,47 @@
+Based on my research of the Stream Video React SDK documentation, here are the exact props and hooks that control the key functionality you're looking for:
+
+Participant List Rendering
+useParticipants() - Hook that returns the list of all participants in the call
+
+useCallStateHooks() - Hook function that wraps all call-state hooks including participants, local participant, and dominant speaker
+
+useParticipantViewContext() - Hook that provides access to participant data within ParticipantView components
+
+ParticipantView - Component that renders a video stream of a participant, accepts participant prop
+
+CallParticipantsList - Pre-built component for rendering participant lists, accepts onClose prop
+
+participantsBarPosition - Prop on SpeakerLayout that controls where participants bar appears ("bottom", "top", "none")
+
+participantsBarLimit - Prop that limits number of participants shown in the bar
+
+Theme Overrides
+StreamTheme - Component that applies theme styling, accepts className prop for custom themes
+
+--str-video__primary-color - CSS variable for primary theme color
+
+--str-video__secondary-color - CSS variable for secondary theme color
+
+--str-video__text-color1 - CSS variable for text color
+
+--str-video__border-radius-circle - CSS variable for border radius settings
+
+.str-video - CSS selector used to override theme variables
+
+Control Bar Composition
+CallControls - Main controls component, accepts onLeave prop for leave button handler
+
+ToggleAudioPublishingButton - Individual button component for audio mute/unmute
+
+ToggleVideoPublishingButton - Individual button component for video on/off
+
+ScreenShareButton - Individual button component for screen sharing
+
+RecordCallButton - Individual button component for recording control
+
+CancelCallButton - Individual button component for ending call, accepts onLeave prop
+
+AcceptCallButton - Individual button component for accepting calls
+
+CallControlsProps - TypeScript interface defining props for custom CallControls components
+
