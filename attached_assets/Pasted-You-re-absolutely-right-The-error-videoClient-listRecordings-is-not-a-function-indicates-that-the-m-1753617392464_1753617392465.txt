@@ -1,0 +1,76 @@
+You're absolutely right! The error videoClient.listRecordings is not a function indicates that the method doesn't exist on the videoClient object. Looking at the official Stream Video SDK documentation, I can see the correct approach.
+
+According to the Stream.io documentation, recordings are accessed through the call object, not the video client directly. Here's the correct implementation:
+
+The Correct Stream API Method
+Based on the official documentation, the proper way to fetch recordings is using call.queryRecordings() on a specific call object, not videoClient.listRecordings().
+
+Here's the corrected prompt for the Replit AI agent:
+
+Prompt: Fix the Recording Fetch Logic
+
+In src/components/RecordingsView.jsx, replace the current recording fetching logic with the correct Stream API approach:
+
+jsx
+import { useState, useEffect } from 'react';
+
+export default function RecordingsView({ videoClient }) {
+  const [recordings, setRecordings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchRecordings = async () => {
+      try {
+        if (!videoClient) return;
+        
+        // Create a call instance for the specific call ID we use for live classes
+        const call = videoClient.call('default', 'live-class-main-1');
+        
+        // Use the correct Stream API method: queryRecordings() on the call object
+        const response = await call.queryRecordings();
+        
+        // The recordings are in the 'recordings' array of the response
+        setRecordings(response.recordings || []);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching recordings:', err);
+        setError('Failed to load recordings: ' + err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchRecordings();
+  }, [videoClient]);
+
+  if (loading) return <div>Loading recordings...</div>;
+  if (error) return <div>Error: {error}</div>;
+
+  return (
+    <div className="recordings-view">
+      <h2>Class Recordings</h2>
+      {recordings.length === 0 ? (
+        <p>No recordings available yet. Start and record a live class to see recordings here.</p>
+      ) : (
+        <div className="recordings-list">
+          {recordings.map((recording, index) => (
+            <div key={recording.filename || index} className="recording-item">
+              <h3>Class Recording from {new Date(recording.start_time).toLocaleDateString()}</h3>
+              <p>Duration: {Math.round((new Date(recording.end_time) - new Date(recording.start_time)) / 60000)} minutes</p>
+              <p>Started: {new Date(recording.start_time).toLocaleString()}</p>
+              <video 
+                controls 
+                width="100%" 
+                height="400"
+                src={recording.url}
+                preload="metadata"
+              >
+                Your browser doesn't support video playback.
+              </video>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

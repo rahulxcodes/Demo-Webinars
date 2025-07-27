@@ -145,6 +145,8 @@ export function MainApp() {
     );
   }
 
+  console.log('[MainApp] Rendering - activeView:', activeView, 'isAdmin:', currentUser?.isAdmin, 'hasVideoClient:', !!videoClient);
+
   return (
     <Layout
       activeView={activeView}

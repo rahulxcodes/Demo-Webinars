@@ -87,6 +87,8 @@ export function useCallStatus(callId: string, videoClient: StreamVideoClient | n
       }
     };
 
+    console.log('[useCallStatus] Starting polling for callId:', callId);
+    
     // Initial check
     checkCallStatus();
 
