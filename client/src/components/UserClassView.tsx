@@ -53,16 +53,16 @@ function StudentLiveClassLayout({
   }
 
   return (
-    <div className="live-class-layout">
-      <div style={{ display: 'flex', height: '100%' }}>
-        <div style={{ flex: 1 }}>
-          <SpeakerLayout />
-        </div>
-        <div style={{ width: '300px' }}>
-          <CallParticipantsList onClose={() => {}} />
-        </div>
+    <div className="zoom-layout-container">
+      <div className="main-video-stage">
+        <SpeakerLayout />
       </div>
-      <CallControls onLeave={() => onLeaveClass()} />
+      <div className="participants-bottom-strip">
+        <CallParticipantsList onClose={() => {}} />
+      </div>
+      <div className="floating-controls">
+        <CallControls onLeave={() => onLeaveClass()} />
+      </div>
     </div>
   );
 }

@@ -2,7 +2,160 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Modern Video Calling Interface Styles */
+/* Zoom-style layout container */
+.zoom-layout-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background-color: #1f1f23;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Main video stage - takes up most of the screen */
+.main-video-stage {
+  flex: 1;
+  position: relative;
+  background-color: #1f1f23;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0; /* Important for flex shrinking */
+}
+
+/* Bottom participant strip - compact horizontal layout */
+.participants-bottom-strip {
+  height: 120px;
+  background-color: #2d2d30;
+  border-top: 1px solid #3d3d42;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Floating controls at bottom center */
+.floating-controls {
+  position: absolute;
+  bottom: 140px; /* Above participant strip */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+}
+
+/* Override Stream's default styles for Zoom-like appearance */
+.str-video__speaker-layout {
+  width: 100% !important;
+  height: 100% !important;
+  background-color: #1f1f23 !important;
+}
+
+.str-video__participant-view {
+  border-radius: 8px !important;
+  border: 2px solid #3d3d42 !important;
+}
+
+/* Main speaker video styling */
+.str-video__participant-view--speaking {
+  border-color: #00d4aa !important;
+  box-shadow: 0 0 12px rgba(0, 212, 170, 0.3) !important;
+}
+
+/* Participant strip styling */
+.participants-bottom-strip .str-video__participant-view {
+  width: 96px !important;
+  height: 72px !important;
+  margin-right: 12px !important;
+  border-radius: 6px !important;
+  flex-shrink: 0;
+}
+
+/* Call controls styling - Zoom-like buttons */
+.str-video__call-controls {
+  background-color: rgba(45, 45, 48, 0.95) !important;
+  border-radius: 24px !important;
+  padding: 12px 20px !important;
+  border: 1px solid #3d3d42 !important;
+  backdrop-filter: blur(10px);
+}
+
+.str-video__call-controls button {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
+  margin: 0 8px !important;
+  background-color: #3d3d42 !important;
+  border: none !important;
+  color: white !important;
+  font-size: 18px !important;
+  transition: all 0.2s ease !important;
+}
+
+.str-video__call-controls button:hover {
+  background-color: #5a5a5f !important;
+  transform: scale(1.05) !important;
+}
+
+/* End call button - red like Zoom */
+.str-video__call-controls button[data-testid="call-controls-button-leave"] {
+  background-color: #ff4757 !important;
+}
+
+.str-video__call-controls button[data-testid="call-controls-button-leave"]:hover {
+  background-color: #ff3742 !important;
+}
+
+/* Main speaker video container */
+.main-video-stage .str-video__participant-view {
+  max-width: 85% !important;
+  max-height: 90% !important;
+  width: auto !important;
+  height: auto !important;
+  aspect-ratio: 16/9 !important;
+}
+
+/* Ensure video content fits properly */
+.main-video-stage video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 8px !important;
+}
+
+/* Name label styling like Zoom */
+.str-video__participant-details {
+  position: absolute !important;
+  bottom: 8px !important;
+  left: 8px !important;
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  color: white !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .participants-bottom-strip {
+    height: 100px;
+    padding: 8px 12px;
+  }
+  
+  .participants-bottom-strip .str-video__participant-view {
+    width: 80px !important;
+    height: 60px !important;
+    margin-right: 8px !important;
+  }
+  
+  .floating-controls {
+    bottom: 110px;
+  }
+}
+
+/* Modern Video Calling Interface Styles - Legacy */
 .live-class-layout {
   display: flex;
   flex-direction: column;
