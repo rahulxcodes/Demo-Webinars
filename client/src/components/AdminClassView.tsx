@@ -55,9 +55,8 @@ function LiveClassLayout({
 
   return (
     <div className="live-class-layout">
-      <SpeakerLayout participantsBarPosition="bottom" />
+      <SpeakerLayout participantsBarPosition="right" />
       <CallControls onLeave={() => onEndClass()} />
-      <CallParticipantsList onClose={() => {}} />
     </div>
   );
 }
