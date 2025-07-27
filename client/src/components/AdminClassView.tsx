@@ -117,6 +117,8 @@ export function AdminClassView({
 
     setIsLoading(true);
     try {
+      console.log('[AdminClassView] Starting class...');
+      
       // Create a new Stream call object with a fixed ID
       const newCall = videoClient.call('default', 'live-class-main-1');
       
@@ -133,7 +135,13 @@ export function AdminClassView({
       // Join the call and create it if it doesn't exist
       await newCall.join({ create: true });
       
-      // Start recording automatically
+      // Set the call and class state immediately after successful join
+      setCall(newCall);
+      setIsClassStarted(true);
+      console.log('[AdminClassView] Class started, triggering full-screen mode');
+      onLiveClassStart?.(); // Trigger full-screen mode
+      
+      // Start recording automatically (after state is set)
       try {
         await newCall.startRecording();
         console.log('Recording started successfully');
@@ -141,12 +149,11 @@ export function AdminClassView({
         console.warn('Failed to start recording:', recordingError);
         // Continue with the class even if recording fails
       }
-      
-      setCall(newCall);
-      setIsClassStarted(true);
-      onLiveClassStart?.(); // Trigger full-screen mode
     } catch (error) {
       console.error('Failed to start class:', error);
+      // Reset states on error
+      setCall(null);
+      setIsClassStarted(false);
     } finally {
       setIsLoading(false);
     }
@@ -174,7 +181,10 @@ export function AdminClassView({
     }
   };
 
-  if (isClassStarted && call) {
+  // Show the live class interface if we have both call and class started
+  if (call && isClassStarted) {
+    console.log('[AdminClassView] Rendering live class interface');
+    
     // Add null checks and error boundary
     if (!call || !videoClient) {
       return (
