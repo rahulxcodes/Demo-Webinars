@@ -82,7 +82,8 @@ export function RecordingsView({ videoClient }: RecordingsViewProps) {
   };
 
   const handleOpenRecording = (url: string) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
+    // Navigate to recording in same tab instead of opening new tab
+    window.location.href = url;
   };
 
   if (isLoading) {
@@ -189,13 +190,20 @@ export function RecordingsView({ videoClient }: RecordingsViewProps) {
                 </div>
                 
                 {recording.url ? (
-                  <Button
-                    onClick={() => handleOpenRecording(recording.url)}
-                    className="w-full md:w-auto"
-                    variant="default"
-                  >
-                    🎬 Watch Recording
-                  </Button>
+                  <div className="space-y-2">
+                    <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+                      <video 
+                        controls 
+                        width="100%" 
+                        height="100%"
+                        src={recording.url}
+                        preload="metadata"
+                        className="w-full h-full object-contain"
+                      >
+                        Your browser doesn't support video playback.
+                      </video>
+                    </div>
+                  </div>
                 ) : (
                   <div className="text-sm text-gray-500">
                     Recording is still processing...
@@ -216,7 +224,7 @@ export function RecordingsView({ videoClient }: RecordingsViewProps) {
             <p>• Recordings are automatically created when instructors start live classes</p>
             <p>• All class participants can access recorded sessions</p>
             <p>• Recordings are available for replay at any time</p>
-            <p>• Click "Watch Recording" to open the video in a new tab</p>
+            <p>• Videos play directly in the interface for easy viewing</p>
           </div>
         </CardContent>
       </Card>

@@ -99,6 +99,7 @@ export function MainApp() {
 
   // Handle loading states
   if (!currentUser) {
+    console.log('[MainApp] No currentUser found, showing loading');
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -135,6 +136,7 @@ export function MainApp() {
   }
 
   if (!videoClient) {
+    console.log('[MainApp] No videoClient found, showing loading. StreamToken exists:', !!streamToken);
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
