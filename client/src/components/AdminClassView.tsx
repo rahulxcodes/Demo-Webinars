@@ -60,8 +60,15 @@ function LiveClassLayout({
     );
   }
 
-  const { useParticipants } = useCallStateHooks();
+  // Use the correct hooks according to Stream.io documentation
+  const { useParticipants, useParticipantCount, useLocalParticipant } = useCallStateHooks();
   const participants = useParticipants();
+  const participantCount = useParticipantCount();
+  const localParticipant = useLocalParticipant();
+
+  console.log('[LiveClassLayout] Participants:', participants.length);
+  console.log('[LiveClassLayout] ParticipantCount:', participantCount);
+  console.log('[LiveClassLayout] LocalParticipant:', localParticipant?.sessionId);
 
   return (
     <div className="live-class-container">
@@ -104,7 +111,23 @@ function LiveClassLayout({
       
       <div className="participants-sidebar">
         <div className="participants-header">
-          <h3>Participants ({participants.length})</h3>
+          <h3>Participants ({participantCount || participants.length})</h3>
+          <button 
+            onClick={() => {
+              console.log('[Debug] Manual participant check:');
+              console.log('- Hook participants:', participants.length);
+              console.log('- Hook participantCount:', participantCount);
+              console.log('- Hook localParticipant:', localParticipant);
+              console.log('- Participants details:', participants.map(p => ({ 
+                sessionId: p.sessionId, 
+                userId: p.userId, 
+                name: p.name 
+              })));
+            }}
+            className="text-xs bg-blue-600 text-white px-2 py-1 rounded mt-2"
+          >
+            Debug Participants
+          </button>
         </div>
         <CallParticipantsList onClose={() => {}} />
       </div>
@@ -148,25 +171,41 @@ export function AdminClassView({
     };
   }, [call, isFullScreen]);
 
-  // Add participant debugging
+  // Enhanced participant debugging with proper Stream state
   useEffect(() => {
     if (call) {
       const handleParticipantsChanged = () => {
-        console.log('[AdminClassView] Participants changed:', call.state.participants.length);
+        console.log('[AdminClassView] ==================');
+        console.log('[AdminClassView] Call state participants:', call.state.participants.length);
+        console.log('[AdminClassView] Call state members:', call.state.members.length);
+        console.log('[AdminClassView] Call CID:', call.cid);
+        
+        // Log all participants from call state
         call.state.participants.forEach((p, index) => {
-          console.log(`  - Participant ${index + 1}:`, p.userId, p.name);
+          console.log(`  - Participant ${index + 1}:`, p.userId, p.name, 'sessionId:', p.sessionId);
         });
+        
+        // Log all members from call state  
+        call.state.members.forEach((m, index) => {
+          console.log(`  - Member ${index + 1}:`, m.user.id, m.user.name, 'role:', m.role);
+        });
+        console.log('[AdminClassView] ==================');
       };
       
+      // Listen to multiple participant events
       call.on('call.session_participant_joined', handleParticipantsChanged);
       call.on('call.session_participant_left', handleParticipantsChanged);
+      call.on('call.member_added', handleParticipantsChanged);
+      call.on('call.member_removed', handleParticipantsChanged);
       
-      // Log initial participants
+      // Log initial state
       handleParticipantsChanged();
       
       return () => {
         call.off('call.session_participant_joined', handleParticipantsChanged);
         call.off('call.session_participant_left', handleParticipantsChanged);
+        call.off('call.member_added', handleParticipantsChanged);
+        call.off('call.member_removed', handleParticipantsChanged);
       };
     }
   }, [call]);
@@ -192,11 +231,16 @@ export function AdminClassView({
           }
         }
       });
-      console.log('[AdminClassView] Call configured with recording enabled');
+      console.log('[AdminClassView] Call configured with recording enabled, CID:', newCall.cid);
       
-      // Join the call
-      await newCall.join();
-      console.log('[AdminClassView] Successfully joined call');
+      // Join the call with create: true to ensure it exists
+      await newCall.join({ create: true });
+      console.log('[AdminClassView] Successfully joined call, CID:', newCall.cid);
+      console.log('[AdminClassView] Call state after join:', {
+        participants: newCall.state.participants.length,
+        members: newCall.state.members.length,
+        isJoined: newCall.state.callingState
+      });
       
       // Set the call and class state immediately after successful join
       setCall(newCall);
