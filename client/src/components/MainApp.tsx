@@ -16,7 +16,6 @@ export function MainApp() {
   const [activeView, setActiveView] = useState<'live-class' | 'recordings'>('live-class');
   const [videoClient, setVideoClient] = useState<StreamVideoClient | null>(null);
 
-
   // Simulate current user based on authenticated user
   const currentUser = user ? {
     id: user.id.toString(),
@@ -151,33 +150,25 @@ export function MainApp() {
   console.log('[MainApp] Rendering - activeView:', activeView, 'isAdmin:', currentUser?.isAdmin, 'hasVideoClient:', !!videoClient);
 
   return (
-    <div className="app-container">
-      <Layout
-        activeView={activeView}
-        setActiveView={setActiveView}
-        currentUser={currentUser}
-        onLogout={logout}
-      >
-        {activeView === 'live-class' && (
-          <>
-            {currentUser.isAdmin ? (
-              <AdminClassView 
-                videoClient={videoClient} 
-                currentUser={currentUser}
-              />
-            ) : (
-              <UserClassView 
-                videoClient={videoClient} 
-                currentUser={currentUser}
-              />
-            )}
-          </>
-        )}
+    <Layout
+      activeView={activeView}
+      setActiveView={setActiveView}
+      currentUser={currentUser}
+      onLogout={logout}
+    >
+      {activeView === 'live-class' && (
+        <>
+          {currentUser.isAdmin ? (
+            <AdminClassView videoClient={videoClient} currentUser={currentUser} />
+          ) : (
+            <UserClassView videoClient={videoClient} currentUser={currentUser} />
+          )}
+        </>
+      )}
 
-        {activeView === 'recordings' && (
-          <RecordingsView videoClient={videoClient} />
-        )}
-      </Layout>
-    </div>
+      {activeView === 'recordings' && (
+        <RecordingsView videoClient={videoClient} />
+      )}
+    </Layout>
   );
 }

@@ -11,15 +11,13 @@ interface LayoutProps {
   };
   onLogout: () => void;
   children: React.ReactNode;
-  showSidebar?: boolean;
 }
 
-export function Layout({ activeView, setActiveView, currentUser, onLogout, children, showSidebar = true }: LayoutProps) {
+export function Layout({ activeView, setActiveView, currentUser, onLogout, children }: LayoutProps) {
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
-      {showSidebar && (
-        <div className="w-64 bg-gray-100 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4">
+      <div className="w-64 bg-gray-100 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4">
         <div className="space-y-2">
           <div className="mb-4">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -54,11 +52,10 @@ export function Layout({ activeView, setActiveView, currentUser, onLogout, child
             Sign Out
           </Button>
         </div>
-        </div>
-      )}
+      </div>
 
       {/* Main Content Area */}
-      <div className={showSidebar ? "flex-1 p-6 overflow-auto" : "flex-1 p-6 overflow-auto"}>
+      <div className="flex-1 p-6 overflow-auto">
         <Card className="h-full p-6">
           {children}
         </Card>

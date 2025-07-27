@@ -24,20 +24,15 @@ interface UserClassViewProps {
     name: string;
     isAdmin: boolean;
   };
-  onLiveClassStart?: () => void;
-  onLiveClassEnd?: () => void;
-  isFullScreen?: boolean;
 }
 
 // Student Live Class Layout Component - Hooks must be inside StreamCall  
 function StudentLiveClassLayout({ 
   currentUser, 
-  onLeaveClass,
-  isFullScreen = false
+  onLeaveClass 
 }: { 
   currentUser: any;
   onLeaveClass: () => void;
-  isFullScreen?: boolean;
 }) {
   // Hooks are now properly inside StreamCall wrapper
   const { useCallCallingState } = useCallStateHooks();
@@ -56,7 +51,7 @@ function StudentLiveClassLayout({
   }
 
   return (
-    <div className={isFullScreen ? "live-class-fullscreen" : "live-class-layout"}>
+    <div className="live-class-layout">
       {/* Header Bar */}
       <div className="class-header">
         <div className="flex items-center space-x-4">
@@ -98,13 +93,7 @@ function StudentLiveClassLayout({
   );
 }
 
-export function UserClassView({ 
-  videoClient, 
-  currentUser, 
-  onLiveClassStart, 
-  onLiveClassEnd, 
-  isFullScreen = false 
-}: UserClassViewProps) {
+export function UserClassView({ videoClient, currentUser }: UserClassViewProps) {
   const [isJoining, setIsJoining] = useState(false);
   const [call, setCall] = useState<Call | null>(null);
   const [isInCall, setIsInCall] = useState(false);
@@ -128,7 +117,6 @@ export function UserClassView({
       
       setCall(newCall);
       setIsInCall(true);
-      onLiveClassStart?.(); // Trigger full-screen mode
     } catch (error) {
       console.error('Failed to join class:', error);
     } finally {
@@ -143,7 +131,6 @@ export function UserClassView({
       await call.leave();
       setCall(null);
       setIsInCall(false);
-      onLiveClassEnd?.(); // Exit full-screen mode
     } catch (error) {
       console.error('Failed to leave class:', error);
     }
@@ -170,7 +157,6 @@ export function UserClassView({
               <StudentLiveClassLayout 
                 currentUser={currentUser} 
                 onLeaveClass={handleLeaveClass}
-                isFullScreen={isFullScreen}
               />
             </StreamTheme>
           </StreamCall>
