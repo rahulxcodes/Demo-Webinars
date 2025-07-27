@@ -15,6 +15,7 @@ export function MainApp() {
   const { user, logout } = useAuth();
   const [activeView, setActiveView] = useState<'live-class' | 'recordings'>('live-class');
   const [videoClient, setVideoClient] = useState<StreamVideoClient | null>(null);
+  const [isInLiveClass, setIsInLiveClass] = useState(false);
 
   // Simulate current user based on authenticated user
   const currentUser = user ? {
@@ -150,25 +151,62 @@ export function MainApp() {
   console.log('[MainApp] Rendering - activeView:', activeView, 'isAdmin:', currentUser?.isAdmin, 'hasVideoClient:', !!videoClient);
 
   return (
-    <Layout
-      activeView={activeView}
-      setActiveView={setActiveView}
-      currentUser={currentUser}
-      onLogout={logout}
-    >
-      {activeView === 'live-class' && (
-        <>
-          {currentUser.isAdmin ? (
-            <AdminClassView videoClient={videoClient} currentUser={currentUser} />
-          ) : (
-            <UserClassView videoClient={videoClient} currentUser={currentUser} />
-          )}
-        </>
-      )}
+    <div className="app-container">
+      {!isInLiveClass && (
+        <Layout
+          activeView={activeView}
+          setActiveView={setActiveView}
+          currentUser={currentUser}
+          onLogout={logout}
 
-      {activeView === 'recordings' && (
-        <RecordingsView videoClient={videoClient} />
+        >
+          {activeView === 'live-class' && (
+            <>
+              {currentUser.isAdmin ? (
+                <AdminClassView 
+                  videoClient={videoClient} 
+                  currentUser={currentUser}
+                  onLiveClassStart={() => setIsInLiveClass(true)}
+                  onLiveClassEnd={() => setIsInLiveClass(false)}
+                />
+              ) : (
+                <UserClassView 
+                  videoClient={videoClient} 
+                  currentUser={currentUser}
+                  onLiveClassStart={() => setIsInLiveClass(true)}
+                  onLiveClassEnd={() => setIsInLiveClass(false)}
+                />
+              )}
+            </>
+          )}
+
+          {activeView === 'recordings' && (
+            <RecordingsView videoClient={videoClient} />
+          )}
+        </Layout>
       )}
-    </Layout>
+      
+      {isInLiveClass && (
+        <div className="main-content-fullscreen">
+          {currentUser.isAdmin ? (
+            <AdminClassView 
+              videoClient={videoClient} 
+              currentUser={currentUser}
+              onLiveClassStart={() => setIsInLiveClass(true)}
+              onLiveClassEnd={() => setIsInLiveClass(false)}
+              isFullScreen={true}
+            />
+          ) : (
+            <UserClassView 
+              videoClient={videoClient} 
+              currentUser={currentUser}
+              onLiveClassStart={() => setIsInLiveClass(true)}
+              onLiveClassEnd={() => setIsInLiveClass(false)}
+              isFullScreen={true}
+            />
+          )}
+        </div>
+      )}
+    </div>
   );
 }

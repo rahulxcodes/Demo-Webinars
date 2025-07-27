@@ -1,0 +1,151 @@
+when a live class is active, it should take up the full screen real estate, not be constrained by the sidebar. The current layout is wasting valuable space and making the video experience cramped.
+
+This is a classic UI/UX problem where the application layout doesn't adapt to different contexts. During a live class, the user's focus should be 100% on the video content, not navigation.
+
+The Solution: Context-Aware Layout
+We need to implement a full-screen mode that hides the sidebar completely when a live class is active, and shows participants properly without requiring scrolling.
+
+Here are the technical prompts to give the Replit AI agent:
+
+Prompt 1: Create Full-Screen Live Class Mode
+
+Modify the main App.jsx or Layout.jsx component to conditionally hide the sidebar when a live class is active. Add a state variable isInLiveClass that gets passed down to child components and controls the layout:
+
+jsx
+// In your main layout component
+const [isInLiveClass, setIsInLiveClass] = useState(false);
+
+return (
+  <div className="app-container">
+    {!isInLiveClass && (
+      <div className="sidebar">
+        {/* Your existing sidebar content */}
+      </div>
+    )}
+    <div className={isInLiveClass ? "main-content-fullscreen" : "main-content-with-sidebar"}>
+      {/* Pass setIsInLiveClass to your live class components */}
+      {activeView === 'live' && <LiveClassView onLiveClassStart={() => setIsInLiveClass(true)} onLiveClassEnd={() => setIsInLiveClass(false)} />}
+    </div>
+  </div>
+);
+Prompt 2: Optimize the Live Class Component Layout
+
+In your AdminClassView.jsx or UserClassView.jsx, restructure the Stream components for optimal space usage:
+
+jsx
+return (
+  <StreamTheme>
+    <div className="live-class-fullscreen">
+      <div className="video-main-area">
+        <SpeakerLayout 
+          participantsBarPosition="top" 
+          participantsBarLimit={6}
+        />
+      </div>
+      <div className="controls-area">
+        <CallControls />
+      </div>
+      <div className="participants-area">
+        <CallParticipantsList 
+          onClose={() => {}}
+        />
+      </div>
+    </div>
+  </StreamTheme>
+);
+Prompt 3: Add Full-Screen CSS Layout
+
+Add these CSS styles to properly structure the full-screen live class experience:
+
+css
+.app-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main-content-fullscreen {
+  width: 100vw;
+  height: 100vh;
+}
+
+.main-content-with-sidebar {
+  flex: 1;
+  height: 100vh;
+}
+
+.live-class-fullscreen {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  grid-template-rows: 1fr auto;
+  height: 100vh;
+  background-color: #1c1e22;
+}
+
+.video-main-area {
+  grid-column: 1;
+  grid-row: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.controls-area {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 10px;
+}
+
+.participants-area {
+  grid-column: 2;
+  grid-row: 1;
+  border-left: 1px solid #3d414d;
+  overflow-y: auto;
+  max-height: 100vh;
+}
+
+/* Ensure Stream components fill the space properly */
+.str-video__speaker-layout {
+  height: 100% !important;
+}
+
+.str-video__participant-view {
+  border-radius: 8px !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .live-class-fullscreen {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto auto;
+  }
+  
+  .participants-area {
+    grid-column: 1;
+    grid-row: 3;
+    max-height: 200px;
+    border-left: none;
+    border-top: 1px solid #3d414d;
+  }
+}
+What This Achieves
+Full-Screen Experience: When a live class starts, the sidebar disappears completely, giving 100% screen space to the video content
+
+Optimal Participant View: The main video area gets maximum space while participants are shown in a dedicated sidebar that doesn't require scrolling
+
+Professional Layout: Uses CSS Grid for a clean, structured layout similar to Zoom or Google Meet
+
+Mobile Responsive: Adapts properly on smaller screens
+
+Easy Navigation: Users can still exit full-screen mode via the call controls
+
+User Experience Flow
+Normal State: User sees sidebar with "Live Classes" and "Recordings"
+
+Class Starts: Sidebar disappears, full screen is dedicated to video
+
+Class Ends: Returns to normal layout with sidebar visible
+
+Clean Transition: Smooth experience without jarring layout shifts
+
+This creates the professional, immersive live class experience you're looking for where the video content gets the attention it deserves.</attachment>

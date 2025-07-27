@@ -2,6 +2,91 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Full-screen live class layout */
+.app-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main-content-fullscreen {
+  width: 100vw;
+  height: 100vh;
+  background-color: #1c1e22;
+}
+
+.live-class-fullscreen {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  grid-template-rows: auto 1fr auto;
+  height: 100vh;
+  background-color: #1c1e22;
+}
+
+.live-class-fullscreen .class-header {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 12px 20px;
+  border-bottom: 1px solid #3d414d;
+}
+
+.live-class-fullscreen .main-content {
+  grid-column: 1;
+  grid-row: 2;
+  position: relative;
+  overflow: hidden;
+  background-color: #1c1e22;
+}
+
+.live-class-fullscreen .sidebar-panel {
+  grid-column: 2;
+  grid-row: 2;
+  border-left: 1px solid #3d414d;
+  overflow-y: auto;
+  max-height: 100%;
+  background-color: #1c1e22;
+}
+
+.live-class-fullscreen .controls-container {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  background-color: rgba(0, 0, 0, 0.9);
+  padding: 10px 20px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Ensure Stream components fill the space properly */
+.str-video__speaker-layout {
+  height: 100% !important;
+  background-color: #1c1e22 !important;
+}
+
+.str-video__participant-view {
+  border-radius: 8px !important;
+}
+
+.str-video__call-controls {
+  background-color: transparent !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .live-class-fullscreen {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto auto;
+  }
+  
+  .live-class-fullscreen .sidebar-panel {
+    grid-column: 1;
+    grid-row: 4;
+    max-height: 200px;
+    border-left: none;
+    border-top: 1px solid #3d414d;
+  }
+}
+
 /* Modern Video Calling Interface Styles */
 .live-class-layout {
   display: flex;

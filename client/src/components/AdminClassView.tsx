@@ -23,17 +23,22 @@ interface AdminClassViewProps {
     name: string;
     isAdmin: boolean;
   };
+  onLiveClassStart?: () => void;
+  onLiveClassEnd?: () => void;
+  isFullScreen?: boolean;
 }
 
 // Professional Live Class Layout Component - Hooks must be inside StreamCall
 function LiveClassLayout({ 
   currentUser, 
   onEndClass, 
-  isInstructor 
+  isInstructor,
+  isFullScreen = false
 }: { 
   currentUser: any;
   onEndClass: () => void;
   isInstructor: boolean;
+  isFullScreen?: boolean;
 }) {
   // Move hooks inside the component that's wrapped by StreamCall
   const { useCallCallingState } = useCallStateHooks();
@@ -52,7 +57,7 @@ function LiveClassLayout({
   }
 
   return (
-    <div className="live-class-layout">
+    <div className={isFullScreen ? "live-class-fullscreen" : "live-class-layout"}>
       {/* Header Bar */}
       <div className="class-header">
         <div className="flex items-center space-x-4">
@@ -96,7 +101,13 @@ function LiveClassLayout({
   );
 }
 
-export function AdminClassView({ videoClient, currentUser }: AdminClassViewProps) {
+export function AdminClassView({ 
+  videoClient, 
+  currentUser, 
+  onLiveClassStart, 
+  onLiveClassEnd, 
+  isFullScreen = false 
+}: AdminClassViewProps) {
   const [call, setCall] = useState<Call | null>(null);
   const [isClassStarted, setIsClassStarted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -133,6 +144,7 @@ export function AdminClassView({ videoClient, currentUser }: AdminClassViewProps
       
       setCall(newCall);
       setIsClassStarted(true);
+      onLiveClassStart?.(); // Trigger full-screen mode
     } catch (error) {
       console.error('Failed to start class:', error);
     } finally {
@@ -156,6 +168,7 @@ export function AdminClassView({ videoClient, currentUser }: AdminClassViewProps
       await call.leave();
       setCall(null);
       setIsClassStarted(false);
+      onLiveClassEnd?.(); // Exit full-screen mode
     } catch (error) {
       console.error('Failed to end class:', error);
     }
@@ -183,6 +196,7 @@ export function AdminClassView({ videoClient, currentUser }: AdminClassViewProps
                 currentUser={currentUser} 
                 onEndClass={handleEndClass}
                 isInstructor={true}
+                isFullScreen={isFullScreen}
               />
             </StreamTheme>
           </StreamCall>
