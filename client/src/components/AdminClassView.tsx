@@ -51,6 +51,42 @@ function LiveClassLayout({
   console.log('[LiveClassLayout] Calling state:', callingState);
   console.log('[LiveClassLayout] Raw participants:', participants.length);
 
+  // Add debugging for call object and user ID as requested
+  useEffect(() => {
+    if (call) {
+      console.log("[LiveClassView] Call object initialized:", call);
+      console.log("[LiveClassView] Call state participants:", call.state.participants);
+      console.log("[LiveClassView] Call state members:", call.state.members);
+      
+      // Get the video client from the call object
+      const videoClient = call.client;
+      const currentUserId = videoClient.userId;
+      if (videoClient && currentUserId) {
+        console.log("[LiveClassView] Current videoClient user ID:", currentUserId);
+        console.log("[LiveClassView] VideoClient info:", { userId: currentUserId });
+        
+        // Check if this user ID is present in the call's participants
+        const userInCall = call.state.participants.some(p => p.userId === currentUserId);
+        console.log("[LiveClassView] Current user in call participants list:", userInCall);
+        
+        // Also check members
+        const userInMembers = call.state.members.some(m => m.user.id === currentUserId);
+        console.log("[LiveClassView] Current user in call members list:", userInMembers);
+        
+        // Log all participant details for debugging
+        console.log("[LiveClassView] All participants details:");
+        call.state.participants.forEach((p, index) => {
+          console.log(`  Participant ${index + 1}:`, {
+            userId: p.userId,
+            sessionId: p.sessionId,
+            name: p.name,
+            isLocalParticipant: p.isLocalParticipant
+          });
+        });
+      }
+    }
+  }, [call]);
+
   // Check for the call object itself before proceeding
   if (!call || callingState === CallingState.OFFLINE || callingState === CallingState.JOINING) {
     return (
@@ -65,8 +101,9 @@ function LiveClassLayout({
   }
 
   // Filter out potential system/recording bots if needed for display count
-  const displayParticipants = participants.filter(p => p.type !== 'bot');
-  console.log('[LiveClassLayout] Display participants (filtered):', displayParticipants.length);
+  // Note: Stream SDK doesn't have a 'type' property, so we'll use all participants
+  const displayParticipants = participants;
+  console.log('[LiveClassLayout] Display participants:', displayParticipants.length);
 
   return (
     <div className="live-class-container">
@@ -121,7 +158,7 @@ function LiveClassLayout({
                 sessionId: p.sessionId, 
                 userId: p.userId, 
                 name: p.name,
-                type: p.type
+                isLocalParticipant: p.isLocalParticipant
               })));
             }}
             className="text-xs bg-blue-600 text-white px-2 py-1 rounded mt-2"
@@ -244,8 +281,21 @@ export function AdminClassView({
         participants: newCall.state.participants.length,
         members: newCall.state.members.length,
         callingState: newCall.state.callingState,
-        settings: newCall.state.settings
+        callCID: newCall.cid
       });
+      
+      // Additional debugging for user recognition
+      const currentUserId = videoClient.userId;
+      if (videoClient && currentUserId) {
+        console.log('[AdminClassView] VideoClient user after join:', {
+          id: currentUserId,
+          clientInfo: { userId: currentUserId }
+        });
+        
+        // Check if user appears in participants immediately after join
+        const userInParticipants = newCall.state.participants.some(p => p.userId === currentUserId);
+        console.log('[AdminClassView] User found in participants after join:', userInParticipants);
+      }
       
       // Set the call and class state immediately after successful join
       setCall(newCall);
