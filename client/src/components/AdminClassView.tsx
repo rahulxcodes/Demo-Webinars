@@ -140,7 +140,9 @@ export function AdminClassView({
       setCall(newCall);
       setIsClassStarted(true);
       console.log('[AdminClassView] State set - call:', !!newCall, 'isClassStarted:', true);
+      console.log('[AdminClassView] About to call onLiveClassStart');
       onLiveClassStart?.(); // Trigger full-screen mode
+      console.log('[AdminClassView] onLiveClassStart called');
       
       // Start recording automatically (after state is set)
       try {
