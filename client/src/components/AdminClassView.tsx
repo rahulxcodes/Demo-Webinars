@@ -64,16 +64,42 @@ function LiveClassLayout({
 
   return (
     <StreamTheme className="custom-dark-theme">
-      <div className="zoom-layout-container">
-        <div className="main-video-stage">
+      <div className="zoom-layout-container" data-sidebar={showSidebar ? 'open' : 'closed'}>
+        <div className="main-video-area">
           <SpeakerLayout 
+            participantsBarPosition="none"
             participantsBarLimit={0}
           />
         </div>
+        <div className={`collapsible-sidebar ${showSidebar ? 'sidebar-open' : 'sidebar-closed'}`}>
+          <div className="sidebar-header">
+            <h3>Participants ({participants.length})</h3>
+            <button 
+              className="sidebar-close-btn"
+              onClick={() => setShowSidebar(false)}
+            >
+              ✕
+            </button>
+          </div>
+          <div className="sidebar-content">
+            <CallParticipantsList 
+              onClose={() => setShowSidebar(false)}
+            />
+          </div>
+        </div>
         <div className="participants-bottom-strip">
-          <CallParticipantsList 
-            onClose={() => setShowSidebar(false)}
-          />
+          <div className="participants-preview">
+            {participants.slice(0, 4).map((participant, index) => (
+              <div key={participant.sessionId} className="participant-tile">
+                <span>{participant.name?.[0] || 'U'}</span>
+              </div>
+            ))}
+            {participants.length > 4 && (
+              <div className="participant-tile more-count">
+                +{participants.length - 4}
+              </div>
+            )}
+          </div>
         </div>
         <div className="floating-controls">
           <div className="custom-control-bar">
@@ -82,7 +108,10 @@ function LiveClassLayout({
             <ScreenShareButton />
             <RecordCallButton />
             <div className="participants-counter">
-              <button className="participants-btn">
+              <button 
+                className="participants-btn"
+                onClick={() => setShowSidebar(!showSidebar)}
+              >
                 <span>👥</span>
                 Participants ({participants.length})
               </button>
