@@ -1,0 +1,101 @@
+You've successfully started a live class from the admin account, but the student interface isn't detecting that a live class is in progress. This is a critical user experience problem where the real-time status detection between admin and student accounts isn't working properly.
+
+The core issue is that your current implementation likely doesn't have a robust mechanism for students to detect when an admin has started a live class. Here's how to fix this:
+
+The Problem
+Your student view probably checks for an active call only once when the component loads, but it doesn't continuously monitor for when an admin starts a class. We need to implement real-time status detection.
+
+The Solution: Real-Time Call Status Detection
+Here are the prompts to give the Replit AI agent to implement proper live class detection:
+
+Prompt 1: Create a Call Status Hook
+
+Create a new custom hook in src/hooks/useCallStatus.js that continuously checks if a specific call is live. This hook should:
+
+Use setInterval to query the Stream API every 5 seconds using videoClient.queryCalls()
+
+Check if the call with ID live-class-main-1 has active participants
+
+Return an object with isLive boolean and participantCount number
+
+Clean up the interval when the component unmounts
+
+Prompt 2: Update the Student Class View
+
+In UserClassView.jsx, replace the current status checking logic with the new hook:
+
+jsx
+import { useCallStatus } from '../hooks/useCallStatus';
+
+const { isLive, participantCount } = useCallStatus('live-class-main-1');
+
+// Update the conditional rendering:
+if (!isLive) {
+  return (
+    <div className="waiting-message">
+      <h2>Class Status</h2>
+      <p>The live class has not started yet.</p>
+      <p>Please wait for your instructor to begin the session.</p>
+      <button onClick={() => window.location.reload()}>
+        Refresh Status
+      </button>
+    </div>
+  );
+}
+
+return (
+  <div className="join-class-prompt">
+    <h2>🔴 Live Class in Progress</h2>
+    <p>Your instructor has started the class with {participantCount} participants.</p>
+    <button 
+      className="join-button"
+      onClick={handleJoinClass}
+    >
+      Join Live Class
+    </button>
+  </div>
+);
+Prompt 3: Add Visual Styling for Class Status
+
+Add these styles to your src/App.css to make the status messages clear and engaging:
+
+css
+.waiting-message {
+  text-align: center;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin: 2rem;
+}
+
+.join-class-prompt {
+  text-align: center;
+  padding: 2rem;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 8px;
+  margin: 2rem;
+}
+
+.join-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.join-button:hover {
+  background-color: #218838;
+}
+How This Works
+Continuous Monitoring: The custom hook polls Stream's API every 5 seconds to check if the specific call (live-class-main-1) has active participants
+
+Real-Time Updates: When the admin starts a class, students will automatically see the status change within 5 seconds
+
+Clear UI States: Students see different messages based on whether a class is live or not
+
+Easy Joining: When a class is detected as live, students get a prominent "Join Live Class" button

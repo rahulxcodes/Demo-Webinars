@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ErrorBoundary } from './ErrorBoundary';
+import { useCallStatus } from '@/hooks/useCallStatus';
 
 interface UserClassViewProps {
   videoClient: StreamVideoClient;
@@ -93,47 +94,14 @@ function StudentLiveClassLayout({
 }
 
 export function UserClassView({ videoClient, currentUser }: UserClassViewProps) {
-  const [isClassLive, setIsClassLive] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
-  const [isCheckingStatus, setIsCheckingStatus] = useState(false);
   const [call, setCall] = useState<Call | null>(null);
   const [isInCall, setIsInCall] = useState(false);
+  
+  // Use the call status hook to monitor live classes in real-time
+  const { isLive, participantCount, loading, error } = useCallStatus('live-class-main-1', videoClient);
 
-  const checkClassStatus = async () => {
-    if (!videoClient) return;
-
-    setIsCheckingStatus(true);
-    try {
-      // Query the Stream API to see if the call is active
-      const result = await videoClient.queryCalls({
-        filter_conditions: { id: 'live-class-main-1' },
-      });
-
-      // Check if call exists and has members
-      if (result.calls && result.calls.length > 0) {
-        const classCall = result.calls[0];
-        // Check if call has active participants by looking at the call state
-        const hasMembers = classCall.state?.members && Object.keys(classCall.state.members).length > 0;
-        setIsClassLive(hasMembers);
-      } else {
-        setIsClassLive(false);
-      }
-    } catch (error) {
-      console.error('Failed to check class status:', error);
-      setIsClassLive(false);
-    } finally {
-      setIsCheckingStatus(false);
-    }
-  };
-
-  // Check status periodically
-  useEffect(() => {
-    checkClassStatus();
-    
-    const interval = setInterval(checkClassStatus, 10000); // Check every 10 seconds
-    
-    return () => clearInterval(interval);
-  }, [videoClient]);
+  // No longer need manual status checking - using the hook instead
 
   const handleJoinClass = async () => {
     if (!videoClient) return;
@@ -214,38 +182,23 @@ export function UserClassView({ videoClient, currentUser }: UserClassViewProps) 
             <div>
               <p className="font-medium">
                 Class Status: 
-                <span className={`ml-2 ${isClassLive ? 'text-green-600' : 'text-gray-500'}`}>
-                  {isClassLive ? '🟢 Live' : '⚫ Not Started'}
+                <span className={`ml-2 ${isLive ? 'text-green-600' : 'text-gray-500'}`}>
+                  {isLive ? '🟢 Live' : '⚫ Not Started'}
                 </span>
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 Class ID: <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">live-class-main-1</code>
               </p>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={checkClassStatus}
-              disabled={isCheckingStatus}
-            >
-              {isCheckingStatus ? (
-                <>
-                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-600 mr-1"></div>
-                  Checking...
-                </>
-              ) : (
-                'Check Status'
-              )}
-            </Button>
           </div>
 
-          {!isClassLive ? (
+          {!isLive ? (
             <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
               <p className="text-yellow-800 dark:text-yellow-200 font-medium">
                 The class has not started yet.
               </p>
               <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                Please wait for your instructor to start the live session. The status will update automatically.
+                Please wait for your instructor to start the live session. Status updates automatically every 5 seconds.
               </p>
             </div>
           ) : (
@@ -255,7 +208,7 @@ export function UserClassView({ videoClient, currentUser }: UserClassViewProps) 
                   🎉 The class is now live!
                 </p>
                 <p className="text-sm text-green-700 dark:text-green-300 mt-1">
-                  Click the button below to join your instructor and classmates.
+                  {participantCount} participant{participantCount !== 1 ? 's' : ''} currently in class. Click below to join.
                 </p>
               </div>
 
