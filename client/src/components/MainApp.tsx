@@ -15,6 +15,7 @@ export function MainApp() {
   const { user, logout } = useAuth();
   const [activeView, setActiveView] = useState<'live-class' | 'recordings'>('live-class');
   const [videoClient, setVideoClient] = useState<StreamVideoClient | null>(null);
+  const [isLive, setIsLive] = useState(false);
 
   // Simulate current user based on authenticated user
   const currentUser = user ? {
@@ -86,7 +87,7 @@ export function MainApp() {
         return () => {
           client.disconnectUser();
         };
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to create StreamVideoClient:', error);
         // If token creation fails, likely due to expired token
         if (error.message?.includes('expired') || error.message?.includes('JWT')) {
@@ -147,28 +148,43 @@ export function MainApp() {
     );
   }
 
-  console.log('[MainApp] Rendering - activeView:', activeView, 'isAdmin:', currentUser?.isAdmin, 'hasVideoClient:', !!videoClient);
+  console.log('[MainApp] Rendering - activeView:', activeView, 'isAdmin:', currentUser?.isAdmin, 'hasVideoClient:', !!videoClient, 'isLive:', isLive);
 
   return (
-    <Layout
-      activeView={activeView}
-      setActiveView={setActiveView}
-      currentUser={currentUser}
-      onLogout={logout}
-    >
-      {activeView === 'live-class' && (
-        <>
-          {currentUser.isAdmin ? (
-            <AdminClassView videoClient={videoClient} currentUser={currentUser} />
-          ) : (
-            <UserClassView videoClient={videoClient} currentUser={currentUser} />
-          )}
-        </>
+    <div className={`app-layout flex h-screen ${isLive ? 'fullscreen' : ''}`}>
+      {!isLive && (
+        <Layout
+          activeView={activeView}
+          setActiveView={setActiveView}
+          currentUser={currentUser}
+          onLogout={logout}
+        />
       )}
+      <main className={`main-content ${isLive ? 'w-full' : 'flex-1 p-6 overflow-auto'}`}>
+        {activeView === 'live-class' && (
+          <>
+            {currentUser.isAdmin ? (
+              <AdminClassView 
+                videoClient={videoClient} 
+                currentUser={currentUser}
+                onLiveClassStart={() => setIsLive(true)}
+                onLiveClassEnd={() => setIsLive(false)}
+              />
+            ) : (
+              <UserClassView 
+                videoClient={videoClient} 
+                currentUser={currentUser}
+                onLiveClassStart={() => setIsLive(true)}
+                onLiveClassEnd={() => setIsLive(false)}
+              />
+            )}
+          </>
+        )}
 
-      {activeView === 'recordings' && (
-        <RecordingsView videoClient={videoClient} />
-      )}
-    </Layout>
+        {activeView === 'recordings' && !isLive && (
+          <RecordingsView videoClient={videoClient} />
+        )}
+      </main>
+    </div>
   );
 }

@@ -10,14 +10,11 @@ interface LayoutProps {
     isAdmin: boolean;
   };
   onLogout: () => void;
-  children: React.ReactNode;
 }
 
-export function Layout({ activeView, setActiveView, currentUser, onLogout, children }: LayoutProps) {
+export function Layout({ activeView, setActiveView, currentUser, onLogout }: LayoutProps) {
   return (
-    <div className="flex h-screen">
-      {/* Sidebar */}
-      <div className="w-64 bg-gray-100 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4">
+    <div className="w-64 bg-gray-100 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4">
         <div className="space-y-2">
           <div className="mb-4">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -52,14 +49,6 @@ export function Layout({ activeView, setActiveView, currentUser, onLogout, child
             Sign Out
           </Button>
         </div>
-      </div>
-
-      {/* Main Content Area */}
-      <div className="flex-1 p-6 overflow-auto">
-        <Card className="h-full p-6">
-          {children}
-        </Card>
-      </div>
     </div>
   );
 }

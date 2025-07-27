@@ -23,6 +23,8 @@ interface AdminClassViewProps {
     name: string;
     isAdmin: boolean;
   };
+  onLiveClassStart: () => void;
+  onLiveClassEnd: () => void;
 }
 
 // Professional Live Class Layout Component - Hooks must be inside StreamCall
@@ -96,7 +98,7 @@ function LiveClassLayout({
   );
 }
 
-export function AdminClassView({ videoClient, currentUser }: AdminClassViewProps) {
+export function AdminClassView({ videoClient, currentUser, onLiveClassStart, onLiveClassEnd }: AdminClassViewProps) {
   const [call, setCall] = useState<Call | null>(null);
   const [isClassStarted, setIsClassStarted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -133,6 +135,7 @@ export function AdminClassView({ videoClient, currentUser }: AdminClassViewProps
       
       setCall(newCall);
       setIsClassStarted(true);
+      onLiveClassStart(); // Notify parent that class has started
     } catch (error) {
       console.error('Failed to start class:', error);
     } finally {
@@ -156,6 +159,7 @@ export function AdminClassView({ videoClient, currentUser }: AdminClassViewProps
       await call.leave();
       setCall(null);
       setIsClassStarted(false);
+      onLiveClassEnd(); // Notify parent that class has ended
     } catch (error) {
       console.error('Failed to end class:', error);
     }

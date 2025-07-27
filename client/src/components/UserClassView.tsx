@@ -24,6 +24,8 @@ interface UserClassViewProps {
     name: string;
     isAdmin: boolean;
   };
+  onLiveClassStart: () => void;
+  onLiveClassEnd: () => void;
 }
 
 // Student Live Class Layout Component - Hooks must be inside StreamCall  
@@ -93,7 +95,7 @@ function StudentLiveClassLayout({
   );
 }
 
-export function UserClassView({ videoClient, currentUser }: UserClassViewProps) {
+export function UserClassView({ videoClient, currentUser, onLiveClassStart, onLiveClassEnd }: UserClassViewProps) {
   const [isJoining, setIsJoining] = useState(false);
   const [call, setCall] = useState<Call | null>(null);
   const [isInCall, setIsInCall] = useState(false);
@@ -117,6 +119,7 @@ export function UserClassView({ videoClient, currentUser }: UserClassViewProps) 
       
       setCall(newCall);
       setIsInCall(true);
+      onLiveClassStart(); // Notify parent that student joined live class
     } catch (error) {
       console.error('Failed to join class:', error);
     } finally {
@@ -131,6 +134,7 @@ export function UserClassView({ videoClient, currentUser }: UserClassViewProps) 
       await call.leave();
       setCall(null);
       setIsInCall(false);
+      onLiveClassEnd(); // Notify parent that student left live class
     } catch (error) {
       console.error('Failed to leave class:', error);
     }
