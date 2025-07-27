@@ -26,19 +26,39 @@ export function useCallStatus(callId: string, videoClient: StreamVideoClient | n
 
     const checkCallStatus = async () => {
       try {
+        console.log(`[useCallStatus] Checking status for call ID: ${callId}`);
+        
         // Query calls to check if our specific call is active
         const response = await videoClient.queryCalls({
           filter_conditions: {
             id: callId
           },
-          limit: 1
+          limit: 10
         });
+
+        console.log(`[useCallStatus] Query response:`, response);
 
         if (response.calls && response.calls.length > 0) {
           const call = response.calls[0];
-          // Check if call has active participants using the correct API structure
-          const isActive = call.state?.members && Object.keys(call.state.members).length > 0;
-          const participantCount = call.state?.members ? Object.keys(call.state.members).length : 0;
+          console.log(`[useCallStatus] Found call:`, call);
+          console.log(`[useCallStatus] Call state:`, call.state);
+          console.log(`[useCallStatus] Call members:`, call.state?.members);
+          console.log(`[useCallStatus] Call session:`, call.session);
+          console.log(`[useCallStatus] Call participants:`, call.state?.participants);
+          console.log(`[useCallStatus] Call recording:`, call.state?.recording);
+          console.log(`[useCallStatus] Call backstage:`, call.backstage);
+          
+          // Check multiple indicators for an active call
+          const hasMembers = call.state?.members && Object.keys(call.state.members).length > 0;
+          const hasParticipants = call.state?.participants && call.state.participants.length > 0;
+          const isRecording = call.state?.recording === true;
+          
+          // For queryCalls, the main indicator is call.state.members
+          const isActive = hasMembers || hasParticipants || isRecording;
+          const participantCount = call.state?.members ? Object.keys(call.state.members).length : 
+                                 (call.state?.participants?.length || 0);
+
+          console.log(`[useCallStatus] Status - isActive: ${isActive}, participantCount: ${participantCount}`);
 
           setStatus({
             isLive: isActive,
@@ -47,6 +67,7 @@ export function useCallStatus(callId: string, videoClient: StreamVideoClient | n
             error: null
           });
         } else {
+          console.log(`[useCallStatus] No calls found for ID: ${callId}`);
           // Call doesn't exist or has no active session
           setStatus({
             isLive: false,
@@ -68,8 +89,8 @@ export function useCallStatus(callId: string, videoClient: StreamVideoClient | n
     // Initial check
     checkCallStatus();
 
-    // Set up polling every 5 seconds
-    intervalId = setInterval(checkCallStatus, 5000);
+    // Set up polling every 3 seconds for faster detection
+    intervalId = setInterval(checkCallStatus, 3000);
 
     // Cleanup on unmount
     return () => {
