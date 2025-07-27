@@ -17,15 +17,7 @@ import {
   type Call,
 } from '@stream-io/video-react-sdk';
 import { 
-  HiMicrophone, 
-  HiMicrophoneSlash, 
-  HiVideoCamera, 
-  HiVideoCameraSlash,
-  HiDesktopComputer,
-  HiStop,
-  HiUsers,
-  HiCog,
-  HiPhone
+  HiUsers
 } from 'react-icons/hi2';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

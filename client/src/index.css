@@ -199,25 +199,62 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
-/* Individual control button styling */
+/* Professional Button Design System */
 .custom-control-bar button {
   width: 48px !important;
   height: 48px !important;
   border-radius: 50% !important;
-  background-color: #3d3d42 !important;
   border: none !important;
   color: white !important;
   font-size: 18px !important;
-  transition: all 0.2s ease !important;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  outline: none !important;
+  
+  /* Smooth transitions for all properties */
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  
+  /* Primary button styling - default state */
+  background-color: #2D2D30 !important;
 }
 
+/* Hover state with scale and enhanced shadow */
 .custom-control-bar button:hover {
-  background-color: #5a5a5f !important;
   transform: scale(1.05) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+  background-color: #3A3A3D !important;
+}
+
+/* Active (pressed) state with inset shadow */
+.custom-control-bar button:active {
+  transform: scale(0.98) !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Focus state for accessibility */
+.custom-control-bar button:focus {
+  outline: 2px solid #005FFF !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(0, 95, 255, 0.2) !important;
+}
+
+.custom-control-bar button:focus-visible {
+  outline: 2px solid #005FFF !important;
+  outline-offset: 2px !important;
+}
+
+/* Haptic feedback animation */
+@keyframes haptic-pulse {
+  0% { transform: scale(1.05); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1.05); }
+}
+
+.custom-control-bar button:active {
+  animation: haptic-pulse 0.1s ease-out !important;
 }
 
 /* Participants counter styling */
@@ -246,63 +283,129 @@
 .participants-btn:hover {
   background-color: rgba(93, 93, 95, 0.2) !important;
   border-color: #5a5a5f !important;
-  transform: none !important;
+  transform: scale(1.02) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
 }
 
-/* Stream component overrides for individual buttons */
+.participants-btn:active {
+  transform: scale(0.98) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+.participants-btn:focus {
+  outline: 2px solid #005FFF !important;
+  outline-offset: 2px !important;
+}
+
+/* Stream Component Button Variants */
+
+/* Primary Buttons (Audio, Video, Screen Share, Record) */
 .str-video__toggle-audio-publishing-button,
 .str-video__toggle-video-publishing-button,
 .str-video__screen-share-button,
-.str-video__record-call-button,
-.str-video__cancel-call-button {
+.str-video__record-call-button {
   width: 48px !important;
   height: 48px !important;
   border-radius: 50% !important;
-  background-color: #3d3d42 !important;
   border: none !important;
   color: white !important;
   font-size: 20px !important;
-  transition: all 0.2s ease !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   position: relative !important;
+  outline: none !important;
+  cursor: pointer !important;
+  
+  /* Primary button background */
+  background-color: #2D2D30 !important;
+  
+  /* Enhanced transitions */
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
+/* Primary button hover states */
 .str-video__toggle-audio-publishing-button:hover,
 .str-video__toggle-video-publishing-button:hover,
 .str-video__screen-share-button:hover,
 .str-video__record-call-button:hover {
-  background-color: #5a5a5f !important;
+  background-color: #3A3A3D !important;
   transform: scale(1.05) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Cancel/End call button - red styling with phone icon rotation */
+/* Active/pressed states for primary buttons */
+.str-video__toggle-audio-publishing-button:active,
+.str-video__toggle-video-publishing-button:active,
+.str-video__screen-share-button:active,
+.str-video__record-call-button:active {
+  transform: scale(0.98) !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  animation: haptic-pulse 0.1s ease-out !important;
+}
+
+/* Toggle States */
+
+/* Inactive state (muted/off) - Danger styling */
+.str-video__toggle-audio-publishing-button[data-testid*="muted"],
+.str-video__toggle-video-publishing-button[data-testid*="off"] {
+  background-color: #FF4757 !important;
+}
+
+.str-video__toggle-audio-publishing-button[data-testid*="muted"]:hover,
+.str-video__toggle-video-publishing-button[data-testid*="off"]:hover {
+  background-color: #FF3742 !important;
+}
+
+/* Active state (sharing/recording) - Success styling */
+.str-video__screen-share-button[data-testid*="active"],
+.str-video__record-call-button[data-testid*="recording"] {
+  background-color: #00D4AA !important;
+}
+
+.str-video__screen-share-button[data-testid*="active"]:hover,
+.str-video__record-call-button[data-testid*="recording"]:hover {
+  background-color: #00C4A0 !important;
+}
+
+/* Danger Button (End Call) */
 .str-video__cancel-call-button {
-  background-color: #ff4757 !important;
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
+  border: none !important;
+  color: white !important;
+  font-size: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  outline: none !important;
+  cursor: pointer !important;
+  
+  /* Danger button styling */
+  background-color: #FF4757 !important;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .str-video__cancel-call-button:hover {
-  background-color: #ff3742 !important;
+  background-color: #FF3742 !important;
   transform: scale(1.05) !important;
+  box-shadow: 0 4px 16px rgba(255, 71, 87, 0.4) !important;
 }
 
+.str-video__cancel-call-button:active {
+  transform: scale(0.98) !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  animation: haptic-pulse 0.1s ease-out !important;
+}
+
+/* Icon styling and rotation for end call */
 .str-video__cancel-call-button svg {
   transform: rotate(135deg) !important;
 }
 
-/* Active state styling */
-.str-video__toggle-audio-publishing-button[data-testid*="muted"],
-.str-video__toggle-video-publishing-button[data-testid*="off"] {
-  background-color: #ff4757 !important;
-}
-
-.str-video__screen-share-button[data-testid*="active"],
-.str-video__record-call-button[data-testid*="recording"] {
-  background-color: #005FFF !important;
-}
-
-/* Icon styling for control buttons */
+/* Icon sizing for all buttons */
 .custom-control-bar .str-video__toggle-audio-publishing-button svg,
 .custom-control-bar .str-video__toggle-video-publishing-button svg,
 .custom-control-bar .str-video__screen-share-button svg,
@@ -312,13 +415,43 @@
   height: 20px !important;
 }
 
-/* Accessibility improvements */
-.custom-control-bar button:focus {
-  outline: 2px solid #005FFF !important;
-  outline-offset: 2px !important;
+/* Disabled state styling */
+.str-video__toggle-audio-publishing-button:disabled,
+.str-video__toggle-video-publishing-button:disabled,
+.str-video__screen-share-button:disabled,
+.str-video__record-call-button:disabled,
+.str-video__cancel-call-button:disabled {
+  background-color: #374151 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6 !important;
 }
 
-.custom-control-bar button:focus-visible {
+.str-video__toggle-audio-publishing-button:disabled:hover,
+.str-video__toggle-video-publishing-button:disabled:hover,
+.str-video__screen-share-button:disabled:hover,
+.str-video__record-call-button:disabled:hover,
+.str-video__cancel-call-button:disabled:hover {
+  transform: none !important;
+  background-color: #374151 !important;
+  box-shadow: none !important;
+}
+
+/* Focus states for accessibility */
+.str-video__toggle-audio-publishing-button:focus,
+.str-video__toggle-video-publishing-button:focus,
+.str-video__screen-share-button:focus,
+.str-video__record-call-button:focus,
+.str-video__cancel-call-button:focus {
+  outline: 2px solid #005FFF !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(0, 95, 255, 0.2) !important;
+}
+
+.str-video__toggle-audio-publishing-button:focus-visible,
+.str-video__toggle-video-publishing-button:focus-visible,
+.str-video__screen-share-button:focus-visible,
+.str-video__record-call-button:focus-visible,
+.str-video__cancel-call-button:focus-visible {
   outline: 2px solid #005FFF !important;
   outline-offset: 2px !important;
 }
