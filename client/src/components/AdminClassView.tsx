@@ -37,9 +37,13 @@ function LiveClassLayout({
   onEndClass: () => void;
   isInstructor: boolean;
 }) {
-  // Move hooks inside the component that's wrapped by StreamCall
-  const { useCallCallingState } = useCallStateHooks();
+  // State management for sidebar visibility
+  const [showSidebar, setShowSidebar] = useState(false);
+  
+  // Stream hooks for call state and participant management
+  const { useCallCallingState, useParticipants } = useCallStateHooks();
   const callingState = useCallCallingState();
+  const participants = useParticipants();
 
   if (callingState !== CallingState.JOINED) {
     return (
@@ -54,20 +58,23 @@ function LiveClassLayout({
   }
 
   return (
-    <div className="zoom-layout-container">
-      <div className="main-video-stage">
-        <SpeakerLayout 
-          participantsBarPosition="none"
-          participantsBarLimit={0}
-        />
+    <StreamTheme className="custom-dark-theme">
+      <div className="zoom-layout-container">
+        <div className="main-video-stage">
+          <SpeakerLayout 
+            participantsBarLimit={0}
+          />
+        </div>
+        <div className="participants-bottom-strip">
+          <CallParticipantsList 
+            onClose={() => setShowSidebar(false)}
+          />
+        </div>
+        <div className="floating-controls">
+          <CallControls onLeave={() => onEndClass()} />
+        </div>
       </div>
-      <div className="participants-bottom-strip">
-        <CallParticipantsList onClose={() => {}} />
-      </div>
-      <div className="floating-controls">
-        <CallControls onLeave={() => onEndClass()} />
-      </div>
-    </div>
+    </StreamTheme>
   );
 }
 

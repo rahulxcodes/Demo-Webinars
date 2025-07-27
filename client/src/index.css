@@ -53,10 +53,17 @@
 }
 
 /* Stream theme overrides using CSS variables */
+.str-video.custom-dark-theme {
+  --str-video__primary-color: #005FFF;
+  --str-video__secondary-color: #2D2D30;
+  --str-video__text-color1: #FFFFFF;
+  --str-video__border-radius-circle: 8px;
+}
+
 .zoom-layout-container {
-  --str-video__primary-color: #00d4aa;
-  --str-video__secondary-color: #3d3d42;
-  --str-video__text-color1: #ffffff;
+  --str-video__primary-color: #005FFF;
+  --str-video__secondary-color: #2D2D30;
+  --str-video__text-color1: #FFFFFF;
   --str-video__border-radius-circle: 8px;
 }
 
