@@ -8,6 +8,10 @@ import {
   SpeakerLayout,
   CallingState,
   useCallStateHooks,
+  ToggleAudioPublishingButton,
+  ToggleVideoPublishingButton,
+  ScreenShareButton,
+  CancelCallButton,
   type StreamVideoClient,
   type Call,
 } from '@stream-io/video-react-sdk';
@@ -70,7 +74,18 @@ function StudentLiveClassLayout({
           />
         </div>
         <div className="floating-controls">
-          <CallControls onLeave={() => onLeaveClass()} />
+          <div className="custom-control-bar">
+            <ToggleAudioPublishingButton />
+            <ToggleVideoPublishingButton />
+            <ScreenShareButton />
+            <div className="participants-counter">
+              <button className="participants-btn">
+                <span>👥</span>
+                Participants ({participants.length})
+              </button>
+            </div>
+            <CancelCallButton onLeave={() => onLeaveClass()} />
+          </div>
         </div>
       </div>
     </StreamTheme>

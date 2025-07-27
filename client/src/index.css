@@ -87,20 +87,78 @@
   flex-shrink: 0;
 }
 
-/* Call controls styling - Zoom-like buttons */
-.str-video__call-controls {
-  background-color: rgba(45, 45, 48, 0.95) !important;
-  border-radius: 24px !important;
-  padding: 12px 20px !important;
-  border: 1px solid #3d3d42 !important;
+/* Custom Control Bar Styling */
+.custom-control-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: rgba(45, 45, 48, 0.95);
+  border-radius: 24px;
+  padding: 12px 20px;
+  border: 1px solid #3d3d42;
   backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
-.str-video__call-controls button {
+/* Individual control button styling */
+.custom-control-bar button {
   width: 48px !important;
   height: 48px !important;
   border-radius: 50% !important;
-  margin: 0 8px !important;
+  background-color: #3d3d42 !important;
+  border: none !important;
+  color: white !important;
+  font-size: 18px !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-control-bar button:hover {
+  background-color: #5a5a5f !important;
+  transform: scale(1.05) !important;
+}
+
+/* Participants counter styling */
+.participants-counter {
+  display: flex;
+  align-items: center;
+  margin: 0 8px;
+}
+
+.participants-btn {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background-color: transparent !important;
+  border: 1px solid #3d3d42 !important;
+  border-radius: 24px !important;
+  padding: 8px 16px !important;
+  color: white !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  width: auto !important;
+  height: auto !important;
+  transition: all 0.2s ease !important;
+}
+
+.participants-btn:hover {
+  background-color: rgba(93, 93, 95, 0.2) !important;
+  border-color: #5a5a5f !important;
+  transform: none !important;
+}
+
+/* Stream component overrides for individual buttons */
+.str-video__toggle-audio-publishing-button,
+.str-video__toggle-video-publishing-button,
+.str-video__screen-share-button,
+.str-video__record-call-button,
+.str-video__cancel-call-button {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
   background-color: #3d3d42 !important;
   border: none !important;
   color: white !important;
@@ -108,18 +166,33 @@
   transition: all 0.2s ease !important;
 }
 
-.str-video__call-controls button:hover {
+.str-video__toggle-audio-publishing-button:hover,
+.str-video__toggle-video-publishing-button:hover,
+.str-video__screen-share-button:hover,
+.str-video__record-call-button:hover {
   background-color: #5a5a5f !important;
   transform: scale(1.05) !important;
 }
 
-/* End call button - red like Zoom */
-.str-video__call-controls button[data-testid="call-controls-button-leave"] {
+/* Cancel/End call button - red styling */
+.str-video__cancel-call-button {
   background-color: #ff4757 !important;
 }
 
-.str-video__call-controls button[data-testid="call-controls-button-leave"]:hover {
+.str-video__cancel-call-button:hover {
   background-color: #ff3742 !important;
+  transform: scale(1.05) !important;
+}
+
+/* Active state styling */
+.str-video__toggle-audio-publishing-button[data-testid*="muted"],
+.str-video__toggle-video-publishing-button[data-testid*="off"] {
+  background-color: #ff4757 !important;
+}
+
+.str-video__screen-share-button[data-testid*="active"],
+.str-video__record-call-button[data-testid*="recording"] {
+  background-color: #005FFF !important;
 }
 
 /* Main speaker video container */
