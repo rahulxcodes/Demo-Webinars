@@ -34,12 +34,14 @@ function LiveClassLayout({
   currentUser, 
   onEndClass, 
   isInstructor,
-  isFullScreen = false
+  isFullScreen = false,
+  videoClient
 }: { 
   currentUser: any;
   onEndClass: () => void;
   isInstructor: boolean;
   isFullScreen?: boolean;
+  videoClient: StreamVideoClient;
 }) {
   // Use Stream hooks correctly within StreamCall context
   const call = useCall();
@@ -51,41 +53,26 @@ function LiveClassLayout({
   console.log('[LiveClassLayout] Calling state:', callingState);
   console.log('[LiveClassLayout] Raw participants:', participants.length);
 
-  // Add debugging for call object and user ID as requested
   useEffect(() => {
-    if (call) {
-      console.log("[LiveClassView] Call object initialized:", call);
-      console.log("[LiveClassView] Call state participants:", call.state.participants);
-      console.log("[LiveClassView] Call state members:", call.state.members);
-      
-      // Get the video client from the call object
-      const videoClient = call.client;
-      const currentUserId = videoClient.userId;
-      if (videoClient && currentUserId) {
-        console.log("[LiveClassView] Current videoClient user ID:", currentUserId);
-        console.log("[LiveClassView] VideoClient info:", { userId: currentUserId });
+    // The videoClient object is passed as a prop, not derived from the call.
+    // We will use it directly.
+
+    // First, check if the videoClient and its user object exist.
+    if (videoClient && videoClient.user) {
+      const currentUserId = videoClient.user.id;
+      console.log("[LiveClassView] Current videoClient user ID:", currentUserId);
+
+      // Now, check if the call object also exists.
+      if (call) {
+        console.log("[LiveClassView] Call object is present. State:", call.state.callingState);
         
-        // Check if this user ID is present in the call's participants
+        // Check if the current user is in the participants list
         const userInCall = call.state.participants.some(p => p.userId === currentUserId);
-        console.log("[LiveClassView] Current user in call participants list:", userInCall);
-        
-        // Also check members
-        const userInMembers = call.state.members.some(m => m.user.id === currentUserId);
-        console.log("[LiveClassView] Current user in call members list:", userInMembers);
-        
-        // Log all participant details for debugging
-        console.log("[LiveClassView] All participants details:");
-        call.state.participants.forEach((p, index) => {
-          console.log(`  Participant ${index + 1}:`, {
-            userId: p.userId,
-            sessionId: p.sessionId,
-            name: p.name,
-            isLocalParticipant: p.isLocalParticipant
-          });
-        });
+        console.log("[LiveClassView] Is current user in participants list:", userInCall);
+        console.log("[LiveClassView] Total participants:", call.state.participants.length);
       }
     }
-  }, [call]);
+  }, [call, videoClient]); // The dependency array is correct
 
   // Check for the call object itself before proceeding
   if (!call || callingState === CallingState.OFFLINE || callingState === CallingState.JOINING) {
@@ -363,6 +350,7 @@ export function AdminClassView({
               onEndClass={handleEndClass}
               isInstructor={true}
               isFullScreen={isFullScreen}
+              videoClient={videoClient}
             />
           </StreamTheme>
         </StreamCall>
