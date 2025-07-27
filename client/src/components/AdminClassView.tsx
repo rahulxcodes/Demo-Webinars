@@ -70,7 +70,6 @@ function LiveClassLayout({
       <div className="zoom-layout-container" data-sidebar={showSidebar ? 'open' : 'closed'}>
         <div className="main-video-area">
           <SpeakerLayout 
-            participantsBarPosition="none"
             participantsBarLimit={0}
           />
         </div>
@@ -106,21 +105,38 @@ function LiveClassLayout({
         </div>
         <div className="floating-controls">
           <div className="custom-control-bar">
-            <ToggleAudioPublishingButton />
-            <ToggleVideoPublishingButton />
-            <ScreenShareButton />
-            <RecordCallButton />
-            <div className="participants-counter">
-              <button 
-                className="participants-btn"
-                onClick={() => setShowSidebar(!showSidebar)}
-                aria-label={`Show participants panel (${participants.length} participants)`}
-              >
-                <HiUsers className="w-5 h-5" />
-                <span>Participants ({participants.length})</span>
-              </button>
+            {/* Primary Controls Group */}
+            <div className="control-group primary-controls">
+              <ToggleAudioPublishingButton />
+              <ToggleVideoPublishingButton />
+              <ScreenShareButton />
             </div>
-            <CancelCallButton onLeave={() => onEndClass()} />
+            
+            {/* Separator */}
+            <div className="control-separator"></div>
+            
+            {/* Secondary Controls Group */}
+            <div className="control-group secondary-controls">
+              <div className="participants-counter">
+                <button 
+                  className="participants-btn"
+                  onClick={() => setShowSidebar(!showSidebar)}
+                  aria-label={`Show participants panel (${participants.length} participants)`}
+                >
+                  <HiUsers className="w-5 h-5" />
+                  <span>Participants ({participants.length})</span>
+                </button>
+              </div>
+              <RecordCallButton />
+            </div>
+            
+            {/* Separator */}
+            <div className="control-separator"></div>
+            
+            {/* Utility Controls Group */}
+            <div className="control-group utility-controls">
+              <CancelCallButton onLeave={() => onEndClass()} />
+            </div>
           </div>
         </div>
       </div>

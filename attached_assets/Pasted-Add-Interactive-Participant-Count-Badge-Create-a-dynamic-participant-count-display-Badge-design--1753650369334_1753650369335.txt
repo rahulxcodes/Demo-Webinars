@@ -1,0 +1,128 @@
+Add Interactive Participant Count Badge
+Create a dynamic participant count display:
+
+Badge design:
+
+Position: Absolute top-right of participants button
+
+Size: 20px × 20px circle
+
+Background: #00D4AA with white text
+
+Font: 12px, bold, centered
+
+Border: 2px solid control bar background for separation
+
+Animation behaviors:
+
+Entrance: Scale from 0 to 1 with bounce effect
+
+Count change: Pulse animation with color change
+
+Show/hide based on participant count (hide if count ≤ 1)
+
+Accessibility: Include screen reader text: "X participants in call"
+
+Prompt 6: Implement Professional State Indicators
+Add visual feedback for all button states:
+
+Mute button states:
+
+Unmuted: Green background, microphone icon
+
+Muted: Red background with pulsing red dot, slashed microphone icon
+
+Hover tooltip: "Mute/Unmute microphone"
+
+Camera button states:
+
+On: Green background, camera icon
+
+Off: Gray background, slashed camera icon
+
+Hover tooltip: "Turn camera on/off"
+
+Screen share states:
+
+Not sharing: Gray background, monitor icon
+
+Sharing: Blue background, monitor icon with small indicator dot
+
+Hover tooltip: "Share your screen"
+
+Prompt 7: Add Professional Hover Effects and Tooltips
+Implement sophisticated interaction design:
+
+Hover effects:
+
+Smooth scale transform: transform: scale(1.05) over 150ms
+
+Background brightness increase: filter: brightness(1.1)
+
+Subtle box shadow expansion: 0 4px 20px rgba(0,0,0,0.25)
+
+Tooltip system:
+
+Use a tooltip library or create custom tooltips
+
+Position above each button with arrow pointer
+
+Dark background with white text, 8px padding, rounded corners
+
+Include keyboard shortcuts in tooltips (e.g., "Space to mute")
+
+Keyboard navigation:
+
+Tab order: Left to right across all buttons
+
+Space bar activation for all buttons
+
+Focus indicators with 2px blue outline
+
+Prompt 8: Add Subtle Animation and Polish
+Implement micro-interactions for premium feel:
+
+Button press animations:
+
+Quick scale down to 0.95 on mouse down
+
+Return to normal size with slight overshoot (scale 1.02 → 1.0)
+
+Duration: 100ms for press, 200ms for release
+
+State change animations:
+
+Color transitions: 200ms ease-in-out for background changes
+
+Icon swaps: 150ms cross-fade between different icon states
+
+Badge animations: Bounce effect when count changes
+
+Loading states:
+
+Subtle spinner for buttons that trigger async actions
+
+Disabled state with reduced opacity (0.6) during processing
+
+Example CSS Structure Reference
+text
+.control-bar-container {
+  /* Glass morphism base */
+  background: rgba(28, 30, 34, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* ... positioning and shadows */
+}
+
+.control-button {
+  /* Base button styling */
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* ... state variations */
+}
+
+.control-button:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
