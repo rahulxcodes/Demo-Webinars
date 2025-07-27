@@ -127,8 +127,41 @@ export function AdminClassView({
     }
   }, [isFullScreen, call, isClassStarted, videoClient]);
 
+  // Cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      if (call && !isFullScreen) {
+        console.log('[AdminClassView] Component unmounting, leaving call');
+        call.leave().catch(console.error);
+      }
+    };
+  }, [call, isFullScreen]);
+
+  // Add participant debugging
+  useEffect(() => {
+    if (call) {
+      const handleParticipantsChanged = () => {
+        console.log('[AdminClassView] Participants changed:');
+        call.state.participants.forEach(p => {
+          console.log('  - Participant:', p.user.id, p.user.name, 'role:', p.user.custom?.role);
+        });
+      };
+      
+      call.on('call.session_participant_joined', handleParticipantsChanged);
+      call.on('call.session_participant_left', handleParticipantsChanged);
+      
+      // Log initial participants
+      handleParticipantsChanged();
+      
+      return () => {
+        call.off('call.session_participant_joined', handleParticipantsChanged);
+        call.off('call.session_participant_left', handleParticipantsChanged);
+      };
+    }
+  }, [call]);
+
   const handleStartClass = async () => {
-    if (!videoClient) return;
+    if (!videoClient || isLoading || isClassStarted) return;
 
     setIsLoading(true);
     try {
@@ -137,19 +170,47 @@ export function AdminClassView({
       // Create a new Stream call object with a fixed ID
       const newCall = videoClient.call('default', 'live-class-main-1');
       
-      // Update call settings to enable recording
-      await newCall.update({
-        settings_override: {
-          recording: {
-            mode: 'available',
-            quality: '720p'
-          }
+      // Check if we're already in this call to prevent duplicate joins
+      try {
+        const callState = await newCall.get();
+        const isAlreadyJoined = callState.members?.some(member => member.user.id === currentUser.id);
+        console.log('[AdminClassView] Call exists, already joined:', isAlreadyJoined);
+        
+        if (!isAlreadyJoined) {
+          // Update call settings to enable recording
+          await newCall.update({
+            settings_override: {
+              recording: {
+                mode: 'available',
+                quality: '720p'
+              }
+            }
+          });
+          
+          // Join the call
+          await newCall.join({ create: false });
+          console.log('[AdminClassView] Successfully joined existing call');
+        } else {
+          console.log('[AdminClassView] Already in call, skipping join');
         }
-      });
-      
-      // Join the call and create it if it doesn't exist
-      await newCall.join({ create: true });
-      console.log('[AdminClassView] Successfully joined call');
+      } catch (getError) {
+        // Call doesn't exist, create it
+        console.log('[AdminClassView] Call does not exist, creating new call');
+        
+        // Update call settings to enable recording
+        await newCall.update({
+          settings_override: {
+            recording: {
+              mode: 'available',
+              quality: '720p'
+            }
+          }
+        });
+        
+        // Join and create the call
+        await newCall.join({ create: true });
+        console.log('[AdminClassView] Successfully created and joined call');
+      }
       
       // Set the call and class state immediately after successful join
       setCall(newCall);
@@ -162,13 +223,13 @@ export function AdminClassView({
       // Start recording automatically (after state is set)
       try {
         await newCall.startRecording();
-        console.log('Recording started successfully');
+        console.log('[AdminClassView] Recording started successfully');
       } catch (recordingError) {
-        console.warn('Failed to start recording:', recordingError);
+        console.warn('[AdminClassView] Failed to start recording:', recordingError);
         // Continue with the class even if recording fails
       }
     } catch (error) {
-      console.error('Failed to start class:', error);
+      console.error('[AdminClassView] Failed to start class:', error);
       // Reset states on error
       setCall(null);
       setIsClassStarted(false);
