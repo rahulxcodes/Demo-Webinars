@@ -29,7 +29,7 @@ export function Header() {
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
               <div className="flex-shrink-0">
-                <VideoCameraIcon className="h-8 w-8 text-primary-600" />
+                <VideoCameraIcon className="h-8 w-8 text-blue-600" />
               </div>
               <span className="text-xl font-bold text-gray-900">
                 Webinar Platform
@@ -51,8 +51,8 @@ export function Header() {
                       href={item.href}
                       className={`inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors duration-200 ${
                         isActive
-                          ? 'text-primary-600 border-b-2 border-primary-600'
-                          : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                          ? 'text-blue-600 border-b-2 border-blue-600'
+                          : 'text-gray-700 hover:text-gray-900 hover:border-gray-300'
                       }`}
                     >
                       {item.name}
@@ -70,12 +70,12 @@ export function Header() {
             ) : session ? (
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
-                  <UserCircleIcon className="h-6 w-6 text-gray-400" />
-                  <span className="text-sm text-gray-700">{session.user?.name}</span>
+                  <UserCircleIcon className="h-6 w-6 text-gray-600" />
+                  <span className="text-sm font-medium text-gray-800">{session.user?.name}</span>
                 </div>
                 <button
                   onClick={() => signOut()}
-                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
                 >
                   Sign out
                 </button>
@@ -84,13 +84,13 @@ export function Header() {
               <div className="flex items-center space-x-4">
                 <Link
                   href="/auth/signin"
-                  className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium"
+                  className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors duration-200"
                 >
                   Sign in
                 </Link>
                 <Link
                   href="/auth/signup"
-                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
                 >
                   Sign up
                 </Link>
@@ -102,7 +102,7 @@ export function Header() {
           <div className="md:hidden">
             <button
               type="button"
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-800 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-colors duration-200"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               <span className="sr-only">Open main menu</span>
@@ -130,8 +130,8 @@ export function Header() {
                   href={item.href}
                   className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
                     isActive
-                      ? 'text-primary-600 bg-primary-50'
-                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50'
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
