@@ -145,7 +145,7 @@ export function CustomControlBar({
           >
             <HiUsers className="w-5 h-5" />
             <div 
-              className="participant-count-badge"
+              className="compact-badge"
               aria-label={`${participantCount} participants in call`}
             >
               {participantCount}

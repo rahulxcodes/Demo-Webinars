@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* CSS variables for compact sidebar design */
+:root {
+  --sidebar-width: clamp(160px, 10vw, 240px);
+}
+
 /* Zoom-style layout container with CSS Grid */
 .zoom-layout-container {
   position: relative;
@@ -14,13 +19,17 @@
   grid-template-areas: 
     "main sidebar"
     "strip strip";
-  transition: grid-template-columns 0.3s ease-in-out;
+  transition: grid-template-columns 0.25s ease-out;
   overflow: hidden;
 }
 
-/* Sidebar open state - Dynamic width calculation */
+/* Sidebar open state - Compact 10% width */
 .zoom-layout-container[data-sidebar="open"] {
-  grid-template-columns: calc(100vw - 340px) 320px;
+  grid-template-columns: calc(100vw - var(--sidebar-width)) var(--sidebar-width);
+}
+
+.zoom-layout-container[data-sidebar="closed"] {
+  grid-template-columns: 1fr 0;
 }
 
 /* Main video area */
@@ -38,7 +47,7 @@
   overflow: hidden;
 }
 
-/* Collapsible sidebar */
+/* Collapsible sidebar - Compact design */
 .collapsible-sidebar {
   grid-area: sidebar;
   background-color: #2d2d30;
@@ -48,6 +57,9 @@
   transform: translateX(100%);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
+  width: var(--sidebar-width) !important;
+  min-width: var(--sidebar-width) !important;
+  max-width: var(--sidebar-width) !important;
 }
 
 .collapsible-sidebar.sidebar-open {
@@ -89,7 +101,25 @@
 .sidebar-content {
   flex: 1;
   overflow-y: auto;
-  padding: 12px;
+  padding: 6px 8px;
+}
+
+/* Compact sidebar scrollbar */
+.sidebar-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+  background: #2d2d30;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+  background: #3d3d42;
+  border-radius: 3px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+  background: #4d4d52;
 }
 
 /* Bottom participant strip - compact horizontal layout */
@@ -966,9 +996,81 @@
   z-index: 1;
 }
 
-/* Allow name labels only in sidebar if needed */
-.participants-sidebar .str-video__participant-details {
+/* Compact participant list styles */
+.sidebar-content .str-video__participant-item {
+  padding: 4px 4px !important;
+  border-radius: 4px;
+  margin-bottom: 2px;
+}
+
+.sidebar-content .str-video__participant-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Compact avatar sizes */
+.sidebar-content .str-video__avatar--md,
+.sidebar-content .str-video__avatar--sm,
+.sidebar-content .str-video__avatar {
+  width: 24px !important;
+  height: 24px !important;
+  font-size: 10px !important;
+}
+
+/* Compact status icons */
+.sidebar-content .str-video__participant-status-icon {
+  font-size: 14px !important;
+  width: 14px !important;
+  height: 14px !important;
+}
+
+/* Hide unnecessary labels */
+.sidebar-content .str-video__participant-role,
+.sidebar-content .str-video__quality-indicator,
+.sidebar-content .str-video__connection-indicator {
+  display: none !important;
+}
+
+/* Compact participant names */
+.sidebar-content .str-video__participant-name {
+  font-size: 12px !important;
+  line-height: 16px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+}
+
+/* Allow name labels in sidebar */
+.sidebar-content .str-video__participant-details {
   display: block !important;
+  font-size: 11px !important;
+  padding: 2px 4px !important;
+}
+
+/* Compact participant button badge */
+.compact-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+  line-height: 18px;
+  border-radius: 50%;
+  background: #10B981;
+  color: #fff;
+  text-align: center;
+  font-weight: 600;
+  z-index: 2;
+}
+
+/* Ensure participants button stays tappable */
+.participants-btn {
+  position: relative;
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
 }
 
 /* Smart Button Layout System */
