@@ -38,6 +38,12 @@
   width: 100vw !important;
 }
 
+/* Hide sidebar when closed */
+.zoom-layout-container[data-sidebar="closed"] .collapsible-sidebar {
+  transform: translateX(100%);
+  pointer-events: none;
+}
+
 /* Collapsible sidebar - Absolute positioning */
 .collapsible-sidebar {
   position: absolute !important;
@@ -57,6 +63,10 @@
 
 .collapsible-sidebar.sidebar-open {
   transform: translateX(0);
+}
+
+.collapsible-sidebar.sidebar-closed {
+  transform: translateX(100%);
 }
 
 .sidebar-header {
