@@ -1,8 +1,38 @@
-// Temporary bridge file for workflow compatibility
-// This project has been converted to Next.js 14
-console.log("Next.js 14 Webinar Platform Foundation");
-console.log("Please run 'npx next dev' to start the application");
-console.log("The application will be available at http://localhost:3000");
+// Bridge script to run Next.js through the workflow
+import { spawn } from 'child_process';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-// Exit to prevent the old workflow from hanging
-process.exit(0);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const projectRoot = join(__dirname, '..');
+
+console.log("Starting Next.js 14 Webinar Platform...");
+
+// Start Next.js development server
+const nextProcess = spawn('npx', ['next', 'dev', '--port', '3000'], {
+  cwd: projectRoot,
+  stdio: 'inherit',
+  shell: true
+});
+
+nextProcess.on('error', (error) => {
+  console.error('Failed to start Next.js:', error);
+  process.exit(1);
+});
+
+nextProcess.on('close', (code) => {
+  console.log(`Next.js process exited with code ${code}`);
+  process.exit(code || 0);
+});
+
+// Handle graceful shutdown
+process.on('SIGINT', () => {
+  console.log('Shutting down Next.js server...');
+  nextProcess.kill('SIGINT');
+});
+
+process.on('SIGTERM', () => {
+  console.log('Shutting down Next.js server...');
+  nextProcess.kill('SIGTERM');
+});
