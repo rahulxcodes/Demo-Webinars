@@ -1,0 +1,62 @@
+I understand you're still experiencing the same issues after implementing the previous prompts. Looking at the conversation history, it seems the video area is still not expanding properly to fill the 90% space when the sidebar is compressed to 10%, and the sidebar elements are still too large.
+
+Let me provide you with a more aggressive and comprehensive solution:
+
+Prompt 1: Force Complete Video Expansion with Viewport Units
+Completely override the video sizing to ensure it fills the freed-up space:
+
+Force viewport-based sizing: .main-video-area { width: calc(100vw - var(--sidebar-width)) !important; height: 100vh !important; }
+
+Override ALL Stream constraints: .main-video-area * { max-width: none !important; max-height: none !important; }
+
+Force video element expansion: .main-video-area video { width: calc(100vw - var(--sidebar-width)) !important; height: 100vh !important; object-fit: cover !important; }
+
+Remove any flex/grid limitations: .main-video-area { display: block !important; position: relative !important; }
+
+Prompt 2: Create Micro-Sized Sidebar Elements
+Aggressively shrink ALL sidebar elements to microscopic sizes:
+
+Tiny avatars: .participants-sidebar .str-video__avatar, .participants-sidebar img { width: 14px !important; height: 14px !important; border-radius: 50% !important; }
+
+Micro text: .participants-sidebar * { font-size: 8px !important; line-height: 10px !important; }
+
+Minimal icons: .participants-sidebar svg, .participants-sidebar .icon { width: 8px !important; height: 8px !important; }
+
+Ultra-compact spacing: .participants-sidebar * { padding: 1px 2px !important; margin: 0 !important; }
+
+Prompt 3: Reset Grid System Completely
+Replace the existing grid system with a simpler, more reliable approach:
+
+Use absolute positioning: .zoom-layout-container { position: relative; width: 100vw; height: 100vh; }
+
+Position video area: .main-video-area { position: absolute; top: 0; left: 0; right: var(--sidebar-width); bottom: 0; }
+
+Position sidebar: .participants-sidebar { position: absolute; top: 0; right: 0; width: var(--sidebar-width); height: 100vh; }
+
+When closed: .zoom-layout-container[data-sidebar="closed"] .main-video-area { right: 0; }
+
+Prompt 4: Debug and Verify Layout
+Add temporary visual debugging to confirm the layout is working:
+
+Color-code areas: .main-video-area { background: rgba(255,0,0,0.2); } and .participants-sidebar { background: rgba(0,255,0,0.2); }
+
+Add size indicators: Display actual computed widths in console: console.log('Video width:', videoArea.offsetWidth, 'Sidebar width:', sidebar.offsetWidth)
+
+Verify calculations: Ensure video + sidebar = 100vw exactly
+
+Remove debug colors once layout is confirmed working
+
+Prompt 5: Create Minimal Participant UI
+Design an ultra-minimal participant display:
+
+Show only initials: Instead of full names, show 2-letter initials in tiny circles
+
+Stack vertically: .participants-sidebar { display: flex; flex-direction: column; gap: 2px; }
+
+Minimal status: Use tiny colored dots for mic/camera status instead of icons
+
+Hide everything else: Remove participant count text, just show number badge on toggle button
+
+If these prompts still don't resolve the issue, the problem might be deeper in the CSS cascade or JavaScript logic. In that case, we may need to temporarily disable ALL Stream default CSS and rebuild the layout from scratch with a completely custom implementation.
+
+The key is using absolute positioning instead of CSS Grid, which eliminates any potential calculation issues and forces the exact dimensions we want.</attachment>

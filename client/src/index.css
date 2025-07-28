@@ -7,49 +7,44 @@
   --sidebar-width: clamp(160px, 10vw, 240px);
 }
 
-/* Zoom-style layout container with CSS Grid */
+/* Zoom-style layout container - Absolute positioning system */
 .zoom-layout-container {
   position: relative;
   width: 100vw;
   height: 100vh;
   background-color: #1f1f23;
-  display: grid;
-  grid-template-columns: 1fr 0;
-  grid-template-rows: 1fr auto;
-  grid-template-areas: 
-    "main sidebar"
-    "strip strip";
-  transition: grid-template-columns 0.2s ease-out;
   overflow: hidden;
 }
 
-/* Sidebar open state - Compact 10% width */
-.zoom-layout-container[data-sidebar="open"] {
-  grid-template-columns: 1fr var(--sidebar-width);
-}
-
-.zoom-layout-container[data-sidebar="closed"] {
-  grid-template-columns: 1fr 0;
-}
-
-/* Main video area - Force full space utilization */
+/* Main video area - Absolute positioning for full expansion */
 .main-video-area {
-  grid-area: main;
-  position: relative;
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 120px; /* Leave space for controls */
   background-color: #1f1f23;
-  display: block;
-  width: 100% !important;
-  height: 100% !important;
-  min-height: 0;
-  min-width: 400px;
+  display: block !important;
   padding: 0;
   margin: 0;
   overflow: hidden;
+  width: calc(100vw - var(--sidebar-width)) !important;
+  height: calc(100vh - 120px) !important;
 }
 
-/* Collapsible sidebar - Compact design */
+/* When sidebar is closed, video takes full width */
+.zoom-layout-container[data-sidebar="closed"] .main-video-area {
+  right: 0;
+  width: 100vw !important;
+}
+
+/* Collapsible sidebar - Absolute positioning */
 .collapsible-sidebar {
-  grid-area: sidebar;
+  position: absolute !important;
+  top: 0;
+  right: 0;
+  width: var(--sidebar-width) !important;
+  height: 100vh !important;
   background-color: #2d2d30;
   border-left: 1px solid #3d3d42;
   display: flex;
@@ -57,9 +52,7 @@
   transform: translateX(100%);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
-  width: var(--sidebar-width) !important;
-  min-width: var(--sidebar-width) !important;
-  max-width: var(--sidebar-width) !important;
+  z-index: 100;
 }
 
 .collapsible-sidebar.sidebar-open {
@@ -262,6 +255,12 @@
   margin: 0 !important;
 }
 
+/* Force complete video expansion */
+.main-video-area * {
+  max-width: none !important;
+  max-height: none !important;
+}
+
 .main-video-area .str-video__speaker-layout {
   width: 100% !important;
   height: 100% !important;
@@ -277,13 +276,16 @@
 }
 
 .main-video-area video {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: none !important;
-  max-height: none !important;
+  width: calc(100vw - var(--sidebar-width)) !important;
+  height: calc(100vh - 120px) !important;
   object-fit: cover !important;
   padding: 0 !important;
   margin: 0 !important;
+}
+
+/* When sidebar closed, video fills full viewport */
+.zoom-layout-container[data-sidebar="closed"] .main-video-area video {
+  width: 100vw !important;
 }
 
 /* Ensure participant details don't overlap video controls */
@@ -1006,12 +1008,17 @@
   z-index: 1;
 }
 
-/* Ultra-compact participant list styles */
+/* Ultra-compact spacing for all elements */
+.sidebar-content * {
+  padding: 1px 2px !important;
+  margin: 0 !important;
+}
+
 .sidebar-content .str-video__participant-item {
   display: flex !important;
   align-items: center !important;
-  gap: 4px !important;
-  padding: 2px 4px !important;
+  gap: 2px !important;
+  padding: 1px 2px !important;
   margin: 1px 0 !important;
   border-radius: 2px;
 }
@@ -1020,21 +1027,25 @@
   background: rgba(255, 255, 255, 0.05);
 }
 
-/* Ultra-compact avatar sizes */
+/* Micro-sized avatar elements */
 .sidebar-content .str-video__avatar--md,
 .sidebar-content .str-video__avatar--sm,
-.sidebar-content .str-video__avatar {
-  width: 20px !important;
-  height: 20px !important;
-  font-size: 8px !important;
-  min-width: 20px !important;
+.sidebar-content .str-video__avatar,
+.sidebar-content img {
+  width: 14px !important;
+  height: 14px !important;
+  font-size: 6px !important;
+  min-width: 14px !important;
+  border-radius: 50% !important;
 }
 
-/* Ultra-compact status icons */
-.sidebar-content .str-video__participant-status-icon {
-  width: 12px !important;
-  height: 12px !important;
-  font-size: 12px !important;
+/* Minimal icons and status indicators */
+.sidebar-content .str-video__participant-status-icon,
+.sidebar-content svg,
+.sidebar-content .icon {
+  width: 8px !important;
+  height: 8px !important;
+  font-size: 8px !important;
 }
 
 /* Hide unnecessary labels */
@@ -1044,10 +1055,15 @@
   display: none !important;
 }
 
-/* Ultra-compact participant names */
+/* Micro text sizing for all sidebar elements */
+.sidebar-content * {
+  font-size: 8px !important;
+  line-height: 10px !important;
+}
+
 .sidebar-content .str-video__participant-name {
-  font-size: 10px !important;
-  line-height: 12px !important;
+  font-size: 8px !important;
+  line-height: 10px !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
