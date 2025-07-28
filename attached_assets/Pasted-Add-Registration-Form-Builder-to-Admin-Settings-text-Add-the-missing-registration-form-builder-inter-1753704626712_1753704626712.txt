@@ -1,0 +1,435 @@
+Add Registration Form Builder to Admin Settings
+text
+Add the missing registration form builder interface to the webinar admin settings:
+
+FIX THE WEBINAR SETTINGS PAGE:
+Update the webinar detail page to include a proper "Registration" tab with form builder:
+
+CREATE REGISTRATION TAB:
+In /app/dashboard/webinars/[id]/page.tsx, add a dedicated Registration tab with:
+
+REGISTRATION TOGGLE SECTION:
+- Large toggle switch for "Enable Registration"
+- When OFF: Show message "Registration is disabled for this webinar"
+- When ON: Show all registration configuration options below
+
+DEFAULT FORM BUILDER INTERFACE:
+Create a section titled "Registration Form Fields":
+
+Default Fields (always present):
+- Full Name (required) - with toggle to make optional
+- Email Address (required) - cannot be disabled  
+- Mobile Number (optional) - with toggle to make required
+
+Add Custom Fields Section:
+- "Add Field" button with dropdown menu
+- Field type options:
+  * Text Input
+  * Long Text (Textarea)
+  * Dropdown Select
+  * Radio Buttons
+  * Checkboxes
+  * Number Input
+  * Date Picker
+  * Website URL
+  * File Upload
+
+FORM FIELD EDITOR:
+For each field, show:
+- Field label input
+- Placeholder text input
+- Help text/description input
+- Required/Optional toggle
+- Field-specific options (like dropdown choices)
+- Delete field button
+- Drag handle for reordering
+
+LIVE FORM PREVIEW:
+Add a "Preview" section showing exactly how the registration form will look to users:
+- Real-time updates as you modify fields
+- Mobile/desktop view toggle
+- "Test Registration" button
+
+REGISTRATION SETTINGS:
+Additional configuration options:
+- Auto-approve registrations (toggle)
+- Maximum attendees (number input)
+- Registration deadline (hours before webinar)
+- Waiting list when full (toggle)
+- Send confirmation emails (toggle)
+
+API ENDPOINTS:
+Create /app/api/webinars/[id]/registration-settings/route.ts:
+
+export async function GET(request: Request, { params }: { params: { id: string } }) {
+try {
+const webinar = await prisma.webinar.findUnique({
+where: { id: params.id },
+include: {
+registrationForm: true
+}
+});
+
+text
+if (!webinar) {
+  return Response.json({ error: 'Webinar not found' }, { status: 404 });
+}
+
+return Response.json({
+  requireRegistration: webinar.requireRegistration,
+  registrationForm: webinar.registrationForm,
+  maxAttendees: webinar.maxAttendees,
+  registrationDeadline: webinar.registrationDeadline
+});
+} catch (error) {
+return Response.json({ error: 'Failed to fetch registration settings' }, { status: 500 });
+}
+}
+
+export async function POST(request: Request, { params }: { params: { id: string } }) {
+try {
+const data = await request.json();
+
+text
+// Update webinar registration settings
+const webinar = await prisma.webinar.update({
+  where: { id: params.id },
+  data: {
+    requireRegistration: data.requireRegistration,
+    maxAttendees: data.maxAttendees,
+    registrationDeadline: data.registrationDeadline
+  }
+});
+
+// Update or create registration form
+await prisma.registrationForm.upsert({
+  where: { webinarId: params.id },
+  update: {
+    autoApprove: data.autoApprove,
+    formSchema: data.formSchema
+  },
+  create: {
+    webinarId: params.id,
+    autoApprove: data.autoApprove,
+    formSchema: data.formSchema
+  }
+});
+
+return Response.json({ success: true });
+} catch (error) {
+return Response.json({ error: 'Failed to update registration settings' }, { status: 500 });
+}
+}
+
+text
+
+FORM BUILDER COMPONENT:
+Create /components/FormBuilder/RegistrationFormBuilder.tsx:
+
+import { useState, useEffect } from 'react';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+
+const defaultFields = [
+{
+id: 'name',
+type: 'text',
+label: 'Full Name',
+placeholder: 'Enter your full name',
+required: true,
+order: 1,
+isDefault: true
+},
+{
+id: 'email',
+type: 'email',
+label: 'Email Address',
+placeholder: 'Enter your email address',
+required: true,
+order: 2,
+isDefault: true
+},
+{
+id: 'mobile',
+type: 'tel',
+label: 'Mobile Number',
+placeholder: 'Enter your mobile number',
+required: false,
+order: 3,
+isDefault: true
+}
+];
+
+export default function RegistrationFormBuilder({ webinarId, initialFormSchema }) {
+const [fields, setFields] = useState(initialFormSchema || defaultFields);
+const [showPreview, setShowPreview] = useState(false);
+
+const addField = (fieldType) => {
+const newField = {
+id: field_${Date.now()},
+type: fieldType,
+label: New ${fieldType} Field,
+placeholder: '',
+required: false,
+order: fields.length + 1,
+isDefault: false
+};
+
+text
+if (fieldType === 'select' || fieldType === 'radio' || fieldType === 'checkbox') {
+  newField.options = [
+    { label: 'Option 1', value: 'option1' },
+    { label: 'Option 2', value: 'option2' }
+  ];
+}
+
+setFields([...fields, newField]);
+};
+
+const updateField = (fieldId, updates) => {
+setFields(fields.map(field =>
+field.id === fieldId ? { ...field, ...updates } : field
+));
+};
+
+const deleteField = (fieldId) => {
+setFields(fields.filter(field => field.id !== fieldId));
+};
+
+const saveForm = async () => {
+try {
+const response = await fetch(/api/webinars/${webinarId}/registration-settings, {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({
+requireRegistration: true,
+formSchema: fields,
+autoApprove: true
+})
+});
+
+text
+  if (response.ok) {
+    alert('Registration form saved successfully!');
+  }
+} catch (error) {
+  alert('Failed to save form');
+}
+};
+
+return (
+<div className="space-y-6">
+{/* Toggle Registration */}
+<div className="bg-white p-6 rounded-lg border">
+<div className="flex items-center justify-between">
+<div>
+<h3 className="text-lg font-semibold">Registration Settings</h3>
+<p className="text-gray-600">Configure registration for this webinar</p>
+</div>
+<label className="relative inline-flex items-center cursor-pointer">
+<input type="checkbox" className="sr-only peer" defaultChecked />
+<div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+<span className="ml-3 text-sm font-medium text-gray-700">Enable Registration</span>
+</label>
+</div>
+</div>
+
+text
+  {/* Form Builder */}
+  <div className="bg-white p-6 rounded-lg border">
+    <div className="flex items-center justify-between mb-4">
+      <h3 className="text-lg font-semibold">Registration Form Fields</h3>
+      <div className="space-x-2">
+        <button
+          onClick={() => setShowPreview(!showPreview)}
+          className="px-4 py-2 text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50"
+        >
+          {showPreview ? 'Edit Form' : 'Preview Form'}
+        </button>
+        <button
+          onClick={saveForm}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        >
+          Save Form
+        </button>
+      </div>
+    </div>
+
+    {!showPreview ? (
+      <div className="space-y-4">
+        {/* Field List */}
+        {fields.map((field, index) => (
+          <div key={field.id} className="border rounded-lg p-4 bg-gray-50">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-medium text-gray-700">
+                  {field.label} ({field.type})
+                </span>
+                {field.required && <span className="text-red-500 text-xs">Required</span>}
+              </div>
+              {!field.isDefault && (
+                <button
+                  onClick={() => deleteField(field.id)}
+                  className="text-red-600 hover:text-red-800"
+                >
+                  Delete
+                </button>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <input
+                type="text"
+                placeholder="Field Label"
+                value={field.label}
+                onChange={(e) => updateField(field.id, { label: e.target.value })}
+                className="border rounded-md px-3 py-2"
+              />
+              <input
+                type="text"
+                placeholder="Placeholder Text"
+                value={field.placeholder}
+                onChange={(e) => updateField(field.id, { placeholder: e.target.value })}
+                className="border rounded-md px-3 py-2"
+              />
+            </div>
+            
+            {!field.isDefault && (
+              <div className="mt-2">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={field.required}
+                    onChange={(e) => updateField(field.id, { required: e.target.checked })}
+                    className="mr-2"
+                  />
+                  Required Field
+                </label>
+              </div>
+            )}
+          </div>
+        ))}
+
+        {/* Add Field Button */}
+        <div className="relative">
+          <select
+            onChange={(e) => {
+              if (e.target.value) {
+                addField(e.target.value);
+                e.target.value = '';
+              }
+            }}
+            className="w-full border rounded-md px-3 py-2 bg-white"
+          >
+            <option value="">+ Add Custom Field</option>
+            <option value="text">Text Input</option>
+            <option value="textarea">Long Text</option>
+            <option value="select">Dropdown</option>
+            <option value="radio">Radio Buttons</option>
+            <option value="checkbox">Checkboxes</option>
+            <option value="number">Number</option>
+            <option value="date">Date</option>
+            <option value="url">Website URL</option>
+          </select>
+        </div>
+      </div>
+    ) : (
+      <FormPreview fields={fields} />
+    )}
+  </div>
+</div>
+);
+}
+
+text
+
+FORM PREVIEW COMPONENT:
+const FormPreview = ({ fields }) => {
+return (
+<div className="border rounded-lg p-6 bg-white max-w-md mx-auto">
+<h3 className="text-xl font-semibold mb-4">Registration Form Preview</h3>
+<form className="space-y-4">
+{fields.map((field) => (
+<div key={field.id}>
+<label className="block text-sm font-medium text-gray-700 mb-1">
+{field.label}
+{field.required && <span className="text-red-500">*</span>}
+</label>
+
+text
+        {field.type === 'text' && (
+          <input
+            type="text"
+            placeholder={field.placeholder}
+            className="w-full border rounded-md px-3 py-2"
+            disabled
+          />
+        )}
+        
+        {field.type === 'email' && (
+          <input
+            type="email"
+            placeholder={field.placeholder}
+            className="w-full border rounded-md px-3 py-2"
+            disabled
+          />
+        )}
+        
+        {field.type === 'tel' && (
+          <input
+            type="tel"
+            placeholder={field.placeholder}
+            className="w-full border rounded-md px-3 py-2"
+            disabled
+          />
+        )}
+        
+        {field.type === 'textarea' && (
+          <textarea
+            placeholder={field.placeholder}
+            rows={3}
+            className="w-full border rounded-md px-3 py-2"
+            disabled
+          />
+        )}
+        
+        {field.type === 'select' && (
+          <select className="w-full border rounded-md px-3 py-2" disabled>
+            <option>Select an option</option>
+            {field.options?.map((option, idx) => (
+              <option key={idx} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+        )}
+      </div>
+    ))}
+    
+    <button
+      type="button"
+      className="w-full bg-blue-600 text-white py-3 rounded-md font-medium"
+      disabled
+    >
+      Register for Webinar
+    </button>
+  </form>
+</div>
+);
+};
+
+text
+
+Make sure this registration form builder appears as a prominent tab in your webinar settings, with all the functionality working properly including saving, previewing, and field customization.
+What This Adds:
+✅ Visible Registration Tab - Clear "Registration" section in webinar settings
+
+✅ Form Builder Interface - Drag-and-drop field editor
+
+✅ Default Fields - Name, Email, Mobile automatically included
+
+✅ Custom Field Types - Text, dropdown, checkbox, etc.
+
+✅ Live Preview - See exactly how the form looks
+
+✅ Save Functionality - Actually saves your form configuration
+
+✅ Toggle Controls - Enable/disable registration easily
+

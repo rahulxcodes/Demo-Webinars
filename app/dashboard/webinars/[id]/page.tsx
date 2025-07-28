@@ -24,6 +24,7 @@ import {
   XMarkIcon
 } from '@heroicons/react/24/outline'
 import { FormBuilder } from '@/components/FormBuilder/FormBuilder'
+import { RegistrationFormBuilder } from '@/components/FormBuilder/RegistrationFormBuilder'
 import { Webinar } from '@/lib/types'
 import { RegistrationFormConfig, FormSchema } from '@/lib/types/registration'
 
@@ -572,13 +573,14 @@ export default function WebinarDetailsPage() {
             </Card>
 
             {/* Form Builder */}
-            {registrationForm?.requireRegistration && (
-              <FormBuilder
-                initialSchema={registrationForm.formSchema as FormSchema}
-                onSave={saveRegistrationForm}
-                loading={saving}
-              />
-            )}
+            <RegistrationFormBuilder
+              webinarId={webinarId}
+              initialFormSchema={registrationForm?.formSchema}
+              onSave={(formData) => {
+                // Refresh webinar data after save
+                fetchWebinar()
+              }}
+            />
           </div>
         )}
 
