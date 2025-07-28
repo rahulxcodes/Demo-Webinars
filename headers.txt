@@ -1,0 +1,11 @@
+HTTP/1.1 302 Found
+Cache-Control: no-cache, no-store, must-revalidate
+vary: RSC, Next-Router-State-Tree, Next-Router-Prefetch, Next-Router-Segment-Prefetch
+location: http://localhost:5000/api/auth/signin?csrf=true
+set-cookie: next-auth.csrf-token=0c3d1a7db2dee2d4d5556a5d78f9fbf4ecd8ad689951d430af9353d8b1f68376%7Cfc42865df0b83f83ba55e0fee3cbebb8ad616a6668d716c9115e973b67b78af1; Path=/; HttpOnly; SameSite=Lax
+set-cookie: next-auth.callback-url=http%3A%2F%2Flocalhost%3A5000; Path=/; HttpOnly; SameSite=Lax
+Date: Mon, 28 Jul 2025 13:19:54 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+

@@ -1,219 +1,168 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
-import Link from 'next/link'
-import { ArrowLeftIcon, UsersIcon } from '@heroicons/react/24/outline'
-import { Button } from '@/components/ui/button'
-import { Card, CardHeader, CardBody } from '@/components/ui/card'
-import BasicWebinar from '@/components/webinar/BasicWebinar'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { 
+  StreamVideo, 
+  StreamVideoClient, 
+  StreamCall,
+  useCallStateHooks,
+  CallControls,
+  CallParticipantsList,
+  SpeakerLayout,
+} from '@stream-io/video-react-sdk'
+import '@stream-io/video-react-sdk/dist/css/styles.css'
 
-interface Webinar {
-  id: string
-  title: string
-  description: string
-  startTime: string
-  duration: number
-  status: string
+interface HostInterfaceProps {
+  params: {
+    id: string
+  }
 }
 
-export default function HostWebinarPage() {
-  const params = useParams()
-  const webinarId = params.id as string
-  const [webinar, setWebinar] = useState<Webinar | null>(null)
+// Host Video Interface Component
+function HostVideoInterface({ callId }: { callId: string }) {
+  const { useCallCallingState, useParticipantCount } = useCallStateHooks()
+  const callingState = useCallCallingState()
+  const participantCount = useParticipantCount()
+
+  return (
+    <div className="h-screen bg-gray-900 flex flex-col">
+      {/* Header */}
+      <div className="bg-gray-800 px-6 py-4 border-b border-gray-700">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-white text-xl font-semibold">Host Interface</h1>
+            <p className="text-gray-400">Call ID: {callId}</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              <span className="text-white">{participantCount} participants</span>
+            </div>
+            <div className="px-3 py-1 bg-red-600 text-white rounded-full text-sm">
+              {callingState}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Video Layout */}
+      <div className="flex-1 relative">
+        <SpeakerLayout />
+      </div>
+
+      {/* Control Bar */}
+      <div className="bg-gray-800 px-6 py-4 border-t border-gray-700">
+        <CallControls />
+      </div>
+
+      {/* Participants Sidebar */}
+      <div className="absolute right-0 top-0 h-full w-80 bg-gray-800 border-l border-gray-700 overflow-y-auto">
+        <div className="p-4">
+          <h3 className="text-white font-semibold mb-4">Participants</h3>
+          <CallParticipantsList />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function HostInterface({ params }: HostInterfaceProps) {
+  const { data: session } = useSession()  
+  const router = useRouter()
+  const [client, setClient] = useState<StreamVideoClient | null>(null)
+  const [call, setCall] = useState(null)
+  const [token, setToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isLive, setIsLive] = useState(false)
-
-  // Mock user data - in real app, get from auth
-  const userId = 'host-' + webinarId
-  const userName = 'Webinar Host'
 
   useEffect(() => {
-    const fetchWebinar = async () => {
+    if (!session?.user?.id) {
+      router.push('/auth/signin')
+      return
+    }
+
+    async function initializeCall() {
       try {
-        const response = await fetch(`/api/webinars/${webinarId}`)
-        if (!response.ok) {
-          throw new Error('Failed to fetch webinar')
+        // Get Stream token for this user
+        const tokenResponse = await fetch(`/api/stream-token/${params.id}?userId=${session.user.id}&role=host`)
+        
+        if (!tokenResponse.ok) {
+          throw new Error('Failed to get Stream token')
         }
-        const data = await response.json()
-        setWebinar(data.webinar)
+
+        const { token: streamToken, apiKey } = await tokenResponse.json()
+        setToken(streamToken)
+
+        // Initialize Stream client
+        const streamClient = new StreamVideoClient({
+          apiKey,
+          user: {
+            id: session.user.id,
+            name: session.user.name || 'Host',
+          },
+          token: streamToken,
+        })
+
+        setClient(streamClient)
+
+        // Join the call
+        const streamCall = streamClient.call('livestream', params.id)
+        await streamCall.join()
+        setCall(streamCall)
+
+        setLoading(false)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load webinar')
-      } finally {
+        console.error('Failed to initialize call:', err)
+        setError(err.message || 'Failed to join webinar')
         setLoading(false)
       }
     }
 
-    if (webinarId) {
-      fetchWebinar()
-    }
-  }, [webinarId])
+    initializeCall()
+  }, [session, params.id, router])
 
-  const handleStartWebinar = async () => {
-    try {
-      setLoading(true)
-      const response = await fetch(`/api/webinars/${webinarId}/start`, {
-        method: 'POST'
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setIsLive(true)
-        // Update webinar status
-        setWebinar(prev => prev ? { ...prev, status: 'live', streamStatus: 'live' } : null)
-        console.log('Webinar started successfully:', data)
-        alert('Webinar is now live! Attendees can join.')
-      } else {
-        const error = await response.json()
-        console.error('Failed to start webinar:', error)
-        alert('Failed to start webinar: ' + error.error)
-      }
-    } catch (error) {
-      console.error('Network error starting webinar:', error)
-      alert('Network error starting webinar')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleEndWebinar = () => {
-    setIsLive(false)
-  }
-
+  // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
-            <div className="h-96 bg-gray-200 rounded"></div>
-          </div>
+      <div className="h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
+          <p className="text-white">Connecting to webinar...</p>
         </div>
       </div>
     )
   }
 
-  if (error || !webinar) {
+  // Show error state
+  if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
-        <div className="max-w-4xl mx-auto">
-          <Card className="text-center p-8">
-            <p className="text-red-600 mb-4">{error || 'Webinar not found'}</p>
-            <Link href="/dashboard">
-              <Button>Back to Dashboard</Button>
-            </Link>
-          </Card>
+      <div className="h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-xl mb-4">Failed to Join Webinar</div>
+          <p className="text-gray-400 mb-4">{error}</p>
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Back to Dashboard
+          </button>
         </div>
       </div>
     )
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto p-4">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/dashboard">
-                <Button variant="outline" size="sm">
-                  <ArrowLeftIcon className="h-4 w-4 mr-2" />
-                  Back to Dashboard
-                </Button>
-              </Link>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">{webinar.title}</h1>
-                <p className="text-gray-600">Host Interface</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              {isLive ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium text-red-600">LIVE</span>
-                </div>
-              ) : (
-                <span className="text-sm text-gray-500">Not Live</span>
-              )}
-            </div>
-          </div>
-        </div>
+  // Show video interface
+  if (client && call) {
+    return (
+      <StreamVideo client={client}>
+        <StreamCall call={call}>
+          <HostVideoInterface callId={params.id} />
+        </StreamCall>
+      </StreamVideo>
+    )
+  }
 
-        {/* Pre-webinar Controls */}
-        {!isLive && (
-          <Card className="mb-6">
-            <CardHeader>
-              <h2 className="text-lg font-semibold">Ready to Start?</h2>
-              <p className="text-gray-600">
-                Click "Start Webinar" to begin the live session. Attendees will be able to join once you go live.
-              </p>
-            </CardHeader>
-            <CardBody>
-              <div className="flex items-center space-x-4">
-                <Button 
-                  onClick={handleStartWebinar} 
-                  disabled={loading}
-                  className="bg-red-600 hover:bg-red-700 disabled:opacity-50"
-                >
-                  {loading ? 'Starting...' : 'Start Webinar'}
-                </Button>
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <UsersIcon className="h-4 w-4" />
-                  <span>Registration Link: /register/{webinarId}</span>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-        )}
-
-        {/* Live Webinar Interface */}
-        {isLive && (
-          <Card className="h-[calc(100vh-200px)]">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <h2 className="text-lg font-semibold">Live Webinar</h2>
-              <Button 
-                onClick={handleEndWebinar}
-                variant="outline"
-                className="text-red-600 border-red-600 hover:bg-red-50"
-              >
-                End Webinar
-              </Button>
-            </CardHeader>
-            <CardBody className="flex-1 p-0">
-              <BasicWebinar
-                webinarId={webinarId}
-                userRole="host"
-                userId={userId}
-                userName={userName}
-              />
-            </CardBody>
-          </Card>
-        )}
-
-        {/* Webinar Info */}
-        <Card className="mt-6">
-          <CardHeader>
-            <h3 className="text-lg font-semibold">Webinar Details</h3>
-          </CardHeader>
-          <CardBody>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="font-medium text-gray-700">Duration:</span>
-                <span className="ml-2 text-gray-600">{webinar.duration} minutes</span>
-              </div>
-              <div>
-                <span className="font-medium text-gray-700">Status:</span>
-                <span className="ml-2 text-gray-600">{webinar.status}</span>
-              </div>
-              <div className="col-span-2">
-                <span className="font-medium text-gray-700">Description:</span>
-                <p className="mt-1 text-gray-600">{webinar.description}</p>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-      </div>
-    </div>
-  )
+  return null
 }

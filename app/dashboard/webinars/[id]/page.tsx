@@ -241,8 +241,8 @@ export default function WebinarDetailsPage() {
         // Show success feedback
         alert('Webinar started successfully! Participants can now join.')
         
-        // Optionally redirect to host interface
-        // router.push(`/webinar/${webinar.streamCallId}/host`)
+        // Redirect to host interface
+        router.push(`/webinar/${webinar.streamCallId}/host`)
       } else {
         console.error('Failed to start webinar:', result.error)
         alert(`Failed to start webinar: ${result.error}`)
