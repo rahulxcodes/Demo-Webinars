@@ -9,8 +9,8 @@ const projectRoot = join(__dirname, '..');
 
 console.log("Starting Next.js 14 Webinar Platform...");
 
-// Start Next.js development server
-const nextProcess = spawn('npx', ['next', 'dev', '--port', '3000'], {
+// Start Next.js development server on port 5000 (required by workflow)
+const nextProcess = spawn('npx', ['next', 'dev', '--port', '5000'], {
   cwd: projectRoot,
   stdio: 'inherit',
   shell: true

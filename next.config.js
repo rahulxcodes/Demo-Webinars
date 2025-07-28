@@ -6,6 +6,8 @@ const nextConfig = {
     STREAM_API_KEY: process.env.STREAM_API_KEY,
   },
   transpilePackages: ['@stream-io/video-react-sdk'],
+  // Configure for Replit environment  
+  serverExternalPackages: [],
 }
 
 export default nextConfig
