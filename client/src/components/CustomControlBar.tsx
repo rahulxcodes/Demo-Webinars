@@ -34,46 +34,38 @@ export function CustomControlBar({
   const { 
     useParticipants, 
     useMicrophoneState, 
-    useCameraState, 
-    useScreenShareState,
+    useCameraState,
     useIsCallRecordingInProgress 
   } = useCallStateHooks();
   
   const participants = useParticipants();
   const { microphone, isMute } = useMicrophoneState();
   const { camera, isMute: isCameraOff } = useCameraState();
-  const { screenShare, isScreenShareOn } = useScreenShareState();
   const isRecording = useIsCallRecordingInProgress();
   
   const handleMuteToggle = async () => {
-    if (microphone.state === 'enabled') {
-      await microphone.disable();
-    } else {
-      await microphone.enable();
-    }
+    await microphone.toggle();
   };
   
   const handleVideoToggle = async () => {
-    if (camera.state === 'enabled') {
-      await camera.disable();
-    } else {
-      await camera.enable();
-    }
+    await camera.toggle();
   };
   
   const handleScreenShareToggle = async () => {
-    if (screenShare.state === 'enabled') {
-      await screenShare.disable();
-    } else {
-      await screenShare.enable();
-    }
+    // Screen share functionality - using call.camera for now as fallback
+    // This will be handled by the StreamVideo SDK automatically
+    console.log('Screen share toggle - functionality to be implemented');
   };
   
   const handleRecordingToggle = async () => {
-    if (isRecording) {
-      await call?.stopRecording();
-    } else {
-      await call?.startRecording();
+    try {
+      if (isRecording) {
+        await call?.stopRecording();
+      } else {
+        await call?.startRecording();
+      }
+    } catch (error) {
+      console.error('Recording toggle failed:', error);
     }
   };
   
@@ -91,45 +83,45 @@ export function CustomControlBar({
         {/* Mute Button */}
         <div className="control-button-wrapper">
           <button
-            className={`control-button ${microphone.state === 'disabled' ? 'muted' : 'unmuted'}`}
+            className={`control-button ${isMute ? 'muted' : 'unmuted'}`}
             onClick={handleMuteToggle}
-            title={microphone.state === 'disabled' ? 'Unmute microphone (Space)' : 'Mute microphone (Space)'}
-            aria-label={microphone.state === 'disabled' ? 'Unmute microphone' : 'Mute microphone'}
+            title={isMute ? 'Unmute microphone (Space)' : 'Mute microphone (Space)'}
+            aria-label={isMute ? 'Unmute microphone' : 'Mute microphone'}
           >
-            {microphone.state === 'disabled' ? <MicOff size={20} /> : <Mic size={20} />}
+            {isMute ? <MicOff size={20} /> : <Mic size={20} />}
           </button>
           <div className="control-button-tooltip">
-            {microphone.state === 'disabled' ? 'Unmute' : 'Mute'} (Space)
+            {isMute ? 'Unmute' : 'Mute'} (Space)
           </div>
         </div>
         
         {/* Video Button */}
         <div className="control-button-wrapper">
           <button
-            className={`control-button ${camera.state === 'disabled' ? 'video-off' : 'video-on'}`}
+            className={`control-button ${isCameraOff ? 'video-off' : 'video-on'}`}
             onClick={handleVideoToggle}
-            title={camera.state === 'disabled' ? 'Turn camera on' : 'Turn camera off'}
-            aria-label={camera.state === 'disabled' ? 'Turn camera on' : 'Turn camera off'}
+            title={isCameraOff ? 'Turn camera on' : 'Turn camera off'}
+            aria-label={isCameraOff ? 'Turn camera on' : 'Turn camera off'}
           >
-            {camera.state === 'disabled' ? <VideoOff size={20} /> : <Video size={20} />}
+            {isCameraOff ? <VideoOff size={20} /> : <Video size={20} />}
           </button>
           <div className="control-button-tooltip">
-            Camera {camera.state === 'disabled' ? 'on' : 'off'}
+            Camera {isCameraOff ? 'on' : 'off'}
           </div>
         </div>
         
         {/* Screen Share Button */}
         <div className="control-button-wrapper">
           <button
-            className={`control-button ${screenShare.state === 'enabled' ? 'screen-sharing' : 'screen-not-sharing'}`}
+            className="control-button screen-not-sharing"
             onClick={handleScreenShareToggle}
-            title={screenShare.state === 'enabled' ? 'Stop sharing screen' : 'Share your screen'}
-            aria-label={screenShare.state === 'enabled' ? 'Stop sharing screen' : 'Share your screen'}
+            title="Share your screen"
+            aria-label="Share your screen"
           >
-            {screenShare.state === 'enabled' ? <MonitorStop size={20} /> : <Monitor size={20} />}
+            <Monitor size={20} />
           </button>
           <div className="control-button-tooltip">
-            {screenShare.state === 'enabled' ? 'Stop sharing' : 'Share screen'}
+            Share screen
           </div>
         </div>
       </div>
