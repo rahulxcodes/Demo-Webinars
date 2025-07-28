@@ -1,0 +1,105 @@
+React has detected that your DashboardPage component is calling hooks in a different order between renders. This violates React's fundamental requirement that hooks must be called in the exact same order on every render.
+
+Understanding the Problem
+The error message shows:
+
+text
+Previous render            Next render
+------------------------------------------------------
+1. useContext                 useContext
+2. useEffect                  useEffect  
+3. undefined                  useState
+This indicates that during the previous render, your component only called useContext and useEffect, but in the next render, it's also calling useState. This inconsistency is what's triggering the error.
+
+Common Causes
+The most likely causes for this error in your webinar platform are:
+
+Early returns before hooks: If you have conditional returns that sometimes skip hook calls
+
+Conditional hook calls: Calling hooks inside if statements or loops
+
+Next.js 15 async params issue: Since you're using dynamic routes like [id], improper handling of the new async params can cause hook order changes
+
+Solution for Next.js 15 Async Params
+Since you're dealing with Next.js 15 where params are now Promises, update your DashboardPage component:
+
+For Client Components:
+tsx
+'use client';
+import { use } from 'react';
+
+export default function DashboardPage({ params }: { params: Promise<{ id?: string }> }) {
+  // ✅ Unwrap params at the very top
+  const resolvedParams = use(params);
+  
+  // ✅ Call all hooks at the top level, always in the same order
+  const { data: session } = useSession();
+  const [loading, setLoading] = useState(false);
+  const [webinars, setWebinars] = useState([]);
+  
+  // ✅ Any conditional logic comes AFTER all hooks
+  if (!session) {
+    return <LoginPrompt />;
+  }
+  
+  // Rest of your component logic...
+}
+For Server Components:
+tsx
+export default async function DashboardPage({ params }: { params: Promise<{ id?: string }> }) {
+  // ✅ Await params at the top
+  const { id } = await params;
+  
+  // Server components don't use hooks, so this won't apply
+  // But ensure consistent rendering logic
+}
+React Hooks Best Practices and Next.js Routing Params Usage Summary
+General Hook Rules Fix
+Move all hooks to the top: Ensure useContext, useEffect, useState, etc. are always called before any conditional logic
+
+Fix conditional returns: Instead of:
+
+tsx
+// ❌ Bad - hooks called after conditional return
+function DashboardPage({ params }) {
+  if (!user) return <Login />;
+  const [state, setState] = useState(); // This might not be called!
+}
+Use:
+
+tsx
+// ✅ Good - all hooks called first
+function DashboardPage({ params }) {
+  const [state, setState] = useState();
+  const user = useAuth();
+  
+  if (!user) return <Login />;
+  // Rest of component...
+}
+Install ESLint plugin: Add eslint-plugin-react-hooks to catch these violations automatically:
+
+bash
+npm install eslint-plugin-react-hooks --save-dev
+Apply These Fixes Across Your App
+Since you're building a webinar platform, check these files for similar issues:
+
+/app/dashboard/page.tsx (your DashboardPage)
+
+/app/webinar/[id]/host/page.tsx
+
+/app/dashboard/webinars/[id]/page.tsx
+
+Any other components with dynamic routes
+
+Update them all to use the new async params pattern and ensure hooks are called consistently.
+
+Quick Diagnostic Steps
+Check your DashboardPage component - look for any useState, useEffect, or useContext calls that might be conditional
+
+Update param handling - use use(params) for client components or await params for server components
+
+Move all hooks to the top - before any conditional logic or early returns
+
+Test the fix - the hook order error should disappear once hooks are called consistently
+
+This should resolve your hook order error and make your webinar platform compatible with Next.js 15's async params pattern.

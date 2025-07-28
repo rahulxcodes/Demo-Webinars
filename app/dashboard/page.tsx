@@ -24,29 +24,8 @@ import { useDebounce } from '@/lib/hooks/useDebounce'
 import { WebinarCard } from '@/components/ui/WebinarCard'
 
 export default function DashboardPage() {
+  // ✅ ALL HOOKS MUST BE CALLED AT THE TOP LEVEL FIRST
   const { data: session, status } = useSession()
-  
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
-      </div>
-    )
-  }
-
-  if (!session) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-          <p className="text-gray-600 mb-8">You need to be logged in to access the dashboard.</p>
-          <Link href="/auth/signin">
-            <Button>Sign In</Button>
-          </Link>
-        </div>
-      </div>
-    )
-  }
   const [webinars, setWebinars] = useState<Webinar[]>([])
   const [stats, setStats] = useState<WebinarStats>({ total: 0, upcoming: 0, past: 0, live: 0 })
   const [loading, setLoading] = useState(true)
@@ -54,11 +33,6 @@ export default function DashboardPage() {
   
   // Debounce search for better performance
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
-
-  useEffect(() => {
-    fetchWebinars()
-    fetchStats()
-  }, [])
 
   const fetchWebinars = useCallback(async () => {
     try {
@@ -102,6 +76,12 @@ export default function DashboardPage() {
     }
   }, [fetchStats])
 
+  // ✅ useEffect must be called after all other hooks are defined
+  useEffect(() => {
+    fetchWebinars()
+    fetchStats()
+  }, [fetchWebinars, fetchStats])
+
   // Memoized filtered webinars for better performance
   const filteredWebinars = useMemo(() => 
     webinars.filter(webinar =>
@@ -140,6 +120,29 @@ export default function DashboardPage() {
       color: 'bg-success-50 text-success-600',
     },
   ], [stats])
+
+  // ✅ CONDITIONAL RENDERING LOGIC AFTER ALL HOOKS
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
+      </div>
+    )
+  }
+
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
+          <p className="text-gray-600 mb-8">You need to be logged in to access the dashboard.</p>
+          <Link href="/auth/signin">
+            <Button>Sign In</Button>
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   if (loading) {
     return (
