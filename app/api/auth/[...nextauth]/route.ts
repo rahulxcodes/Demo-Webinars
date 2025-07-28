@@ -5,7 +5,7 @@ import GoogleProvider from 'next-auth/providers/google'
 import { prisma } from '@/lib/db'
 import bcrypt from 'bcryptjs'
 
-const handler = NextAuth({
+export const authOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     // Email/Password Authentication
@@ -54,6 +54,7 @@ const handler = NextAuth({
   ],
   session: {
     strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -75,6 +76,8 @@ const handler = NextAuth({
     signIn: '/auth/signin',
     // signUp: '/auth/signup', // NextAuth doesn't have built-in signup page option
   },
-})
+  secret: process.env.NEXTAUTH_SECRET,
+}
 
+const handler = NextAuth(authOptions)
 export { handler as GET, handler as POST }

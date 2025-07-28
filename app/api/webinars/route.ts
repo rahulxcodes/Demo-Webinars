@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '../auth/[...nextauth]/route';
 import { prisma } from '@/lib/db';
 import { CreateWebinarRequest } from '@/lib/types';
 import { calculateWebinarStatus } from '@/lib/utils/webinar-status';
@@ -6,6 +8,27 @@ import { createWebinarCall, generateUniqueSlug } from '@/lib/stream/client';
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    // Check if user has permission to create webinars
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id }
+    });
+
+    if (!user || (user.role !== 'HOST' && user.role !== 'ADMIN')) {
+      return NextResponse.json(
+        { error: 'Insufficient permissions to create webinars' },
+        { status: 403 }
+      );
+    }
+
     const body: CreateWebinarRequest = await request.json();
     
     // Validate required fields
@@ -34,11 +57,11 @@ export async function POST(request: NextRequest) {
     const slug = generateUniqueSlug(body.title);
     const streamCallId = `webinar-${slug}`;
 
-    // Create Stream call first
+    // Create Stream call first with authenticated user
     try {
       await createWebinarCall(
         streamCallId,
-        'default-host',
+        session.user.id,
         body.title,
         startTime,
         1000
@@ -63,7 +86,7 @@ export async function POST(request: NextRequest) {
         status,
         streamStatus: 'created',
         maxAttendees: 1000,
-        hostId: 'default-host', // TODO: Replace with actual user ID from auth
+        hostId: session.user.id,
         registrationForm: {
           create: {
             requireRegistration: true,
@@ -123,14 +146,29 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    // Check authentication for GET requests too
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const skip = (page - 1) * limit;
 
+    // Get webinars for the authenticated user
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id }
+    });
+
     // Optimized database queries with selected fields only
     const [webinars, total] = await Promise.all([
       prisma.webinar.findMany({
+        where: user?.role === 'ADMIN' ? {} : { hostId: session.user.id }, // Admins see all, others see only their own
         select: {
           id: true,
           title: true,
@@ -139,12 +177,20 @@ export async function GET(request: NextRequest) {
           duration: true,
           status: true,
           createdAt: true,
+          host: {
+            select: {
+              name: true,
+              email: true,
+            }
+          }
         },
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
       }),
-      prisma.webinar.count(),
+      prisma.webinar.count({
+        where: user?.role === 'ADMIN' ? {} : { hostId: session.user.id }
+      }),
     ]);
 
     // Calculate real-time status for each webinar
