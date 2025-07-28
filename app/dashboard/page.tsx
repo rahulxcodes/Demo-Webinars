@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -19,21 +19,26 @@ import {
 } from '@heroicons/react/24/outline'
 import { WebinarStats, Webinar } from '@/lib/types'
 import { formatWebinarStatus } from '@/lib/utils/webinar-status'
+import { useDebounce } from '@/lib/hooks/useDebounce'
+import { WebinarCard } from '@/components/ui/WebinarCard'
 
 export default function DashboardPage() {
   const [webinars, setWebinars] = useState<Webinar[]>([])
   const [stats, setStats] = useState<WebinarStats>({ total: 0, upcoming: 0, past: 0, live: 0 })
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  
+  // Debounce search for better performance
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
   useEffect(() => {
     fetchWebinars()
     fetchStats()
   }, [])
 
-  const fetchWebinars = async () => {
+  const fetchWebinars = useCallback(async () => {
     try {
-      const response = await fetch('/api/webinars')
+      const response = await fetch('/api/webinars?limit=20')
       if (response.ok) {
         const data = await response.json()
         setWebinars(data.webinars)
@@ -43,9 +48,9 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const response = await fetch('/api/webinars/stats')
       if (response.ok) {
@@ -55,30 +60,34 @@ export default function DashboardPage() {
     } catch (error) {
       console.error('Error fetching stats:', error)
     }
-  }
+  }, [])
 
-  const handleDeleteWebinar = async (id: string) => {
+  const handleDeleteWebinar = useCallback(async (id: string) => {
     if (confirm('Are you sure you want to delete this webinar?')) {
       try {
         const response = await fetch(`/api/webinars/${id}`, {
           method: 'DELETE',
         })
         if (response.ok) {
-          setWebinars(webinars.filter(w => w.id !== id))
+          setWebinars(prev => prev.filter(w => w.id !== id))
           fetchStats() // Refresh stats after deletion
         }
       } catch (error) {
         console.error('Error deleting webinar:', error)
       }
     }
-  }
+  }, [fetchStats])
 
-  const filteredWebinars = webinars.filter(webinar =>
-    webinar.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (webinar.description && webinar.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  // Memoized filtered webinars for better performance
+  const filteredWebinars = useMemo(() => 
+    webinars.filter(webinar =>
+      webinar.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      (webinar.description && webinar.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
+    ), [webinars, debouncedSearchTerm]
   )
 
-  const statsData = [
+  // Memoized stats data for performance
+  const statsData = useMemo(() => [
     {
       id: 1,
       title: 'Total Webinars',
@@ -106,7 +115,7 @@ export default function DashboardPage() {
       icon: ChartBarIcon,
       color: 'bg-success-50 text-success-600',
     },
-  ]
+  ], [stats])
 
   if (loading) {
     return (
@@ -211,48 +220,13 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {filteredWebinars.map((webinar) => {
-                  const statusInfo = formatWebinarStatus(webinar.status)
-                  const startDate = new Date(webinar.startTime)
-                  
-                  return (
-                    <div key={webinar.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3">
-                          <h3 className="text-lg font-medium text-gray-900">{webinar.title}</h3>
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.className}`}>
-                            {statusInfo.label}
-                          </span>
-                        </div>
-                        {webinar.description && (
-                          <p className="text-gray-600 mt-1">{webinar.description}</p>
-                        )}
-                        <div className="flex items-center text-sm text-gray-500 mt-2">
-                          <CalendarIcon className="h-4 w-4 mr-1" />
-                          {startDate.toLocaleDateString()} at {startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          <ClockIcon className="h-4 w-4 ml-4 mr-1" />
-                          {webinar.duration} minutes
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="sm">
-                          <PencilIcon className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <DocumentDuplicateIcon className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleDeleteWebinar(webinar.id)}
-                          className="text-red-600 hover:text-red-700 hover:border-red-300"
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  )
-                })}
+                {filteredWebinars.map((webinar) => (
+                  <WebinarCard 
+                    key={webinar.id} 
+                    webinar={webinar} 
+                    onDelete={handleDeleteWebinar}
+                  />
+                ))}
               </div>
             )}
           </CardBody>

@@ -1,0 +1,212 @@
+Phase 2B: Fix Lag Issues
+The lag is likely caused by several common Next.js performance bottlenecks. Let's address them systematically.
+
+🤖 Replit AI Agent Prompt #5: Performance Optimization
+text
+Optimize the existing webinar platform to eliminate lag and improve performance:
+
+IDENTIFY AND FIX PERFORMANCE ISSUES:
+
+1. DATABASE OPTIMIZATION:
+- Add database indexes to frequently queried fields in schema.prisma:
+model Webinar {
+id String @id @default(cuid())
+hostId String @index // Add index
+title String
+startTime DateTime @index // Add index for sorting
+status String @index // Add index for filtering
+createdAt DateTime @default(now()) @index
+
+@@index([hostId, startTime]) // Composite index
+@@index([status, startTime]) // For status filtering
+}
+
+text
+
+2. API OPTIMIZATION:
+Fix /app/api/webinars/route.ts:
+- Add proper pagination (limit 20 webinars per page)
+- Use database-level sorting instead of client-side
+- Add proper caching headers
+- Optimize database queries with select only needed fields
+- Add request debouncing
+
+3. CLIENT-SIDE OPTIMIZATIONS:
+
+React Performance:
+- Convert components to use React.memo where appropriate
+- Add useMemo for expensive calculations
+- Use useCallback for event handlers
+- Implement proper key props for lists
+
+Data Fetching:
+- Use SWR or React Query for data fetching with caching
+- Implement stale-while-revalidate strategy
+- Add optimistic updates for form submissions
+- Cache API responses in browser
+
+4. REDUCE BUNDLE SIZE:
+- Use dynamic imports for heavy components
+- Lazy load components that aren't immediately visible
+- Tree shake unused dependencies
+- Optimize images with Next.js Image component
+
+5. FORM OPTIMIZATION:
+Update webinar creation form:
+- Debounce form validation (300ms delay)
+- Use controlled inputs only when necessary
+- Implement form state persistence without re-renders
+- Add form auto-save with throttling
+
+6. DASHBOARD OPTIMIZATION:
+Fix dashboard performance:
+- Virtualize long lists if >50 webinars
+- Implement infinite scrolling instead of loading all data
+- Cache webinar statistics calculations
+- Use skeleton loading to improve perceived performance
+
+7. DATABASE CONNECTION:
+- Implement proper connection pooling
+- Add database connection timeouts
+- Use prepared statements for repeated queries
+- Implement query result caching
+
+8. REPLIT-SPECIFIC OPTIMIZATIONS:
+- Reduce concurrent API calls
+- Optimize for Replit's resource constraints
+- Add request queuing for heavy operations
+- Implement proper memory management
+
+CODE EXAMPLES:
+
+Optimized API endpoint:
+// /app/api/webinars/route.ts
+export async function GET(request: Request) {
+const { searchParams } = new URL(request.url);
+const page = parseInt(searchParams.get('page') || '1');
+const limit = parseInt(searchParams.get('limit') || '10');
+const skip = (page - 1) * limit;
+
+try {
+const [webinars, total] = await Promise.all([
+prisma.webinar.findMany({
+select: {
+id: true,
+title: true,
+startTime: true,
+duration: true,
+status: true,
+},
+orderBy: { createdAt: 'desc' },
+skip,
+take: limit,
+}),
+prisma.webinar.count(),
+]);
+
+text
+return Response.json({
+  webinars,
+  pagination: {
+    page,
+    limit,
+    total,
+    totalPages: Math.ceil(total / limit),
+  }
+}, {
+  headers: {
+    'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+  },
+});
+} catch (error) {
+return Response.json({ error: 'Failed to fetch webinars' }, { status: 500 });
+}
+}
+
+text
+
+Optimized Dashboard Component:
+// Use React.memo and proper hooks
+const Dashboard = React.memo(() => {
+const [webinars, setWebinars] = useState([]);
+const [loading, setLoading] = useState(true);
+
+// Debounced search
+const debouncedSearch = useMemo(
+() => debounce((query) => {
+// Search logic here
+}, 300),
+[]
+);
+
+// Memoized statistics
+const stats = useMemo(() => ({
+total: webinars.length,
+upcoming: webinars.filter(w => w.status === 'upcoming').length,
+past: webinars.filter(w => w.status === 'ended').length,
+}), [webinars]);
+
+return (
+// Component JSX
+);
+});
+
+text
+
+9. IMAGE AND ASSET OPTIMIZATION:
+- Use Next.js Image component for all images
+- Compress and optimize any icons or graphics
+- Use SVG icons instead of icon fonts where possible
+- Implement proper lazy loading
+
+10. MONITORING AND DEBUGGING:
+- Add performance monitoring with console.time
+- Implement error boundaries for better error handling
+- Add loading time measurements
+- Use React DevTools Profiler to identify bottlenecks
+
+IMMEDIATE FIXES TO IMPLEMENT:
+1. Add database indexes
+2. Implement pagination on dashboard
+3. Add React.memo to heavy components
+4. Use debounced search and form validation
+5. Add proper caching headers
+6. Optimize database queries
+
+This should dramatically improve performance and eliminate the lag issues.
+Quick Diagnostic Questions:
+Before implementing the full optimization, let me know:
+
+Where specifically is the lag happening?
+
+Dashboard loading?
+
+Form submission?
+
+Page navigation?
+
+All of the above?
+
+How many webinars do you currently have in the database?
+
+Are you seeing errors in the browser console or network tab?
+
+Is the lag constant or does it happen during specific actions?
+
+Immediate Quick Fixes (while running the optimization prompt):
+Add this to your dashboard component to reduce re-renders:
+
+javascript
+const Dashboard = React.memo(() => {
+  // Your existing dashboard code
+});
+Add pagination to your API call:
+
+javascript
+// In your dashboard API call
+const response = await fetch('/api/webinars?limit=10&page=1');
+Add database indexes by updating your Prisma schema and running:
+
+bash
+npx prisma db push
+Let's get this lag fixed immediately! Run the optimization prompt above, and let me know which specific areas are lagging the most so I can provide targeted fixes. 🚀⚡

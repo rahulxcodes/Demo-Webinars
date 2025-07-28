@@ -31,5 +31,12 @@ model Webinar {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Performance indexes for faster queries
+  @@index([hostId])
+  @@index([startTime])
+  @@index([status])
+  @@index([createdAt])
+  @@index([hostId, startTime])
+  @@index([status, startTime])
   @@map("webinars")
 }

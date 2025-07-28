@@ -64,9 +64,18 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const skip = (page - 1) * limit;
 
-    // Fetch webinars with pagination
+    // Optimized database queries with selected fields only
     const [webinars, total] = await Promise.all([
       prisma.webinar.findMany({
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          startTime: true,
+          duration: true,
+          status: true,
+          createdAt: true,
+        },
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
@@ -87,6 +96,10 @@ export async function GET(request: NextRequest) {
         limit,
         total,
         pages: Math.ceil(total / limit),
+      },
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',
       },
     });
   } catch (error) {
