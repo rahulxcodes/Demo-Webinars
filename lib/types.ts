@@ -15,6 +15,9 @@ export interface CreateWebinarRequest {
   description?: string;
   startTime: string;
   duration: number;
+  autoRecord?: boolean;
+  recordingQuality?: string;
+  allowHostRecordingControl?: boolean;
 }
 
 export interface WebinarStats {

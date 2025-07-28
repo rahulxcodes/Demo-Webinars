@@ -95,6 +95,12 @@ model Webinar {
   capacity        Int?
   status          String   @default("scheduled")
   streamStatus    String   @default("created")
+  
+  // Recording Settings
+  autoRecord      Boolean  @default(true)
+  recordingQuality String  @default("720p")
+  allowHostRecordingControl Boolean @default(true)
+  
   settings        Json?
   demoAttendanceThreshold Int @default(600)
   createdAt       DateTime @default(now())

@@ -23,7 +23,7 @@ interface CustomControlBarProps {
   onEndCall: () => void
   showRecording?: boolean
   webinarTitle?: string
-  isRecordingActive?: boolean
+  isRecording?: boolean
   onToggleRecording?: () => void
 }
 
@@ -33,7 +33,7 @@ export function CustomControlBar({
   onEndCall,
   showRecording = true,
   webinarTitle,
-  isRecordingActive = false,
+  isRecording = false,
   onToggleRecording
 }: CustomControlBarProps) {
   const {
@@ -49,7 +49,7 @@ export function CustomControlBar({
   const callingState = useCallCallingState()
 
   // Use recording state passed from parent component
-  const isCallRecordingInProgress = isRecordingActive
+  const isCallRecordingInProgress = isRecording
 
   const [duration, setDuration] = useState(0)
 
@@ -100,7 +100,7 @@ export function CustomControlBar({
     if (onToggleRecording) {
       onToggleRecording()
     }
-    console.log('Recording toggled:', !isRecordingActive)
+    console.log('Recording toggled:', !isRecording)
   }
 
   return (
@@ -158,18 +158,22 @@ export function CustomControlBar({
 
           {/* Recording */}
           {showRecording && (
-            <Button
-              variant={isCallRecordingInProgress ? "primary" : "secondary"}
-              size="sm"
-              className={`control-button recording ${isCallRecordingInProgress ? 'recording-active' : ''}`}
-              onClick={handleToggleRecording}
-            >
-              {isCallRecordingInProgress ? (
-                <Square className="w-4 h-4 fill-current" />
-              ) : (
-                <Circle className="w-4 h-4" />
-              )}
-            </Button>
+            <div className="control-button-wrapper">
+              <Button
+                variant={isCallRecordingInProgress ? "destructive" : "secondary"}
+                size="sm"
+                className={`control-button recording ${isCallRecordingInProgress ? 'recording-active' : ''}`}
+                onClick={handleToggleRecording}
+                title={isCallRecordingInProgress ? 'Stop recording' : 'Start recording'}
+                aria-label={isCallRecordingInProgress ? 'Stop recording' : 'Start recording'}
+              >
+                {isCallRecordingInProgress ? (
+                  <Square className="w-4 h-4 fill-current animate-pulse" />
+                ) : (
+                  <Circle className="w-4 h-4" />
+                )}
+              </Button>
+            </div>
           )}
 
           {/* Participants */}

@@ -1,0 +1,346 @@
+Fix the isRecordingActive error and implement comprehensive webinar recording system:
+
+PROBLEM 1: ReferenceError: isRecordingActive is not defined at line 256
+PROBLEM 2: Need webinar recording settings (auto-record by default)
+PROBLEM 3: Need live recording controls that don't disrupt the webinar
+
+COMPLETE SOLUTION:
+
+1. FIX THE UNDEFINED VARIABLE ERROR:
+Update your LiveWebinarLayout component in /app/webinar/[id]/host/page.tsx:
+
+function LiveWebinarLayout({
+currentUser,
+onEndWebinar,
+webinar
+}: {
+currentUser: any;
+onEndWebinar: () => void;
+webinar: any;
+}) {
+const [showSidebar, setShowSidebar] = useState(false);
+
+// Stream hooks - ADD the missing recording hook
+const {
+useCallCallingState,
+useParticipants,
+useIsCallRecordingInProgress // ← ADD THIS LINE
+} = useCallStateHooks();
+
+const callingState = useCallCallingState();
+const participants = useParticipants();
+const isRecordingActive = useIsCallRecordingInProgress(); // ← FIX: Add this line
+
+if (callingState !== CallingState.JOINED) {
+return (
+<div className="flex items-center justify-center h-full bg-gray-900">
+<div className="text-center">
+<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+<p className="text-white text-lg font-medium">Joining webinar...</p>
+<p className="text-gray-400 text-sm mt-2">Please wait while we connect you</p>
+</div>
+</div>
+);
+}
+
+return (
+<StreamTheme className="custom-dark-theme">
+<div className="zoom-layout-container" data-sidebar={showSidebar ? 'open' : 'closed'}>
+{/* Webinar Title Header with Recording Status /}
+<div className="webinar-header">
+<div className="flex justify-between items-center p-4 bg-gray-800 text-white">
+<h1 className="text-xl font-semibold">{webinar?.title}</h1>
+<div className="flex items-center space-x-4">
+{/ Recording Status Indicator */}
+{isRecordingActive && (
+<div className="flex items-center space-x-2">
+<div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+<span className="text-sm">Recording</span>
+</div>
+)}
+<span className="px-3 py-1 bg-red-500 text-white rounded-full text-sm animate-pulse">
+🔴 LIVE
+</span>
+<span className="text-sm text-gray-300">
+{participants.length} attendees
+</span>
+</div>
+</div>
+</div>
+
+text
+    <div className="main-video-area">
+      <SpeakerLayout participantsBarLimit={0} />
+    </div>
+
+    <div className={`collapsible-sidebar ${showSidebar ? 'sidebar-open' : 'sidebar-closed'}`}>
+      <div className="sidebar-header">
+        <h3>Attendees ({participants.length})</h3>
+        <button 
+          className="sidebar-close-btn"
+          onClick={() => setShowSidebar(false)}
+        >
+          ✕
+        </button>
+      </div>
+      <div className="sidebar-content">
+        <CallParticipantsList onClose={() => setShowSidebar(false)} />
+      </div>
+    </div>
+
+    <div className="participants-bottom-strip">
+      <div className="participants-preview">
+        {participants.slice(0, 4).map((participant, index) => (
+          <div key={participant.sessionId} className="participant-tile">
+            <span>{participant.name?. || 'A'}</span>
+          </div>
+        ))}
+        {participants.length > 4 && (
+          <div className="participant-tile more-count">
+            +{participants.length - 4}
+          </div>
+        )}
+      </div>
+    </div>
+
+    <div className="floating-controls">
+      <CustomControlBar
+        onToggleParticipants={() => setShowSidebar(!showSidebar)}
+        participantCount={participants.length}
+        onEndCall={onEndWebinar}
+        showRecording={true}
+        isRecording={isRecordingActive} // ← Now properly defined
+        webinarTitle={webinar?.title}
+      />
+    </div>
+  </div>
+</StreamTheme>
+);
+}
+
+text
+
+2. ADD RECORDING SETTINGS TO WEBINAR CREATION:
+Update your webinar creation form to include recording settings:
+
+// In your webinar creation form, add these fields:
+
+<div className="space-y-4"> <div> <label className="flex items-center space-x-2"> <input type="checkbox" name="autoRecord" defaultChecked={true} // Auto-record by default className="rounded border-gray-300" /> <span className="text-sm font-medium">Auto-record webinar</span> </label> <p className="text-xs text-gray-500 mt-1"> Recording will start automatically when webinar begins </p> </div> <div> <label className="block text-sm font-medium text-gray-700 mb-2"> Recording Quality </label> <select name="recordingQuality" defaultValue="720p" className="block w-full rounded-md border-gray-300 shadow-sm" > <option value="480p">480p (Standard)</option> <option value="720p">720p (HD)</option> <option value="1080p">1080p (Full HD)</option> </select> </div> </div> ```
+UPDATE DATABASE SCHEMA:
+Add recording settings to your Webinar model:
+
+text
+model Webinar {
+  id                      String   @id @default(cuid())
+  hostId                  String
+  title                   String
+  slug                    String   @unique
+  streamCallId            String   @unique
+  description             String?
+  timezone                String   @default("UTC")
+  startTime               DateTime
+  duration                Int      @default(60)
+  isRecurring            Boolean  @default(false)
+  recurrenceRule         Json?
+  requireRegistration    Boolean  @default(true)
+  registrationDeadline   Int?
+  maxAttendees           Int?
+  capacity               Int?
+  status                 String   @default("scheduled")
+  streamStatus           String   @default("created")
+  
+  // Recording Settings
+  autoRecord             Boolean  @default(true)    // ← ADD THIS
+  recordingQuality       String   @default("720p")  // ← ADD THIS
+  allowHostRecordingControl Boolean @default(true)  // ← ADD THIS
+  
+  settings               Json?
+  demoAttendanceThreshold Int     @default(600)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  
+  registrationForm       RegistrationForm?
+  registrations          Registration[]
+  attendance             Attendance[]
+  videos                 WebinarVideo[]
+}
+UPDATE WEBINAR START TO HANDLE AUTO-RECORDING:
+Modify your handleStartWebinar function:
+
+text
+const handleStartWebinar = async () => {
+  if (!call) return;
+  
+  setIsLoading(true);
+  try {
+    // Configure call settings including recording
+    await call.update({
+      settings_override: {
+        recording: {
+          mode: webinar.autoRecord ? 'auto-on' : 'available',
+          quality: webinar.recordingQuality || '720p'
+        },
+        screensharing: {
+          enabled: true,
+          access_request_enabled: true
+        }
+      }
+    });
+
+    // Start the webinar via API
+    const response = await fetch(`/api/webinars/${id}/start`, {
+      method: 'POST'
+    });
+
+    const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to start webinar');
+    }
+
+    // Make the call go live
+    await call.goLive({
+      start_hls: true,
+      start_recording: webinar.autoRecord, // Auto-start recording if enabled
+    });
+
+    // If auto-record is enabled, start recording
+    if (webinar.autoRecord) {
+      try {
+        await call.startRecording();
+        console.log('Auto-recording started successfully');
+      } catch (recordingError) {
+        console.warn('Auto-recording failed to start:', recordingError);
+        // Don't fail the webinar start if recording fails
+      }
+    }
+
+    setIsWebinarStarted(true);
+    setWebinar(prev => ({ ...prev, status: 'live' }));
+    
+  } catch (error) {
+    console.error('Failed to start webinar:', error);
+    alert(`Failed to start webinar: ${error.message}`);
+  } finally {
+    setIsLoading(false);
+  }
+};
+UPDATE CUSTOMCONTROLBAR FOR LIVE RECORDING CONTROLS:
+Modify your CustomControlBar to handle recording controls safely:
+
+text
+// In CustomControlBar.tsx
+const handleRecordingToggle = async () => {
+  // Don't allow recording control if host controls are disabled
+  if (!webinar?.allowHostRecordingControl) {
+    alert('Recording controls are disabled for this webinar');
+    return;
+  }
+
+  try {
+    if (isRecording) {
+      // Stop recording gracefully
+      console.log('Host stopping recording...');
+      await call?.stopRecording();
+      console.log('Recording stopped by host');
+    } else {
+      // Start recording
+      console.log('Host starting recording...');
+      await call?.startRecording();
+      console.log('Recording started by host');
+    }
+  } catch (error) {
+    console.error('Recording toggle failed:', error);
+    
+    // Show user-friendly error without disrupting webinar
+    if (error.message.includes('not running')) {
+      console.warn('Recording was not running, ignoring stop request');
+    } else {
+      alert(`Recording control failed: ${error.message}`);
+    }
+  }
+};
+
+// Recording button with safety checks
+{showRecording && webinar?.allowHostRecordingControl && (
+  <div className="control-button-wrapper">
+    <button
+      className={`control-button ${isRecording ? 'recording' : 'not-recording'}`}
+      onClick={handleRecordingToggle}
+      title={isRecording ? 'Stop recording' : 'Start recording'}
+      aria-label={isRecording ? 'Stop recording' : 'Start recording'}
+    >
+      <Square size={20} className={isRecording ? 'animate-pulse' : ''} />
+    </button>
+    <div className="control-button-tooltip">
+      {isRecording ? 'Stop recording' : 'Start recording'}
+    </div>
+  </div>
+)}
+SAFE WEBINAR END WITH RECORDING CLEANUP:
+Update your handleEndWebinar to handle recording gracefully:
+
+text
+const handleEndWebinar = async () => {
+  if (!call) return;
+  
+  try {
+    // Check recording status before stopping
+    try {
+      const callState = await call.queryCall();
+      const isActuallyRecording = callState.call.egress?.recording;
+      
+      if (isActuallyRecording) {
+        console.log('Stopping recording before ending webinar...');
+        await call.stopRecording();
+        console.log('Recording stopped successfully');
+      } else {
+        console.log('No active recording to stop');
+      }
+    } catch (recordingError) {
+      console.warn('Recording stop failed (continuing with webinar end):', recordingError);
+      // Don't fail webinar end if recording stop fails
+    }
+    
+    // Leave the call
+    console.log('Leaving webinar call...');
+    await call.leave();
+    
+    // Update webinar status via API
+    await fetch(`/api/webinars/${id}/end`, { method: 'POST' });
+    
+    setIsWebinarStarted(false);
+    setCall(null);
+    console.log('Webinar ended successfully');
+    
+  } catch (error) {
+    console.error('Error ending webinar:', error);
+    // Always clean up local state even if API calls fail
+    setIsWebinarStarted(false);
+    setCall(null);
+  }
+};
+KEY FEATURES IMPLEMENTED:
+✅ Fixed isRecordingActive undefined error
+✅ Auto-recording enabled by default in webinar settings
+✅ Live recording start/stop controls for hosts
+✅ Recording controls don't disrupt webinar if they fail
+✅ Visual recording status indicators
+✅ Graceful error handling for all recording operations
+✅ Database schema updated with recording preferences
+✅ Host can control recording permissions per webinar
+
+This ensures your webinar recording system is robust, user-friendly, and doesn't break the live webinar experience even if recording operations fail.
+
+text
+
+## **🎯 Key Benefits of This Solution:**
+
+1. **✅ Error Fixed**: `isRecordingActive` is now properly defined using Stream's hook
+2. **✅ Auto-Recording**: Webinars auto-record by default, configurable in settings
+3. **✅ Live Controls**: Host can start/stop recording during webinar without disruption
+4. **✅ Graceful Failure**: Recording errors don't break the webinar experience
+5. **✅ Visual Feedback**: Clear recording status indicators in the UI
+6. **✅ Flexible Settings**: Per-webinar recording preferences and controls
+
+**Run this comprehensive fix and your webinar recording system will be professional, reliable, and user-friendly!** 🎥✨

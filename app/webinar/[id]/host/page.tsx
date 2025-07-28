@@ -40,9 +40,10 @@ function LiveWebinarLayout({
   const [showSidebar, setShowSidebar] = useState(false)
 
   // Stream hooks for call state and participant management
-  const { useCallCallingState, useParticipants } = useCallStateHooks()
+  const { useCallCallingState, useParticipants, useIsCallRecordingInProgress } = useCallStateHooks()
   const callingState = useCallCallingState()
   const participants = useParticipants()
+  const isRecordingActive = useIsCallRecordingInProgress()
 
   if (callingState !== CallingState.JOINED) {
     return (
@@ -63,9 +64,16 @@ function LiveWebinarLayout({
         <div className="webinar-header">
           <div className="flex justify-between items-center p-4 bg-gray-800 text-white">
             <h1 className="text-xl font-semibold">{webinar?.title}</h1>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-4">
+              {/* Recording Status Indicator */}
+              {isRecordingActive && (
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm">Recording</span>
+                </div>
+              )}
               <span className="px-3 py-1 bg-red-500 text-white rounded-full text-sm animate-pulse">
-                LIVE
+                🔴 LIVE
               </span>
               <span className="text-sm text-gray-300">
                 {participants.length} attendees
@@ -119,7 +127,7 @@ function LiveWebinarLayout({
             onEndCall={onEndWebinar}
             showRecording={true}
             webinarTitle={webinar?.title}
-            isRecordingActive={isRecordingActive}
+            isRecording={isRecordingActive}
             onToggleRecording={handleToggleRecording}
           />
         </div>
@@ -231,9 +239,25 @@ export default function HostWebinarPage({ params }: HostInterfaceProps) {
   }, [initializeWebinar, streamClient])
 
   const handleStartWebinar = async () => {
+    if (!call) return
+    
     setIsLoading(true)
     try {
-      console.log('🎬 RECORDING FIX: Starting webinar and recording...')
+      console.log('🎬 RECORDING FIX: Starting webinar with auto-record settings...')
+      
+      // Configure call settings including recording
+      await call.update({
+        settings_override: {
+          recording: {
+            mode: webinar?.autoRecord ? 'auto-on' : 'available',
+            quality: webinar?.recordingQuality || '720p'
+          },
+          screensharing: {
+            enabled: true,
+            access_request_enabled: true
+          }
+        }
+      })
       
       // Start the webinar via API
       const response = await fetch(`/api/webinars/${id}/start`, {
@@ -246,26 +270,23 @@ export default function HostWebinarPage({ params }: HostInterfaceProps) {
         throw new Error(result.error || 'Failed to start webinar')
       }
 
-      // Make the call go live first
-      if (call) {
-        console.log('📺 RECORDING FIX: Making call go live...')
-        await call.goLive({
-          start_hls: true,
-          start_recording: false, // Don't auto-start recording
-        })
-        
-        // Wait a moment for the call to be fully live
-        await new Promise(resolve => setTimeout(resolve, 2000))
-        
-        // Now start recording explicitly
+      // Make the call go live
+      console.log('📺 RECORDING FIX: Making call go live...')
+      await call.goLive({
+        start_hls: true,
+        start_recording: webinar?.autoRecord, // Auto-start recording if enabled
+      })
+      
+      // If auto-record is enabled, ensure recording starts
+      if (webinar?.autoRecord) {
         try {
-          console.log('🔴 RECORDING FIX: Starting recording explicitly...')
+          console.log('🔴 RECORDING FIX: Starting auto-recording...')
           await call.startRecording()
           setIsRecordingActive(true)
-          console.log('✅ RECORDING FIX: Recording started successfully')
+          console.log('✅ RECORDING FIX: Auto-recording started successfully')
         } catch (recordingError) {
-          console.warn('⚠️ RECORDING FIX: Recording failed to start:', recordingError)
-          // Continue without recording if it fails
+          console.warn('⚠️ RECORDING FIX: Auto-recording failed to start:', recordingError)
+          // Don't fail the webinar start if recording fails
           setIsRecordingActive(false)
         }
       }
@@ -282,29 +303,32 @@ export default function HostWebinarPage({ params }: HostInterfaceProps) {
   }
 
   const handleEndWebinar = async () => {
+    if (!call) return
+    
     try {
       console.log('🛑 RECORDING FIX: Ending webinar...')
       
-      if (call) {
-        // Only stop recording if it's actually running
-        if (isRecordingActive) {
-          try {
-            console.log('⏹️ RECORDING FIX: Stopping recording...')
-            await call.stopRecording()
-            setIsRecordingActive(false)
-            console.log('✅ RECORDING FIX: Recording stopped successfully')
-          } catch (recordingError) {
-            console.warn('⚠️ RECORDING FIX: Failed to stop recording (may not have been running):', recordingError)
-            // Continue with webinar end even if recording stop fails
-          }
+      // Check recording status before stopping
+      try {
+        const callState = await call.queryCall()
+        const isActuallyRecording = callState.call.egress?.recording
+        
+        if (isActuallyRecording || isRecordingActive) {
+          console.log('⏹️ RECORDING FIX: Stopping recording before ending webinar...')
+          await call.stopRecording()
+          setIsRecordingActive(false)
+          console.log('✅ RECORDING FIX: Recording stopped successfully')
         } else {
           console.log('ℹ️ RECORDING FIX: No active recording to stop')
         }
-        
-        // Leave the call
-        console.log('👋 RECORDING FIX: Leaving call...')
-        await call.leave()
+      } catch (recordingError) {
+        console.warn('⚠️ RECORDING FIX: Recording stop failed (continuing with webinar end):', recordingError)
+        // Don't fail webinar end if recording stop fails
       }
+      
+      // Leave the call
+      console.log('👋 RECORDING FIX: Leaving webinar call...')
+      await call.leave()
       
       // Update webinar status via API
       console.log('💾 RECORDING FIX: Updating webinar status...')
@@ -312,14 +336,16 @@ export default function HostWebinarPage({ params }: HostInterfaceProps) {
       
       setIsWebinarStarted(false)
       setCall(null)
+      console.log('✅ RECORDING FIX: Webinar ended successfully')
       
       // Redirect back to dashboard
-      console.log('🏠 RECORDING FIX: Redirecting to dashboard...')
       router.push('/dashboard')
       
     } catch (error) {
-      console.error('❌ RECORDING FIX: Failed to end webinar:', error)
-      // Even if there's an error, try to redirect
+      console.error('❌ RECORDING FIX: Error ending webinar:', error)
+      // Always clean up local state even if API calls fail
+      setIsWebinarStarted(false)
+      setCall(null)
       router.push('/dashboard')
     }
   }
@@ -327,20 +353,35 @@ export default function HostWebinarPage({ params }: HostInterfaceProps) {
   const handleToggleRecording = async () => {
     if (!call) return
 
+    // Don't allow recording control if host controls are disabled
+    if (!webinar?.allowHostRecordingControl) {
+      alert('Recording controls are disabled for this webinar')
+      return
+    }
+
     try {
       if (isRecordingActive) {
-        console.log('⏹️ RECORDING FIX: Manual recording stop...')
+        // Stop recording gracefully
+        console.log('⏹️ RECORDING FIX: Host stopping recording...')
         await call.stopRecording()
         setIsRecordingActive(false)
-        console.log('✅ RECORDING FIX: Recording stopped manually')
+        console.log('✅ RECORDING FIX: Recording stopped by host')
       } else {
-        console.log('🔴 RECORDING FIX: Manual recording start...')
+        // Start recording
+        console.log('🔴 RECORDING FIX: Host starting recording...')
         await call.startRecording()
         setIsRecordingActive(true)
-        console.log('✅ RECORDING FIX: Recording started manually')
+        console.log('✅ RECORDING FIX: Recording started by host')
       }
     } catch (error) {
-      console.error('❌ RECORDING FIX: Failed to toggle recording:', error)
+      console.error('❌ RECORDING FIX: Recording toggle failed:', error)
+      
+      // Show user-friendly error without disrupting webinar
+      if (error.message.includes('not running')) {
+        console.warn('Recording was not running, ignoring stop request')
+      } else {
+        alert(`Recording control failed: ${error.message}`)
+      }
     }
   }
 

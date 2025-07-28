@@ -30,9 +30,18 @@ export async function POST(request: NextRequest) {
     }
 
     const body: CreateWebinarRequest = await request.json();
+    const {
+      title,
+      description,
+      startTime: startTimeString,
+      duration,
+      autoRecord = true,
+      recordingQuality = '720p',
+      allowHostRecordingControl = true
+    } = body;
     
     // Validate required fields
-    if (!body.title || !body.startTime || !body.duration) {
+    if (!title || !startTimeString || !duration) {
       return NextResponse.json(
         { error: 'Missing required fields: title, startTime, duration' },
         { status: 400 }
@@ -40,7 +49,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Convert startTime to Date object
-    const startTime = new Date(body.startTime);
+    const startTime = new Date(startTimeString);
     
     // Validate that startTime is in the future
     if (startTime < new Date()) {
@@ -51,10 +60,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate initial status
-    const status = calculateWebinarStatus(startTime, body.duration);
+    const status = calculateWebinarStatus(startTime, duration);
 
     // Generate unique slug and Stream call ID
-    const slug = generateUniqueSlug(body.title);
+    const slug = generateUniqueSlug(title);
     const streamCallId = `webinar-${slug}`;
 
     // Create Stream call first with authenticated user
@@ -62,7 +71,7 @@ export async function POST(request: NextRequest) {
       await createWebinarCall(
         streamCallId,
         session.user.id,
-        body.title,
+        title,
         startTime,
         1000
       );
@@ -77,12 +86,15 @@ export async function POST(request: NextRequest) {
     // Create webinar in database with Stream integration
     const webinar = await prisma.webinar.create({
       data: {
-        title: body.title,
+        title,
         slug,
         streamCallId,
-        description: body.description || null,
+        description: description || null,
         startTime,
-        duration: body.duration,
+        duration,
+        autoRecord,
+        recordingQuality,
+        allowHostRecordingControl,
         status,
         streamStatus: 'created',
         maxAttendees: 1000,

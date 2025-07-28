@@ -19,6 +19,9 @@ const webinarSchema = z.object({
   date: z.string().min(1, 'Date is required'),
   time: z.string().min(1, 'Time is required'),
   duration: z.string().min(1, 'Duration is required'),
+  autoRecord: z.boolean().default(true),
+  recordingQuality: z.string().default('720p'),
+  allowHostRecordingControl: z.boolean().default(true),
 })
 
 type WebinarFormData = z.infer<typeof webinarSchema>
@@ -35,6 +38,11 @@ export default function NewWebinarPage() {
     reset,
   } = useForm<WebinarFormData>({
     resolver: zodResolver(webinarSchema),
+    defaultValues: {
+      autoRecord: true,
+      recordingQuality: '720p',
+      allowHostRecordingControl: true,
+    },
   })
 
   const onSubmit = async (data: WebinarFormData) => {
@@ -49,6 +57,9 @@ export default function NewWebinarPage() {
         description: data.description,
         startTime,
         duration: parseInt(data.duration),
+        autoRecord: data.autoRecord,
+        recordingQuality: data.recordingQuality,
+        allowHostRecordingControl: data.allowHostRecordingControl,
       }
       
       console.log('Creating webinar:', webinarData)
@@ -229,6 +240,55 @@ export default function NewWebinarPage() {
                   <option value="120">2 hours</option>
                   <option value="180">3 hours</option>
                 </Select>
+              </div>
+
+              {/* Recording Settings */}
+              <div className="border-t pt-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Recording Settings</h3>
+                
+                <div className="space-y-4">
+                  {/* Auto Record */}
+                  <div>
+                    <label className="flex items-center space-x-2">
+                      <input 
+                        type="checkbox" 
+                        {...register('autoRecord')}
+                        className="rounded border-gray-300"
+                      />
+                      <span className="text-sm font-medium">Auto-record webinar</span>
+                    </label>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Recording will start automatically when webinar begins
+                    </p>
+                  </div>
+
+                  {/* Recording Quality */}
+                  <div>
+                    <Label htmlFor="recordingQuality">
+                      Recording Quality
+                    </Label>
+                    <Select id="recordingQuality" {...register('recordingQuality')}>
+                      <option value="480p">480p (Standard)</option>
+                      <option value="720p">720p (HD)</option>
+                      <option value="1080p">1080p (Full HD)</option>
+                    </Select>
+                  </div>
+
+                  {/* Host Recording Control */}
+                  <div>
+                    <label className="flex items-center space-x-2">
+                      <input 
+                        type="checkbox" 
+                        {...register('allowHostRecordingControl')}
+                        className="rounded border-gray-300"
+                      />
+                      <span className="text-sm font-medium">Allow host to control recording during webinar</span>
+                    </label>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Host can start/stop recording manually during the webinar
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* Features Preview */}
