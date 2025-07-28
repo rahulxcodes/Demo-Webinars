@@ -7,11 +7,18 @@ import {
   StreamVideo, 
   StreamVideoClient, 
   StreamCall,
+  StreamTheme,
   useCallStateHooks,
   CallControls,
   CallParticipantsList,
   SpeakerLayout,
+  CallingState,
+  type Call
 } from '@stream-io/video-react-sdk'
+import { CustomControlBar } from '@/components/webinar/CustomControlBar'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import '@stream-io/video-react-sdk/dist/css/styles.css'
 
 interface HostInterfaceProps {
@@ -20,153 +27,114 @@ interface HostInterfaceProps {
   }>
 }
 
-// Enhanced Host Video Interface Component
-function HostVideoInterface({ callId }: { callId: string }) {
-  const { 
-    useCallCallingState, 
-    useParticipantCount,
-    useCallEndedAt,
-    useCallStartsAt,
-    useCallCreatedAt,
-    useParticipants
-  } = useCallStateHooks()
-  
+// Professional Live Webinar Layout Component
+function LiveWebinarLayout({
+  currentUser,
+  onEndWebinar,
+  webinar
+}: {
+  currentUser: any
+  onEndWebinar: () => void
+  webinar: any
+}) {
+  const [showSidebar, setShowSidebar] = useState(false)
+
+  // Stream hooks for call state and participant management
+  const { useCallCallingState, useParticipants } = useCallStateHooks()
   const callingState = useCallCallingState()
-  const participantCount = useParticipantCount()
-  const callEndedAt = useCallEndedAt()
-  const callStartsAt = useCallStartsAt()
-  const callCreatedAt = useCallCreatedAt()
   const participants = useParticipants()
 
-  // Calculate call duration
-  const [duration, setDuration] = useState(0)
-  useEffect(() => {
-    if (callingState === 'joined') {
-      const interval = setInterval(() => {
-        const startTime = callStartsAt || callCreatedAt || new Date()
-        const now = new Date()
-        const diff = Math.floor((now.getTime() - startTime.getTime()) / 1000)
-        setDuration(diff)
-      }, 1000)
-      return () => clearInterval(interval)
-    }
-  }, [callingState, callStartsAt, callCreatedAt])
-
-  const formatDuration = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600)
-    const minutes = Math.floor((seconds % 3600) / 60)
-    const secs = seconds % 60
-    return hours > 0 
-      ? `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-      : `${minutes}:${secs.toString().padStart(2, '0')}`
+  if (callingState !== CallingState.JOINED) {
+    return (
+      <div className="flex items-center justify-center h-full bg-gray-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-white text-lg font-medium">Joining webinar...</p>
+          <p className="text-gray-400 text-sm mt-2">Please wait while we connect you</p>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col">
-      {/* Enhanced Header */}
-      <div className="bg-black/30 backdrop-blur-sm px-6 py-4 border-b border-gray-700/50">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+    <StreamTheme className="custom-dark-theme">
+      <div className="zoom-layout-container" data-sidebar={showSidebar ? 'open' : 'closed'}>
+        {/* Webinar Header */}
+        <div className="webinar-header">
+          <div className="flex justify-between items-center p-4 bg-gray-800 text-white">
+            <h1 className="text-xl font-semibold">{webinar?.title}</h1>
             <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-              <span className="text-white font-medium">LIVE</span>
-            </div>
-            <div className="text-gray-300">|</div>
-            <div>
-              <h1 className="text-white text-xl font-semibold">Host Dashboard</h1>
-              <p className="text-gray-400 text-sm">Stream ID: {callId}</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-6">
-            {/* Call Duration */}
-            <div className="flex items-center space-x-2 bg-gray-800/50 px-3 py-2 rounded-lg">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="text-white text-sm font-mono">{formatDuration(duration)}</span>
-            </div>
-            
-            {/* Participant Count */}
-            <div className="flex items-center space-x-2 bg-gray-800/50 px-3 py-2 rounded-lg">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-              <span className="text-white font-medium">{participantCount}</span>
-              <span className="text-gray-400 text-sm">viewers</span>
-            </div>
-            
-            {/* Call Status */}
-            <div className={`px-3 py-2 rounded-lg text-sm font-medium ${
-              callingState === 'joined' ? 'bg-green-600 text-white' :
-              callingState === 'connecting' ? 'bg-yellow-600 text-white' :
-              'bg-red-600 text-white'
-            }`}>
-              {callingState === 'joined' ? 'Connected' : 
-               callingState === 'connecting' ? 'Connecting...' : 
-               callingState}
+              <span className="px-3 py-1 bg-red-500 text-white rounded-full text-sm animate-pulse">
+                LIVE
+              </span>
+              <span className="text-sm text-gray-300">
+                {participants.length} attendees
+              </span>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Video Layout with improved styling */}
-      <div className="flex-1 relative bg-black">
-        <SpeakerLayout 
-          participantsBarPosition="bottom"
-        />
-        
-        {/* Overlay for empty state */}
-        {participantCount === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-            <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gray-700 rounded-full flex items-center justify-center">
-                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
+        <div className="main-video-area">
+          <SpeakerLayout 
+            participantsBarLimit={0}
+          />
+        </div>
+
+        <div className={`collapsible-sidebar ${showSidebar ? 'sidebar-open' : 'sidebar-closed'}`}>
+          <div className="sidebar-header">
+            <h3>Attendees ({participants.length})</h3>
+            <button 
+              className="sidebar-close-btn"
+              onClick={() => setShowSidebar(false)}
+            >
+              ✕
+            </button>
+          </div>
+          <div className="sidebar-content">
+            <CallParticipantsList 
+              onClose={() => setShowSidebar(false)}
+            />
+          </div>
+        </div>
+
+        <div className="participants-bottom-strip">
+          <div className="participants-preview">
+            {participants.slice(0, 4).map((participant, index) => (
+              <div key={participant.sessionId} className="participant-tile">
+                <span>{participant.name?.charAt(0) || 'A'}</span>
               </div>
-              <h3 className="text-white text-lg font-medium mb-2">Waiting for participants</h3>
-              <p className="text-gray-400">Share your webinar link to invite attendees</p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Enhanced Control Bar */}
-      <div className="bg-black/40 backdrop-blur-sm px-6 py-4 border-t border-gray-700/50">
-        <div className="flex items-center justify-center">
-          <div className="bg-gray-800/80 rounded-xl p-2">
-            <CallControls />
+            ))}
+            {participants.length > 4 && (
+              <div className="participant-tile more-count">
+                +{participants.length - 4}
+              </div>
+            )}
           </div>
         </div>
-      </div>
 
-      {/* Enhanced Participants Sidebar */}
-      <div className="absolute right-4 top-20 bottom-20 w-80 bg-black/40 backdrop-blur-sm border border-gray-700/50 rounded-xl overflow-hidden">
-        <div className="p-4 border-b border-gray-700/50">
-          <h3 className="text-white font-semibold flex items-center">
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            Participants ({participantCount})
-          </h3>
-        </div>
-        <div className="flex-1 overflow-y-auto p-4">
-          <CallParticipantsList />
+        <div className="floating-controls">
+          <CustomControlBar
+            onToggleParticipants={() => setShowSidebar(!showSidebar)}
+            participantCount={participants.length}
+            onEndCall={onEndWebinar}
+            showRecording={true}
+            webinarTitle={webinar?.title}
+          />
         </div>
       </div>
-    </div>
+    </StreamTheme>
   )
 }
 
-export default function HostInterface({ params }: HostInterfaceProps) {
+export default function HostWebinarPage({ params }: HostInterfaceProps) {
   const { id } = use(params) // Unwrap params using React.use() for Next.js 15
   const { data: session } = useSession()  
   const router = useRouter()
-  const [client, setClient] = useState<StreamVideoClient | null>(null)
-  const [call, setCall] = useState(null)
-  const [token, setToken] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [streamClient, setStreamClient] = useState<StreamVideoClient | null>(null)
+  const [call, setCall] = useState<Call | null>(null)
+  const [webinar, setWebinar] = useState(null)
+  const [isWebinarStarted, setIsWebinarStarted] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -175,93 +143,210 @@ export default function HostInterface({ params }: HostInterfaceProps) {
       return
     }
 
-    async function initializeCall() {
+    async function initializeWebinar() {
       try {
-        // Get Stream token for this user
-        const tokenResponse = await fetch(`/api/stream-token/${id}?userId=${session.user.id}&role=host`)
+        // Fetch webinar details
+        const webinarResponse = await fetch(`/api/webinars/${id}`)
+        const webinarData = await webinarResponse.json()
         
-        if (!tokenResponse.ok) {
-          throw new Error('Failed to get Stream token')
+        if (!webinarResponse.ok) {
+          throw new Error(webinarData.error || 'Failed to fetch webinar')
         }
 
-        const { token: streamToken, apiKey } = await tokenResponse.json()
-        setToken(streamToken)
+        setWebinar(webinarData)
+
+        // Get Stream token for host
+        const tokenResponse = await fetch(`/api/stream-token/${id}?userId=${session.user.id}&role=host`)
+        const { token, apiKey } = await tokenResponse.json()
 
         // Initialize Stream client with getOrCreateInstance to prevent duplicates
-        const streamClient = StreamVideoClient.getOrCreateInstance({
+        const client = StreamVideoClient.getOrCreateInstance({
           apiKey,
           user: {
             id: session.user.id,
             name: session.user.name || 'Host',
+            role: 'host'
           },
-          token: streamToken,
+          token,
         })
 
-        setClient(streamClient)
+        // Join the existing Stream call
+        const streamCall = client.call('livestream', id)
+        await streamCall.join({ create: false })
 
-        // Join the call
-        const streamCall = streamClient.call('livestream', id)
-        await streamCall.join({ create: false, data: { custom: { isHost: true } } })
+        setStreamClient(client)
         setCall(streamCall)
-
-        setLoading(false)
-      } catch (err) {
-        console.error('Failed to initialize call:', err)
-        setError(err.message || 'Failed to join webinar')
-        setLoading(false)
+        
+        // Check if webinar is already live
+        if (webinarData.status === 'live') {
+          setIsWebinarStarted(true)
+        }
+        
+        setIsLoading(false)
+      } catch (error) {
+        console.error('Failed to initialize webinar:', error)
+        setError(error.message)
+        setIsLoading(false)
       }
     }
 
-    initializeCall()
+    initializeWebinar()
 
     // Cleanup function to properly disconnect when component unmounts
     return () => {
-      if (client) {
-        client.disconnectUser()
+      if (streamClient) {
+        streamClient.disconnectUser()
       }
     }
-  }, [session, id, router])
+  }, [id, session?.user?.id, router, streamClient])
 
-  // Show loading state
-  if (loading) {
+  const handleStartWebinar = async () => {
+    setIsLoading(true)
+    try {
+      // Start the webinar via API
+      const response = await fetch(`/api/webinars/${id}/start`, {
+        method: 'POST'
+      })
+
+      const result = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to start webinar')
+      }
+
+      // Make the call go live
+      if (call) {
+        await call.goLive({
+          start_hls: true,
+          start_recording: true,
+        })
+      }
+
+      setIsWebinarStarted(true)
+      setWebinar(prev => ({ ...prev, status: 'live' }))
+      
+    } catch (error) {
+      console.error('Failed to start webinar:', error)
+      alert(`Failed to start webinar: ${error.message}`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleEndWebinar = async () => {
+    try {
+      // Stop recording
+      if (call) {
+        await call.stopRecording()
+        
+        // Leave the call
+        await call.leave()
+      }
+      
+      // Update webinar status via API
+      await fetch(`/api/webinars/${id}/end`, { method: 'POST' })
+      
+      setIsWebinarStarted(false)
+      setCall(null)
+      
+      // Redirect back to dashboard
+      router.push('/dashboard')
+      
+    } catch (error) {
+      console.error('Failed to end webinar:', error)
+    }
+  }
+
+  if (isLoading) {
     return (
-      <div className="h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
-          <p className="text-white">Connecting to webinar...</p>
-        </div>
+      <div className="flex justify-center items-center h-screen bg-gray-900">
+        <div className="text-white text-lg">Loading webinar...</div>
       </div>
     )
   }
 
-  // Show error state
   if (error) {
     return (
-      <div className="h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-500 text-xl mb-4">Failed to Join Webinar</div>
-          <p className="text-gray-400 mb-4">{error}</p>
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Back to Dashboard
-          </button>
-        </div>
+      <div className="flex justify-center items-center h-screen bg-gray-900">
+        <div className="text-red-400">Error: {error}</div>
       </div>
     )
   }
 
-  // Show video interface
-  if (client && call) {
+  // Show professional webinar interface when started
+  if (isWebinarStarted && call && streamClient) {
     return (
-      <StreamVideo client={client}>
-        <StreamCall call={call}>
-          <HostVideoInterface callId={id} />
-        </StreamCall>
-      </StreamVideo>
+      <ErrorBoundary>
+        <StreamVideo client={streamClient}>
+          <StreamCall call={call}>
+            <LiveWebinarLayout 
+              currentUser={session?.user} 
+              onEndWebinar={handleEndWebinar} 
+              webinar={webinar} 
+            />
+          </StreamCall>
+        </StreamVideo>
+      </ErrorBoundary>
     )
   }
 
-  return null
+  // Show webinar start interface
+  return (
+    <div className="min-h-screen bg-gray-100 p-6">
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Webinar Host Control</h1>
+          <div className="text-sm text-gray-600">
+            Welcome, {session?.user?.name}
+          </div>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              🎥 {webinar?.title}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-gray-600">
+              <p>Ready to start your webinar?</p>
+              <p className="text-sm mt-1">
+                Stream ID: <code className="bg-gray-100 px-2 py-1 rounded">{webinar?.streamCallId}</code>
+              </p>
+            </div>
+            
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="font-medium text-blue-900 mb-2">
+                What happens when you start:
+              </h3>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• Professional video interface will launch</li>
+                <li>• Recording will begin automatically</li>
+                <li>• Registered attendees can join immediately</li>
+                <li>• You'll have full host controls</li>
+              </ul>
+            </div>
+            
+            <Button 
+              onClick={handleStartWebinar} 
+              className="w-full"
+              size="lg"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Starting Webinar...
+                </>
+              ) : (
+                <>
+                  🚀 Start Webinar
+                </>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
 }

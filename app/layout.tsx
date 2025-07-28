@@ -1,6 +1,7 @@
 import React from 'react'
 import type { Metadata } from 'next'
 import './globals.css'
+import '../styles/webinar-live-class.css'
 import { Header } from '@/components/ui/Header'
 import { Providers } from './providers'
 
