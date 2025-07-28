@@ -65,7 +65,7 @@ export default function NewWebinarPage() {
   if (submitSuccess) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="max-w-md w-full mx-4 animate-slide-up" variant="elevated">
+        <Card className="max-w-md w-full mx-4" variant="elevated">
           <CardBody className="text-center py-12">
             <div className="mx-auto h-16 w-16 rounded-full bg-gradient-to-r from-success-100 to-success-200 flex items-center justify-center mb-6">
               <CheckCircleIcon className="h-8 w-8 text-success-600" />
@@ -89,7 +89,7 @@ export default function NewWebinarPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8 animate-slide-up">
+        <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Create New Webinar
           </h1>
@@ -99,7 +99,7 @@ export default function NewWebinarPage() {
         </div>
 
         {/* Progress Indicator */}
-        <div className="mb-8 animate-slide-up">
+        <div className="mb-8">
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-500 text-white text-sm font-medium">
@@ -118,7 +118,7 @@ export default function NewWebinarPage() {
         </div>
 
         {/* Form Card */}
-        <Card className="animate-slide-up">
+        <Card>
           <CardHeader>
             <h2 className="text-xl font-semibold text-gray-900">Webinar Information</h2>
             <p className="text-sm text-gray-600">Fill in the basic details for your webinar</p>

@@ -31,7 +31,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
-        <div className="mb-8 animate-slide-up">
+        <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Welcome back! 👋
           </h1>
@@ -41,7 +41,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-slide-up">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {stats.map((stat) => (
             <Card key={stat.name} className="transition-all duration-200 hover:shadow-medium">
               <CardBody className="flex items-center">
@@ -58,7 +58,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Action Section */}
-        <div className="mb-8 animate-slide-up">
+        <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <Link href="/dashboard/new-webinar">
               <Button size="lg" className="w-full sm:w-auto">
@@ -77,7 +77,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Webinars Section */}
-        <Card className="animate-slide-up">
+        <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900">

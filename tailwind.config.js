@@ -49,7 +49,7 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
       boxShadow: {
         'soft': '0 2px 8px 0 rgba(0, 0, 0, 0.05)',
