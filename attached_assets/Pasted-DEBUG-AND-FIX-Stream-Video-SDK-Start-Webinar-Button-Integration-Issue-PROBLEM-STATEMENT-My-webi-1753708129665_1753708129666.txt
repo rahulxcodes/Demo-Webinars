@@ -1,0 +1,119 @@
+DEBUG AND FIX: Stream Video SDK "Start Webinar" Button Integration Issue
+
+PROBLEM STATEMENT:
+My webinar platform has a "Start Webinar" button that should activate a pre-scheduled Stream Video call, but it's not working. I need you to analyze the current code and fix the integration following Replit's best practices for live streaming applications.
+
+CURRENT ARCHITECTURE THAT SHOULD BE WORKING:
+1. Webinar Creation → Creates Stream call with unique streamCallId and stores in database
+2. Click "Start Webinar" → Should call /api/webinars/[id]/start endpoint
+3. Start API → Should use streamClient.call().goLive() to activate existing call
+4. Host Interface → Should connect to existing call using stored streamCallId
+
+REPLIT-SPECIFIC DEBUGGING APPROACH:
+Based on Replit's approach to video streaming apps, please check these areas:
+
+1. ENVIRONMENT VARIABLES IN REPLIT:
+   - Verify STREAM_API_KEY and STREAM_SECRET are properly set in Replit Secrets
+   - Check if environment variables are accessible at runtime
+   - Add logging to confirm API keys are loaded correctly
+
+2. NETWORK CONNECTIVITY:
+   - Replit has specific network constraints for WebRTC and streaming
+   - Check if Stream SDK can connect to external servers from Replit
+   - Add connection testing for Stream API endpoints
+
+3. STREAM CLIENT INITIALIZATION:
+   - Verify StreamVideoClient is properly initialized server-side
+   - Check if Stream call creation actually succeeds during webinar creation
+   - Add comprehensive error logging for all Stream SDK operations
+
+4. API ENDPOINT DEBUGGING:
+   - Add detailed console.log statements to /api/webinars/[id]/start endpoint
+   - Verify if the endpoint is actually being called when button is clicked
+   - Check if streamCallId exists in database and is valid
+   - Test if call.goLive() method works in Replit environment
+
+5. FRONTEND-BACKEND CONNECTION:
+   - Verify fetch request from frontend actually reaches the API
+   - Check for CORS issues or request blocking
+   - Add error handling and user feedback for failed requests
+
+SPECIFIC REPLIT REQUIREMENTS TO IMPLEMENT:
+1. Use Replit's built-in logging system for debugging
+2. Add a /debug/stream-status endpoint to test Stream connectivity
+3. Implement Replit-compatible error handling and retry logic
+4. Ensure all async operations work properly in Replit's environment
+5. Add fallback mechanisms for network issues
+
+DEBUGGING STEPS TO IMPLEMENT:
+1. Create test endpoint: /api/debug/stream-test that tries to:
+   - Initialize Stream client
+   - Create a test call
+   - Make the call go live
+   - Return detailed success/failure information
+
+2. Add comprehensive logging to webinar creation process:
+   - Log when Stream call is created
+   - Log the streamCallId being stored
+   - Log any Stream API errors
+
+3. Add detailed logging to start webinar process:
+   - Log when start button is clicked
+   - Log API request being sent
+   - Log streamCallId being retrieved from database
+   - Log Stream call.goLive() attempt and response
+
+4. Create frontend error display:
+   - Show loading states during start process
+   - Display specific error messages when start fails
+   - Add retry button for failed starts
+
+EXPECTED FIXES TO IMPLEMENT:
+1. Fix Stream SDK initialization with proper Replit environment setup
+2. Add proper error handling for all Stream operations
+3. Implement network retry logic for Stream API calls
+4. Add comprehensive debugging endpoints
+5. Fix any CORS or network connectivity issues specific to Replit
+
+TESTING APPROACH:
+1. First test basic Stream connectivity from Replit
+2. Test webinar creation → verify Stream call is actually created
+3. Test start webinar API → verify it can find and activate the call
+4. Test frontend integration → verify button click triggers correct API call
+5. Add visual feedback for each step of the process
+
+Please analyze the current implementation, identify exactly where the "Start Webinar" process is failing, and provide a complete fix that works reliably in Replit's environment with proper error handling and debugging capabilities.
+Additional Follow-up Prompts for Replit Agent:
+After running the main debug prompt, you can ask the Replit agent these specific questions:
+
+1. Network Connectivity Test:
+text
+Create a simple test endpoint that verifies if Replit can connect to Stream Video SDK servers and make API calls
+2. Environment Variables Check:
+text
+Add logging to verify that STREAM_API_KEY and STREAM_SECRET are properly loaded from Replit Secrets
+3. Step-by-Step Debug:
+text
+Add console.log statements to every step of the start webinar process so we can see exactly where it fails
+What This Approach Will Identify:
+Based on Replit's patterns for video streaming applications, the most common issues are:
+
+Environment Variable Access - Stream keys not properly configured in Replit Secrets
+
+Network Limitations - Replit's hosting environment blocking certain WebRTC connections
+
+API Initialization - Stream client not properly initialized server-side
+
+Database Connection - streamCallId not being stored or retrieved correctly
+
+Frontend-Backend Communication - Button click not properly triggering API calls
+
+The debug prompt above follows Replit's recommended approach of:
+
+Incremental debugging with detailed logging
+
+Environment-specific testing for Replit constraints
+
+Built-in error handling with proper user feedback
+
+Network connectivity validation for external APIs

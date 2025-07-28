@@ -48,6 +48,7 @@ export default function WebinarDetailsPage() {
     duration: 60,
   })
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const [startingWebinar, setStartingWebinar] = useState(false)
 
   useEffect(() => {
     fetchWebinar()
@@ -216,6 +217,44 @@ export default function WebinarDetailsPage() {
     // Show success message
   }
 
+  const handleStartWebinar = useCallback(async () => {
+    if (!webinar) return
+
+    console.log('Starting webinar:', webinar.id, 'with Stream Call ID:', webinar.streamCallId)
+    setStartingWebinar(true)
+
+    try {
+      const response = await fetch(`/api/webinars/${webinarId}/start`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const result = await response.json()
+      console.log('Start webinar response:', result)
+
+      if (response.ok) {
+        // Update local state
+        setWebinar(prev => prev ? { ...prev, status: 'live', streamStatus: 'live' } : null)
+        
+        // Show success feedback
+        alert('Webinar started successfully! Participants can now join.')
+        
+        // Optionally redirect to host interface
+        // router.push(`/webinar/${webinar.streamCallId}/host`)
+      } else {
+        console.error('Failed to start webinar:', result.error)
+        alert(`Failed to start webinar: ${result.error}`)
+      }
+    } catch (error) {
+      console.error('Error starting webinar:', error)
+      alert('Failed to start webinar. Please try again.')
+    } finally {
+      setStartingWebinar(false)
+    }
+  }, [webinar, webinarId, router])
+
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Cog6ToothIcon },
     { id: 'settings', label: 'Settings', icon: PencilIcon },
@@ -289,9 +328,14 @@ export default function WebinarDetailsPage() {
                 </Button>
               </div>
             )}
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleStartWebinar}
+              disabled={startingWebinar || webinar.status === 'live'}
+            >
               <PlayIcon className="h-4 w-4 mr-2" />
-              Start Webinar
+              {startingWebinar ? 'Starting...' : webinar.status === 'live' ? 'Live' : 'Start Webinar'}
             </Button>
             <Button variant="outline" size="sm">
               <DocumentDuplicateIcon className="h-4 w-4 mr-2" />

@@ -52,7 +52,7 @@ export async function createWebinarCall(
       await generateStreamToken(createdByUserId)
     )
 
-    const call = streamServerClient.call('default', callId)
+    const call = streamServerClient.call('livestream', callId)
     
     const callData = {
       created_by_id: createdByUserId,
@@ -102,7 +102,7 @@ export async function startWebinarCall(callId: string, hostUserId: string = 'def
       await generateStreamToken(hostUserId)
     )
 
-    const call = streamServerClient.call('default', callId)
+    const call = streamServerClient.call('livestream', callId)
     
     // Update call permissions before going live
     await call.update({
