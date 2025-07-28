@@ -23,6 +23,8 @@ interface CustomControlBarProps {
   onEndCall: () => void
   showRecording?: boolean
   webinarTitle?: string
+  isRecordingActive?: boolean
+  onToggleRecording?: () => void
 }
 
 export function CustomControlBar({
@@ -30,7 +32,9 @@ export function CustomControlBar({
   participantCount,
   onEndCall,
   showRecording = true,
-  webinarTitle
+  webinarTitle,
+  isRecordingActive = false,
+  onToggleRecording
 }: CustomControlBarProps) {
   const {
     useCameraState,
@@ -44,8 +48,8 @@ export function CustomControlBar({
   const { screenShare, isMute: isScreenShareMuted } = useScreenShareState()
   const callingState = useCallCallingState()
 
-  // Recording state (simplified for now)
-  const [isCallRecordingInProgress, setIsCallRecordingInProgress] = useState(false)
+  // Use recording state passed from parent component
+  const isCallRecordingInProgress = isRecordingActive
 
   const [duration, setDuration] = useState(0)
 
@@ -93,13 +97,10 @@ export function CustomControlBar({
   }
 
   const handleToggleRecording = async () => {
-    try {
-      // Toggle recording state (simplified implementation)
-      setIsCallRecordingInProgress(!isCallRecordingInProgress)
-      console.log('Recording toggled:', !isCallRecordingInProgress)
-    } catch (error) {
-      console.error('Failed to toggle recording:', error)
+    if (onToggleRecording) {
+      onToggleRecording()
     }
+    console.log('Recording toggled:', !isRecordingActive)
   }
 
   return (

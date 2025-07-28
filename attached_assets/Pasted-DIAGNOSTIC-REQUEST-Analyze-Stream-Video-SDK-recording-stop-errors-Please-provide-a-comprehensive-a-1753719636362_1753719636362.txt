@@ -1,0 +1,55 @@
+DIAGNOSTIC REQUEST: Analyze Stream Video SDK recording stop errors
+
+Please provide a comprehensive analysis of the recording stop errors occurring when ending the webinar.
+
+ERROR DETAILS:
+1. "[coordinator]: client:post - Error - url: /call/livestream/webinar-wesfsdf-1753719442053/stop_recording"
+2. "StopRecording failed with error: call egress is not running"
+
+SHOW ME THE CURRENT STATE:
+
+1. WEBINAR END FUNCTION:
+   - Show me the complete handleEndWebinar function at line 420 in /app/webinar/[id]/host/page.tsx
+   - How are you calling call.stopRecording()?
+   - What's the exact sequence of operations when ending the webinar?
+
+2. RECORDING START LOGIC:
+   - Show me where and how recording is started in the webinar
+   - Are you calling call.startRecording() when the webinar begins?
+   - Is there proper error handling for recording start failures?
+
+3. STREAM CALL CONFIGURATION:
+   - How is the Stream call configured for recording?
+   - What recording settings are being used in call.update()?
+   - Are you using the correct call type ('livestream' vs 'default')?
+
+4. RECORDING STATUS CHECK:
+   - Show me how you check if recording is actually running before stopping it
+   - Are you using useIsCallRecordingInProgress() hook?
+   - What does the recording status show in the UI?
+
+5. CALL TYPE VERIFICATION:
+   - What call type are you using? ('default', 'livestream', etc.)
+   - Show me the exact call creation: streamClient.call(callType, callId)
+   - Are you using the correct call type for recording features?
+
+6. ERROR HANDLING:
+   - How are recording errors currently being handled?
+   - Are there any console logs showing recording start success/failure?
+   - What happens if recording never started but you try to stop it?
+
+7. STREAM SDK VERSION:
+   - What version of @stream-io/video-react-sdk are you using?
+   - Are you using the latest stable version?
+
+SPECIFIC DEBUGGING REQUESTS:
+- Add logging to show recording status before attempting to stop
+- Add error handling for recording operations that gracefully handles "not running" state
+- Check if recording actually started successfully when webinar began
+- Verify the correct call type and configuration for recording features
+
+Please show the exact code so I can identify whether this is:
+- Recording never started properly
+- Wrong call type for recording
+- Missing recording configuration
+- Improper error handling
