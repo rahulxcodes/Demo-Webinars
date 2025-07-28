@@ -31,6 +31,10 @@ model Webinar {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Relations
+  registrationForm RegistrationForm?
+  registrations    Registration[]
+
   // Performance indexes for faster queries
   @@index([hostId])
   @@index([startTime])
@@ -39,4 +43,50 @@ model Webinar {
   @@index([hostId, startTime])
   @@index([status, startTime])
   @@map("webinars")
+}
+
+model RegistrationForm {
+  id                   String   @id @default(cuid())
+  webinarId            String   @unique
+  requireRegistration  Boolean  @default(true)
+  autoApprove          Boolean  @default(true)
+  maxAttendees         Int?
+  registrationDeadline Int?     // hours before webinar
+  formSchema           Json     // stores form field configuration
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  // Relations
+  webinar       Webinar        @relation(fields: [webinarId], references: [id], onDelete: Cascade)
+  registrations Registration[]
+
+  @@index([webinarId])
+  @@map("registration_forms")
+}
+
+model Registration {
+  id            String    @id @default(cuid())
+  webinarId     String
+  formId        String
+  userEmail     String
+  userName      String
+  mobileNumber  String?
+  formResponses Json      // stores all form field responses
+  status        String    @default("pending") // pending, approved, rejected
+  joinToken     String    @unique @default(cuid())
+  sourceData    Json?     // UTM parameters, referrer info
+  registeredAt  DateTime  @default(now())
+  approvedAt    DateTime?
+
+  // Relations
+  webinar          Webinar          @relation(fields: [webinarId], references: [id], onDelete: Cascade)
+  registrationForm RegistrationForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  // Prevent duplicate registrations
+  @@unique([webinarId, userEmail])
+  @@index([webinarId])
+  @@index([formId])
+  @@index([status])
+  @@index([userEmail])
+  @@map("registrations")
 }

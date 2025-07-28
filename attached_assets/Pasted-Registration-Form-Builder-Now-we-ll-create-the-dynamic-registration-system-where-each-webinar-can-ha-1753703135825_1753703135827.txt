@@ -1,0 +1,191 @@
+Registration Form Builder
+Now we'll create the dynamic registration system where each webinar can have its own custom registration form, just like Zoom webinars.
+
+🤖 Replit AI Agent Prompt #6: Registration System
+text
+Build a comprehensive registration system for the webinar platform with custom form builder:
+
+WEBINAR SETTINGS ENHANCEMENT:
+Update /app/dashboard/webinars/[id]/page.tsx to add a "Registration" tab:
+
+Registration Configuration Panel:
+- Toggle "Require Registration" (on/off switch)
+- When enabled, show additional options:
+  * Auto-approve vs Manual approval toggle
+  * Maximum attendees limit input
+  * Registration deadline (hours before webinar)
+  * Custom registration form builder
+
+DYNAMIC FORM BUILDER:
+Create /components/FormBuilder/FormBuilder.tsx:
+
+Default Fields (always included):
+- Full Name (required)
+- Email Address (required)
+- Mobile Number (optional toggle)
+
+Custom Field Types:
+- Text Input (with validation options)
+- Textarea (for longer responses)
+- Dropdown Select (with custom options)
+- Checkbox Group (multiple selections)
+- Radio Buttons (single selection)
+- Number Input (with min/max validation)
+
+Form Builder Interface:
+- Drag-and-drop field ordering
+- Add/Remove field buttons
+- Field property editor (label, placeholder, required/optional)
+- Live form preview
+- Save form configuration to database
+
+DATABASE SCHEMA UPDATES:
+Add to schema.prisma:
+
+model RegistrationForm {
+id String @id @default(cuid())
+webinarId String @unique
+requireRegistration Boolean @default(true)
+autoApprove Boolean @default(true)
+maxAttendees Int?
+registrationDeadline Int? // hours before webinar
+formSchema Json // stores form field configuration
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+
+webinar Webinar @relation(fields: [webinarId], references: [id])
+registrations Registration[]
+}
+
+model Registration {
+id String @id @default(cuid())
+webinarId String
+formId String
+userEmail String
+userName String
+mobileNumber String?
+formResponses Json // stores all form field responses
+status String @default("pending") // pending, approved, rejected
+joinToken String @unique @default(cuid())
+sourceData Json? // UTM parameters, referrer info
+registeredAt DateTime @default(now())
+approvedAt DateTime?
+
+webinar Webinar @relation(fields: [webinarId], references: [id])
+registrationForm RegistrationForm @relation(fields: [formId], references: [id])
+}
+
+text
+
+PUBLIC REGISTRATION PAGE:
+Create /app/register/[webinarId]/page.tsx:
+
+Registration Page Features:
+- Display webinar information (title, date, time, description)
+- Host information with avatar/photo
+- Dynamic form based on webinar's registration configuration
+- Form validation with proper error messages
+- Success confirmation after submission
+- Responsive design for mobile users
+
+Registration Form Rendering:
+- Render fields based on saved form schema
+- Proper input types and validation
+- Required field indicators
+- Character limits and validation messages
+- Submit button with loading state
+
+REGISTRATION API ENDPOINTS:
+Create /app/api/webinars/[id]/register/route.ts:
+
+POST Registration:
+- Validate form data against form schema
+- Check webinar capacity and registration deadline
+- Prevent duplicate registrations (same email)
+- Generate unique join token
+- Save registration to database
+- Send confirmation email
+- Return success/error response
+
+Create /app/api/registrations/route.ts:
+- GET: List registrations with filtering
+- PATCH: Approve/reject registrations (bulk operations)
+
+REGISTRATION MANAGEMENT:
+Create /app/dashboard/webinars/[id]/registrations/page.tsx:
+
+Registration Dashboard:
+- List all registrations for the webinar
+- Filter by status (All, Pending, Approved, Rejected)
+- Search by name or email
+- Bulk approve/reject actions
+- Export to CSV functionality
+- Registration statistics (conversion rates, sources)
+
+Registration Details:
+- View individual registration responses
+- Manual approve/reject with notes
+- Resend confirmation emails
+- Edit registration details if needed
+
+EMAIL SYSTEM:
+Create email templates and sending logic:
+
+Email Templates:
+- Registration confirmation (auto-approved)
+- Registration pending approval
+- Registration approved notification
+- Registration rejected with reason
+- Webinar reminder emails (24h, 1h before)
+
+Email Service Integration:
+- Use Resend or Nodemailer for sending
+- HTML email templates with webinar branding
+- Track email delivery status
+- Handle bounced emails
+
+REGISTRATION ANALYTICS:
+Add analytics to registration system:
+- Registration conversion funnel
+- Source tracking (UTM parameters, referrers)
+- Time-based registration patterns
+- Geographic distribution
+- Device/browser analytics
+- Form field completion rates
+
+SECURITY FEATURES:
+- Rate limiting on registration endpoints
+- CAPTCHA integration for spam prevention
+- Email verification for new registrants
+- Secure join token generation
+- Input sanitization and validation
+
+MOBILE OPTIMIZATION:
+- Fully responsive registration forms
+- Touch-friendly form controls
+- Mobile-optimized layouts
+- Progressive Web App features
+- Offline form completion (save as draft)
+
+WAITLIST SYSTEM:
+When webinar reaches capacity:
+- Add users to waiting list automatically
+- Notify when spots become available
+- Waiting list management interface
+- Automatic promotion system
+
+Make sure the registration system is user-friendly, secure, and provides excellent experience for both hosts managing registrations and attendees signing up for webinars.
+What This Achieves:
+📝 Custom registration forms for each webinar
+
+🎯 Dynamic form builder with drag-and-drop
+
+📊 Registration management dashboard
+
+📧 Automated email confirmations
+
+🔒 Security and spam prevention
+
+📱 Mobile-optimized registration pages
+
+📈 Registration analytics and tracking
