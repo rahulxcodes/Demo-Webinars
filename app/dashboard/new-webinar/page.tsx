@@ -1,20 +1,21 @@
 'use client'
 
 import React, { useState } from 'react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { format, addDays } from 'date-fns'
+import * as z from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import { Card, CardHeader, CardBody, CardFooter } from '@/components/ui/card'
+import { CheckCircleIcon, ClockIcon, CalendarIcon, UserGroupIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
 
 const webinarSchema = z.object({
   title: z.string().min(1, 'Title is required').min(3, 'Title must be at least 3 characters'),
-  description: z.string().optional(),
+  description: z.string().min(1, 'Description is required').min(10, 'Description must be at least 10 characters'),
   date: z.string().min(1, 'Date is required'),
   time: z.string().min(1, 'Time is required'),
   duration: z.string().min(1, 'Duration is required'),
@@ -23,183 +24,238 @@ const webinarSchema = z.object({
 type WebinarFormData = z.infer<typeof webinarSchema>
 
 export default function NewWebinarPage() {
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  
+  const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitSuccess, setSubmitSuccess] = useState(false)
+
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     reset,
   } = useForm<WebinarFormData>({
     resolver: zodResolver(webinarSchema),
-    defaultValues: {
-      date: format(addDays(new Date(), 1), 'yyyy-MM-dd'),
-      time: '10:00',
-      duration: '60',
-    },
   })
 
   const onSubmit = async (data: WebinarFormData) => {
+    setIsSubmitting(true)
     try {
+      // Simulate API call
       console.log('Webinar Form Data:', data)
       
-      // Simulate API call delay
+      // Simulate delay
       await new Promise(resolve => setTimeout(resolve, 1000))
       
-      setIsSubmitted(true)
-      reset()
+      setSubmitSuccess(true)
       
-      // Hide success message after 3 seconds
-      setTimeout(() => setIsSubmitted(false), 3000)
+      // Reset form after successful submission
+      setTimeout(() => {
+        reset()
+        setSubmitSuccess(false)
+        router.push('/dashboard')
+      }, 2000)
+      
     } catch (error) {
       console.error('Error creating webinar:', error)
+    } finally {
+      setIsSubmitting(false)
     }
+  }
+
+  if (submitSuccess) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="max-w-md w-full mx-4 animate-slide-up" variant="elevated">
+          <CardBody className="text-center py-12">
+            <div className="mx-auto h-16 w-16 rounded-full bg-gradient-to-r from-success-100 to-success-200 flex items-center justify-center mb-6">
+              <CheckCircleIcon className="h-8 w-8 text-success-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Webinar Created!</h2>
+            <p className="text-gray-600 mb-4">Your webinar has been successfully created and is ready to go.</p>
+            <div className="flex items-center justify-center text-sm text-gray-500">
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              Redirecting to dashboard...
+            </div>
+          </CardBody>
+        </Card>
+      </div>
+    )
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <Link 
-            href="/dashboard" 
-            className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 mb-4"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Dashboard
-          </Link>
-          
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8 animate-slide-up">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Create New Webinar
           </h1>
-          <p className="text-gray-600">
-            Fill in the details for your upcoming webinar
+          <p className="text-lg text-gray-600">
+            Set up your webinar with just a few details
           </p>
         </div>
 
-        {isSubmitted && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-md">
-            <div className="flex">
-              <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-green-800">
-                  Webinar created successfully!
-                </p>
+        {/* Progress Indicator */}
+        <div className="mb-8 animate-slide-up">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-500 text-white text-sm font-medium">
+                1
               </div>
+              <span className="ml-2 text-sm font-medium text-gray-900">Basic Details</span>
+            </div>
+            <div className="flex-1 h-0.5 bg-gray-200"></div>
+            <div className="flex items-center opacity-50">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-gray-500 text-sm font-medium">
+                2
+              </div>
+              <span className="ml-2 text-sm text-gray-500">Settings (Coming Soon)</span>
             </div>
           </div>
-        )}
-        
-        <div className="bg-white rounded-lg shadow p-6">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div>
-              <Label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                Title <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="title"
-                {...register('title')}
-                placeholder="Enter webinar title"
-                className={errors.title ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : ''}
-              />
-              {errors.title && (
-                <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
-              )}
-            </div>
+        </div>
 
-            <div>
-              <Label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                Description
-              </Label>
-              <Textarea
-                id="description"
-                {...register('description')}
-                placeholder="Describe what your webinar will cover (optional)"
-                rows={4}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Form Card */}
+        <Card className="animate-slide-up">
+          <CardHeader>
+            <h2 className="text-xl font-semibold text-gray-900">Webinar Information</h2>
+            <p className="text-sm text-gray-600">Fill in the basic details for your webinar</p>
+          </CardHeader>
+          
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <CardBody className="space-y-6">
+              {/* Title */}
               <div>
-                <Label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
-                  Date <span className="text-red-500">*</span>
+                <Label htmlFor="title" required>
+                  Webinar Title
                 </Label>
                 <Input
-                  id="date"
-                  type="date"
-                  {...register('date')}
-                  min={format(new Date(), 'yyyy-MM-dd')}
-                  className={errors.date ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : ''}
+                  id="title"
+                  {...register('title')}
+                  placeholder="e.g., Introduction to React Development"
+                  error={!!errors.title}
+                  helperText={errors.title?.message}
+                  leftIcon={<DocumentTextIcon className="h-4 w-4" />}
                 />
-                {errors.date && (
-                  <p className="mt-1 text-sm text-red-600">{errors.date.message}</p>
-                )}
               </div>
 
+              {/* Description */}
               <div>
-                <Label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
-                  Time <span className="text-red-500">*</span>
+                <Label htmlFor="description" required>
+                  Description
                 </Label>
-                <Input
-                  id="time"
-                  type="time"
-                  {...register('time')}
-                  className={errors.time ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : ''}
+                <Textarea
+                  id="description"
+                  {...register('description')}
+                  placeholder="Describe what attendees will learn and what topics you'll cover..."
+                  rows={4}
+                  error={!!errors.description}
+                  helperText={errors.description?.message || "Help attendees understand what they'll gain from your webinar"}
                 />
-                {errors.time && (
-                  <p className="mt-1 text-sm text-red-600">{errors.time.message}</p>
-                )}
               </div>
-            </div>
 
-            <div>
-              <Label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-2">
-                Duration <span className="text-red-500">*</span>
-              </Label>
-              <Select
-                id="duration"
-                {...register('duration')}
-                className={errors.duration ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : ''}
-              >
-                <option value="30">30 minutes</option>
-                <option value="60">1 hour</option>
-                <option value="90">1.5 hours</option>
-                <option value="120">2 hours</option>
-              </Select>
-              {errors.duration && (
-                <p className="mt-1 text-sm text-red-600">{errors.duration.message}</p>
-              )}
-            </div>
+              {/* Date & Time Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="date" required>
+                    Date
+                  </Label>
+                  <Input
+                    id="date"
+                    type="date"
+                    {...register('date')}
+                    error={!!errors.date}
+                    helperText={errors.date?.message}
+                    leftIcon={<CalendarIcon className="h-4 w-4" />}
+                  />
+                </div>
 
-            <div className="flex justify-end space-x-4 pt-6">
-              <Link href="/dashboard">
-                <Button type="button" variant="outline">
+                <div>
+                  <Label htmlFor="time" required>
+                    Start Time
+                  </Label>
+                  <Input
+                    id="time"
+                    type="time"
+                    {...register('time')}
+                    error={!!errors.time}
+                    helperText={errors.time?.message}
+                    leftIcon={<ClockIcon className="h-4 w-4" />}
+                  />
+                </div>
+              </div>
+
+              {/* Duration */}
+              <div>
+                <Label htmlFor="duration" required>
+                  Duration
+                </Label>
+                <Select
+                  id="duration"
+                  {...register('duration')}
+                  error={!!errors.duration}
+                  helperText={errors.duration?.message || "Choose the expected length of your webinar"}
+                >
+                  <option value="">Select duration</option>
+                  <option value="30">30 minutes</option>
+                  <option value="60">1 hour</option>
+                  <option value="90">1.5 hours</option>
+                  <option value="120">2 hours</option>
+                  <option value="180">3 hours</option>
+                </Select>
+              </div>
+
+              {/* Features Preview */}
+              <div className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-lg p-6 border border-primary-200">
+                <h3 className="text-sm font-semibold text-primary-900 mb-3 flex items-center">
+                  <UserGroupIcon className="h-4 w-4 mr-2" />
+                  What you get with your webinar:
+                </h3>
+                <ul className="text-sm text-primary-800 space-y-1">
+                  <li className="flex items-center">
+                    <CheckCircleIcon className="h-4 w-4 mr-2 text-primary-600" />
+                    HD video and crystal clear audio
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircleIcon className="h-4 w-4 mr-2 text-primary-600" />
+                    Screen sharing and presentation tools
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircleIcon className="h-4 w-4 mr-2 text-primary-600" />
+                    Interactive chat and Q&A features
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircleIcon className="h-4 w-4 mr-2 text-primary-600" />
+                    Automatic recording and playback
+                  </li>
+                </ul>
+              </div>
+            </CardBody>
+
+            <CardFooter>
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.push('/dashboard')}
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto"
+                >
                   Cancel
                 </Button>
-              </Link>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="min-w-[120px]"
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Saving...
-                  </div>
-                ) : (
-                  'Save Webinar'
-                )}
-              </Button>
-            </div>
+                <Button
+                  type="submit"
+                  loading={isSubmitting}
+                  className="w-full sm:w-auto min-w-[140px]"
+                >
+                  {isSubmitting ? 'Creating Webinar...' : 'Create Webinar'}
+                </Button>
+              </div>
+            </CardFooter>
           </form>
-        </div>
+        </Card>
       </div>
     </div>
   )
