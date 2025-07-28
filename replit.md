@@ -1,8 +1,8 @@
-# Video Calling Application
+# Next.js 14 Webinar Platform
 
 ## Overview
 
-This is a modern video calling application built with React frontend and Express backend, utilizing Stream.io for real-time video communication. The application features a clean, responsive interface with support for video calls, screen sharing, and device controls.
+This is a professional educational webinar platform built with Next.js 14 App Router, TypeScript, and Tailwind CSS. The platform is designed to integrate with Stream.io for real-time video communication and Prisma with PostgreSQL for data persistence. This foundation provides the core structure for building comprehensive webinar functionality.
 
 ## User Preferences
 
@@ -10,86 +10,47 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### January 26, 2025
-- ✓ Created dedicated Express server (`server/index.js`) on port 3001
-- ✓ Implemented GET `/token` endpoint with userId query parameter  
-- ✓ Added proper error handling for missing credentials and userId
-- ✓ Updated client to use new token endpoint format
-- ✓ Configured dual-server setup (Vite on 5000, Express on 3001)
-- ✓ Added PostgreSQL database with Drizzle ORM
-- ✓ Implemented database storage layer with Users, Calls, and CallParticipants tables
-- ✓ Created database endpoints for call management (join, list active calls)
-- ✓ Enhanced frontend with active calls list and improved layout
-- ✓ Created shared Layout component with sidebar navigation
-- ✓ Implemented user role simulation (admin vs student interfaces)
-- ✓ Added AdminClassView component for instructor flow
-- ✓ Integrated automatic recording for admin-started classes
-- ✓ Fixed Stream.io API key consistency issues
-- ✓ Created UserClassView component for student flow
-- ✓ Implemented live class detection via Stream API queries
-- ✓ Added periodic status checking for students
-- ✓ Configured role-based rendering in main App component
-- ✓ Created RecordingsView component with Stream API integration
-- ✓ Implemented recordings query and display functionality
-- ✓ Added recording playback with external link opening
-- ✓ Enhanced UI with proper loading states and error handling
-- ✓ Implemented complete authentication system with JWT tokens
-- ✓ Added database schema with role enum (ADMIN/STUDENT) and auth fields
-- ✓ Created registration, login, and profile endpoints with proper validation
-- ✓ Implemented password hashing with bcrypt and secure token generation
-- ✓ Added user management with role-based access control
-- ✓ Created React Context-based authentication with protected routes
-- ✓ Implemented login/signup pages with React Router DOM integration
-- ✓ Added QueryClient configuration for proper TanStack Query setup
-- ✓ Fixed WebSocket connection issues with sequential token-then-client initialization
-- ✓ Enhanced MainApp component with proper loading states and error handling
-- ✓ Fixed JWT token expiration errors by implementing token validation and automatic logout
-- ✓ Added comprehensive error boundaries around Stream components
-- ✓ Implemented automatic token refresh mechanism with expired token detection
-- ✓ Enhanced Stream client error handling with proper connection error recovery
-- ✓ **MAJOR UI OVERHAUL**: Implemented Zoom-style layout structure for live classes
-- ✓ Replaced sidebar participants with horizontal bottom strip (120px height)
-- ✓ Added main video stage taking 85% of screen with centered speaker layout
-- ✓ Implemented floating controls overlay positioned above participant strip
-- ✓ Added comprehensive CSS styling for professional video call appearance
-- ✓ Enhanced participant view styling with hover effects and speaking indicators
-- ✓ Configured responsive design for mobile devices with adjusted dimensions
-- ✓ **PROFESSIONAL DESIGN SYSTEM**: Implemented comprehensive button design system
-- ✓ Added three button variants: Primary (#2D2D30), Danger (#FF4757), and Success (#00D4AA)
-- ✓ Enhanced button states with proper hover, active, focus, and disabled styling
-- ✓ Implemented haptic feedback animations with scale transforms and inset shadows
-- ✓ Added collapsible sidebar system with CSS Grid dynamic layout and smooth transitions
-- ✓ Integrated professional icon system using react-icons with 20px sizing and accessibility
-- ✓ Applied Stream SDK component styling overrides for consistent visual design
-- ✓ **CUSTOM CONTROL BAR**: Completely replaced default CallControls with custom implementation
-- ✓ Integrated Stream hooks (useCall, useMicrophoneState, useCameraState, useScreenShare, useRecording)
-- ✓ Implemented Lucide React icons for modern, consistent iconography
-- ✓ Created individual control components with 52px circular buttons and proper state management
-- ✓ Added professional hover effects, state indicators, and accessibility features
+### January 28, 2025
+- ✓ **COMPLETE PROJECT TRANSFORMATION**: Converted from Vite+React to Next.js 14 foundation
+- ✓ Installed Next.js 14 with App Router and TypeScript
+- ✓ Created basic Next.js project structure with app directory
+- ✓ Set up Tailwind CSS with Next.js configuration
+- ✓ Implemented basic homepage with "Welcome to Webinar Platform"
+- ✓ Created dashboard page with "New Webinar" button and placeholder table
+- ✓ Added Prisma schema with User and Webinar models
+- ✓ Configured NextAuth for authentication foundation
+- ✓ Created basic UI components (Button) with Tailwind styling
+- ✓ Set up environment configuration with DATABASE_URL, NEXTAUTH_SECRET, STREAM_API_KEY
+- ✓ Configured TypeScript with Next.js optimized settings
+- ✓ Removed legacy Express server and Vite configuration
+- ✓ Updated project to run on Next.js dev server (port 3000)
+- ✓ Created proper file structure: /app, /components/ui, /lib, /prisma
 
 ## System Architecture
 
-### Frontend Architecture
-- **Framework**: React with TypeScript
-- **Bundler**: Vite for fast development and optimized builds (port 5000)
-- **Styling**: Tailwind CSS with shadcn/ui component library
-- **UI Theme**: New York style with neutral base color and CSS variables
-- **Routing**: Wouter for lightweight client-side routing
-- **State Management**: React Query (TanStack Query) for server state management
+### Framework Architecture
+- **Framework**: Next.js 14 with App Router
+- **Language**: TypeScript with strict mode enabled
+- **Styling**: Tailwind CSS with custom utility classes
+- **Development**: Next.js dev server on port 3000
+- **Build System**: Next.js optimized bundling and compilation
 
-### Backend Architecture
-- **Primary Server**: Express.js server (port 3001) for Stream.io token generation
-- **Secondary Server**: TypeScript server (port 5000) for Vite development
-- **Language**: ES modules with modern JavaScript/TypeScript
-- **Token Service**: Dedicated endpoint `/token` with userId query parameter
-- **CORS**: Enabled for cross-origin requests between frontend and backend
+### Frontend Structure
+- **App Directory**: Modern Next.js App Router pattern
+- **Components**: Modular UI components in `/components/ui`
+- **Utilities**: Shared utility functions in `/lib`
+- **Pages**: File-based routing with app directory structure
 
 ### Database Strategy
-- **ORM**: Drizzle ORM configured for PostgreSQL
-- **Connection**: Neon Database serverless PostgreSQL
-- **Schema Location**: Shared schema definitions in `/shared/schema.ts`
-- **Tables**: Users, Calls, Call Participants with proper relations
-- **Storage Layer**: DatabaseStorage class implementing IStorage interface
+- **ORM**: Prisma ORM for type-safe database operations
+- **Connection**: PostgreSQL via DATABASE_URL environment variable
+- **Schema Location**: Prisma schema in `/prisma/schema.prisma`
+- **Models**: User and Webinar models with proper types and relations
+
+### Authentication Foundation
+- **Auth System**: NextAuth.js for authentication management
+- **Session Strategy**: JWT-based sessions
+- **API Routes**: Authentication endpoints in `/app/api/auth`
 
 ## Key Components
 
