@@ -1,0 +1,48 @@
+DIAGNOSTIC REQUEST: Analyze "Webinar not found" error in host interface
+
+Please provide a comprehensive analysis of the current implementation for the "Webinar not found" error occurring at line 311 in /app/webinar/[id]/host/page.tsx during initializeWebinar function.
+
+SHOW ME THE CURRENT STATE:
+
+1. WEBINAR API ENDPOINT:
+   - Show me the complete code for /app/api/webinars/[id]/route.ts
+   - What's the exact logic for fetching a webinar by ID?
+   - Are there any authentication or authorization checks that might cause this error?
+
+2. HOST PAGE IMPLEMENTATION:
+   - Show me the exact code around line 311 in /app/webinar/[id]/host/page.tsx
+   - What's the complete initializeWebinar function?
+   - How is the webinar ID being passed and used in the fetch request?
+
+3. DATABASE STATE:
+   - What webinars currently exist in the database?
+   - What's the exact webinar ID being requested when the error occurs?
+   - Are there any database connection issues?
+
+4. URL AND ROUTING:
+   - What's the exact URL being accessed when this error occurs?
+   - How is the webinar ID being extracted from the params?
+   - Is the Next.js 15 async params fix properly implemented?
+
+5. AUTHENTICATION CONTEXT:
+   - Is the user properly authenticated when accessing the host page?
+   - Are there any session or token issues preventing access?
+   - What's the user's role and permissions?
+
+6. ERROR DETAILS:
+   - What's the complete error stack trace?
+   - What HTTP status code is returned by the API?
+   - Are there any console errors or network errors?
+
+7. REQUEST/RESPONSE DEBUG:
+   - Show me exactly what request is being made to fetch the webinar
+   - What response (if any) is being returned?
+   - Are there any CORS or network connectivity issues?
+
+SPECIFIC DEBUGGING REQUESTS:
+- Add console.log statements to show the webinar ID being requested
+- Add error logging to the API endpoint to see why the webinar lookup fails
+- Check if the webinar exists in the database with the requested ID
+- Verify that the user has permission to access this specific webinar
+
+Please provide the complete technical analysis so I can identify exactly why the webinar lookup is failing and provide a targeted fix.
