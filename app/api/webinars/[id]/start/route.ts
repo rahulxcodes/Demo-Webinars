@@ -34,9 +34,9 @@ export async function POST(
     }
 
     try {
-      // Start the Stream call (make it live)
-      console.log('Starting Stream call:', webinar.streamCallId)
-      await startWebinarCall(webinar.streamCallId)
+      // Start the Stream call (make it live) with the actual host user ID
+      console.log('Starting Stream call:', webinar.streamCallId, 'for host:', webinar.hostId)
+      await startWebinarCall(webinar.streamCallId, webinar.hostId)
 
       // Update webinar status
       const updatedWebinar = await prisma.webinar.update({

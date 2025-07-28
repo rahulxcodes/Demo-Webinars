@@ -52,6 +52,7 @@ export default function HostWebinarPage() {
 
   const handleStartWebinar = async () => {
     try {
+      setLoading(true)
       const response = await fetch(`/api/webinars/${webinarId}/start`, {
         method: 'POST'
       })
@@ -59,8 +60,10 @@ export default function HostWebinarPage() {
       if (response.ok) {
         const data = await response.json()
         setIsLive(true)
-        // Show success message
+        // Update webinar status
+        setWebinar(prev => prev ? { ...prev, status: 'live', streamStatus: 'live' } : null)
         console.log('Webinar started successfully:', data)
+        alert('Webinar is now live! Attendees can join.')
       } else {
         const error = await response.json()
         console.error('Failed to start webinar:', error)
@@ -69,6 +72,8 @@ export default function HostWebinarPage() {
     } catch (error) {
       console.error('Network error starting webinar:', error)
       alert('Network error starting webinar')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -146,8 +151,12 @@ export default function HostWebinarPage() {
             </CardHeader>
             <CardBody>
               <div className="flex items-center space-x-4">
-                <Button onClick={handleStartWebinar} className="bg-red-600 hover:bg-red-700">
-                  Start Webinar
+                <Button 
+                  onClick={handleStartWebinar} 
+                  disabled={loading}
+                  className="bg-red-600 hover:bg-red-700 disabled:opacity-50"
+                >
+                  {loading ? 'Starting...' : 'Start Webinar'}
                 </Button>
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
                   <UsersIcon className="h-4 w-4" />

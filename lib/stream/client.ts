@@ -17,12 +17,13 @@ export async function generateStreamToken(userId: string) {
     // Import jwt dynamically
     const jwt = await import('jsonwebtoken')
     
+    const now = Math.floor(Date.now() / 1000)
     const payload = {
       user_id: userId,
       iss: 'https://pronto.getstream.io',
       sub: 'user/' + userId,
-      iat: Math.round(new Date().getTime() / 1000),
-      exp: Math.round(new Date().getTime() / 1000) + 3600, // 1 hour
+      iat: now - 60, // Start 1 minute ago to avoid timing issues
+      exp: now + 3600, // Expire in 1 hour
     }
     
     const token = jwt.sign(payload, secret!, { algorithm: 'HS256' })
@@ -41,9 +42,13 @@ export async function createWebinarCall(
   maxParticipants: number = 1000
 ) {
   try {
-    // Connect as a server user first
+    // Connect as the host user with proper role
     await streamServerClient.connectUser(
-      { id: createdByUserId, name: 'Host' },
+      { 
+        id: createdByUserId, 
+        name: 'Host',
+        role: 'admin' // Give admin role for call management
+      },
       await generateStreamToken(createdByUserId)
     )
 
@@ -56,7 +61,13 @@ export async function createWebinarCall(
         webinar_title: webinarTitle,
         max_participants: maxParticipants,
         call_type: 'webinar'
-      }
+      },
+      members: [
+        {
+          user_id: createdByUserId,
+          role: 'admin' // Host as admin
+        }
+      ]
     }
 
     console.log('Creating Stream call with data:', callData)
@@ -79,15 +90,32 @@ export async function createWebinarCall(
   }
 }
 
-export async function startWebinarCall(callId: string) {
+export async function startWebinarCall(callId: string, hostUserId: string = 'default-host') {
   try {
-    // Connect as a server user first
+    // Connect as the host user with admin role
     await streamServerClient.connectUser(
-      { id: 'host-system', name: 'System Host' },
-      await generateStreamToken('host-system')
+      { 
+        id: hostUserId, 
+        name: 'Webinar Host',
+        role: 'admin' // Admin role for call management
+      },
+      await generateStreamToken(hostUserId)
     )
 
     const call = streamServerClient.call('default', callId)
+    
+    // Update call permissions before going live
+    await call.update({
+      settings_override: {
+        backstage: {
+          enabled: true,
+        },
+        broadcasting: {
+          enabled: true,
+        },
+      }
+    })
+    
     await call.goLive()
     
     // Disconnect after starting the call
