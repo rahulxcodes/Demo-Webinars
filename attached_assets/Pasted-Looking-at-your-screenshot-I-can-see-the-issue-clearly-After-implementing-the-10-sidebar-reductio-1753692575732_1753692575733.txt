@@ -1,0 +1,71 @@
+Looking at your screenshot, I can see the issue clearly. After implementing the 10% sidebar reduction, the video is not expanding to fill the available space that was freed up, and the sidebar elements (text, icons, avatars) are still too large and not properly compressed into the compact 10% width.
+
+Here are the precise prompts to fix both issues:
+
+Prompt 1: Force Video to Fill Available Space After Sidebar Resize
+Fix the video area to properly utilize the space freed up by the smaller sidebar:
+
+Ensure the main video area takes the full allocated grid space: .main-video-area { width: 100% !important; height: 100% !important; overflow: hidden; }
+
+Force the Stream video components to fill the container: .main-video-area .str-video__speaker-layout { width: 100% !important; height: 100% !important; }
+
+Remove any max-width constraints on video elements: .main-video-area .str-video__participant-view { max-width: 100% !important; width: 100% !important; }
+
+Ensure video content stretches to edges: .main-video-area video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+
+Prompt 2: Dramatically Reduce Sidebar Element Sizes
+Compress all sidebar elements to fit properly in the 10% width:
+
+Avatar sizes: .participants-sidebar .str-video__avatar { width: 20px !important; height: 20px !important; }
+
+Text sizes: .participants-sidebar .str-video__participant-name { font-size: 10px !important; line-height: 12px !important; }
+
+Icon sizes: .participants-sidebar .str-video__participant-status-icon { width: 12px !important; height: 12px !important; font-size: 12px !important; }
+
+Overall padding: .participants-sidebar .str-video__participant-item { padding: 2px 4px !important; margin: 1px 0 !important; }
+
+Prompt 3: Create Ultra-Compact Participant List Layout
+Redesign the participant list for minimal space usage:
+
+Horizontal layout for each participant: .participants-sidebar .str-video__participant-item { display: flex; align-items: center; gap: 4px; }
+
+Truncate long names: .participants-sidebar .str-video__participant-name { max-width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+Remove extra spacing: .participants-sidebar { padding: 4px 2px !important; }
+
+Compress header: .participants-header { padding: 6px 4px !important; font-size: 11px !important; }
+
+Prompt 4: Fix Grid Layout to Properly Allocate Video Space
+Ensure the CSS Grid correctly assigns the remaining 90% to video:
+
+Update the grid template: .zoom-layout-container[data-sidebar="open"] { grid-template-columns: 1fr var(--sidebar-width); }
+
+This ensures video gets ALL remaining space (not calc() which might have issues)
+
+Verify transition smoothness: transition: grid-template-columns 0.2s ease-out;
+
+Add debug border temporarily to verify: .main-video-area { border: 2px solid red; } (remove after testing)
+
+Prompt 5: Optimize Sidebar Header and Scrolling
+Make the sidebar header and scrolling ultra-compact:
+
+Minimal header: .participants-header h3 { font-size: 10px !important; margin: 0 !important; padding: 2px 0 !important; }
+
+Thin scrollbar: .participants-sidebar::-webkit-scrollbar { width: 3px !important; }
+
+Remove close button or make tiny: .participants-sidebar .close-button { width: 16px !important; height: 16px !important; font-size: 10px !important; }
+
+Compress participant count: Display as just numbers, not "Participants (X)"
+
+Expected Results After Implementation
+Video area: Should expand to utilize ~90% of viewport width
+
+Sidebar: Compressed to slim 10% strip with tiny avatars (20px) and small text (10px)
+
+No wasted space: Video fills all available area not used by the compact sidebar
+
+Professional look: Clean, minimal sidebar that doesn't dominate the interface
+
+Maintained functionality: All features work but in a much smaller footprint
+
+The key is ensuring the grid layout properly allocates space AND forcing all sidebar elements to be dramatically smaller to fit the 10% width constraint while keeping the video as the main focus.</attachment>
