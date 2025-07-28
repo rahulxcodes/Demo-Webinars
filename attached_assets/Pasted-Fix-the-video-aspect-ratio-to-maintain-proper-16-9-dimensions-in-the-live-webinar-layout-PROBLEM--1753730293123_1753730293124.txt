@@ -1,0 +1,229 @@
+Fix the video aspect ratio to maintain proper 16:9 dimensions in the live webinar layout:
+
+PROBLEM: Video height increased but width decreased, breaking the 16:9 aspect ratio. Need to maintain proper video proportions.
+
+SPECIFIC CSS FIXES FOR 16:9 ASPECT RATIO:
+
+1. UPDATE VIDEO CONTAINER FOR PROPER ASPECT RATIO:
+Replace the current video CSS with aspect-ratio aware styling:
+
+/* Main video area with proper 16:9 aspect ratio handling /
+.main-video-area {
+position: absolute !important;
+top: 60px; / Header height */
+left: 0;
+right: 0;
+bottom: 0;
+width: 100% !important;
+height: calc(100vh - 60px) !important;
+display: flex !important;
+align-items: center !important;
+justify-content: center !important;
+background-color: #000;
+overflow: hidden;
+}
+
+/* Force Stream components to maintain aspect ratio */
+.main-video-area .str-video__speaker-layout {
+width: 100% !important;
+height: 100% !important;
+display: flex !important;
+align-items: center !important;
+justify-content: center !important;
+padding: 0 !important;
+margin: 0 !important;
+}
+
+.main-video-area .str-video__participant-view {
+width: 100% !important;
+height: 100% !important;
+display: flex !important;
+align-items: center !important;
+justify-content: center !important;
+}
+
+text
+
+2. PERFECT VIDEO ELEMENT SIZING FOR 16:9:
+Use aspect-ratio CSS property and smart object-fit:
+
+/* Video element with proper 16:9 aspect ratio /
+.main-video-area video {
+width: 100% !important;
+height: 100% !important;
+aspect-ratio: 16/9 !important; / Force 16:9 aspect ratio /
+object-fit: contain !important; / Shows full video without cropping */
+object-position: center !important;
+background-color: #000;
+max-width: 100% !important;
+max-height: 100% !important;
+}
+
+/* Alternative: If you want to fill completely (may crop slightly) /
+/
+.main-video-area video {
+width: 100% !important;
+height: 100% !important;
+object-fit: cover !important;
+object-position: center !important;
+}
+*/
+
+text
+
+3. RESPONSIVE ASPECT RATIO CONTAINER:
+Add a responsive container that maintains 16:9 ratio:
+
+/* Create responsive 16:9 container inside main video area */
+.video-aspect-container {
+position: relative;
+width: 100%;
+height: 100%;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.video-aspect-container::before {
+content: '';
+display: block;
+width: 100%;
+aspect-ratio: 16/9;
+}
+
+.video-content {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+width: 100%;
+height: 100%;
+max-width: 100%;
+max-height: calc(100vw * 9/16); /* Maintain 16:9 within viewport */
+}
+
+text
+
+4. UPDATE LIVESTREAMINGLAYOUT COMPONENT:
+Modify your component to use the aspect ratio container:
+
+// In your LiveWebinarLayout component
+
+<div className="main-video-area"> <div className="video-aspect-container"> <div className="video-content"> <SpeakerLayout participantsBarLimit={0} style={{ width: '100%', height: '100%', aspectRatio: '16/9' }} /> </div> </div> </div> ```
+HANDLE DIFFERENT SCREEN SIZES:
+Add responsive handling for various screen dimensions:
+
+text
+/* Responsive video sizing for different screen ratios */
+@media (aspect-ratio > 16/9) {
+  /* Wide screens - limit by height */
+  .main-video-area video {
+    height: 100% !important;
+    width: auto !important;
+    max-width: calc(100vh * 16/9) !important;
+  }
+}
+
+@media (aspect-ratio < 16/9) {
+  /* Tall screens - limit by width */
+  .main-video-area video {
+    width: 100% !important;
+    height: auto !important;
+    max-height: calc(100vw * 9/16) !important;
+  }
+}
+
+/* For mobile devices */
+@media (max-width: 768px) {
+  .main-video-area video {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 16/9 !important;
+    object-fit: contain !important;
+  }
+}
+SIDEBAR ADJUSTMENTS FOR ASPECT RATIO:
+Update sidebar behavior to maintain video ratio:
+
+text
+/* When sidebar is open, maintain video aspect ratio */
+.zoom-layout-container[data-sidebar="open"] .main-video-area {
+  right: var(--sidebar-width);
+  width: calc(100vw - var(--sidebar-width)) !important;
+}
+
+.zoom-layout-container[data-sidebar="open"] .main-video-area video {
+  max-width: calc((100vw - var(--sidebar-width))) !important;
+  max-height: calc((100vw - var(--sidebar-width)) * 9/16) !important;
+}
+
+/* When sidebar is closed */
+.zoom-layout-container[data-sidebar="closed"] .main-video-area {
+  right: 0;
+  width: 100vw !important;
+}
+
+.zoom-layout-container[data-sidebar="closed"] .main-video-area video {
+  max-width: 100vw !important;
+  max-height: calc(100vw * 9/16) !important;
+}
+REMOVE CONFLICTING CSS:
+Remove any CSS that might be forcing incorrect dimensions:
+
+text
+/* Remove these if they exist - they may conflict with aspect ratio */
+.main-video-area video {
+  /* Remove fixed width/height that ignores aspect ratio */
+  /* width: calc(100vw - var(--sidebar-width)) !important; */
+  /* height: calc(100vh - 120px) !important; */
+}
+PROFESSIONAL VIDEO CENTERING:
+Ensure video is perfectly centered with proper ratio:
+
+text
+/* Perfect centering with maintained aspect ratio */
+.main-video-area {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.main-video-area .str-video__speaker-layout,
+.main-video-area .str-video__participant-view {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.main-video-area video {
+  display: block !important;
+  margin: 0 auto !important;
+}
+TESTING CHECKLIST:
+✅ Video maintains 16:9 aspect ratio
+✅ No stretching or squashing of video
+✅ Works with sidebar open and closed
+✅ Responsive on different screen sizes
+✅ Video is centered in available space
+✅ No black bars on sides (unless screen ratio requires it)
+✅ Professional appearance like Zoom/Teams
+
+The key is using aspect-ratio: 16/9 CSS property combined with object-fit: contain to maintain proper video proportions while filling the available space optimally.
+
+text
+
+## **🎯 Key Changes:**
+
+1. **✅ 16:9 Aspect Ratio**: Uses CSS `aspect-ratio: 16/9` property
+2. **✅ Smart Object-fit**: `object-fit: contain` shows full video without distortion
+3. **✅ Responsive Design**: Adapts to different screen sizes while maintaining ratio
+4. **✅ Centered Video**: Properly centered in available space
+5. **✅ Sidebar Compatible**: Maintains ratio when sidebar opens/closes
+
+## **📱 Different Display Options:**
+
+- **`object-fit: contain`** - Shows full video with black bars if needed (recommended)
+- **`object-fit: cover`** - Fills space completely but may crop video slightly
+- **`aspect-ratio: 16/9`** - Forces proper video proportions
+
+**Run this fix and your video will maintain the perfect 16:9 aspect ratio while using the maximum available space!** The video will look professional and properly proportioned like in Zoom or Teams. 📺✨

@@ -121,15 +121,17 @@ function LiveWebinarLayout({
           </div>
         </div>
 
-        {/* Full Height Video Area */}
+        {/* Full Height Video Area with 16:9 Aspect Ratio */}
         <div className="main-video-area">
           <SpeakerLayout 
             participantsBarLimit={0}
             style={{ 
               width: '100%', 
               height: '100%', 
-              minHeight: '100%', 
-              flex: 1 
+              aspectRatio: '16/9',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
           />
         </div>
