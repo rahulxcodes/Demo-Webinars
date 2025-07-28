@@ -3,22 +3,14 @@ import {
   StreamVideo,
   StreamCall,
   StreamTheme,
-  CallControls,
   CallParticipantsList,
   SpeakerLayout,
   CallingState,
   useCallStateHooks,
-  ToggleAudioPublishingButton,
-  ToggleVideoPublishingButton,
-  ScreenShareButton,
-  RecordCallButton,
-  CancelCallButton,
   type StreamVideoClient,
   type Call,
 } from '@stream-io/video-react-sdk';
-import { 
-  HiUsers
-} from 'react-icons/hi2';
+import { CustomControlBar } from './CustomControlBar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -104,58 +96,12 @@ function LiveClassLayout({
           </div>
         </div>
         <div className="floating-controls">
-          <div className="custom-control-bar">
-            {/* Primary Controls Group */}
-            <div className="control-group primary-controls">
-              <div className="control-button-wrapper">
-                <ToggleAudioPublishingButton title="Mute/Unmute microphone (Space)" />
-                <div className="control-button-tooltip">Mute/Unmute (Space)</div>
-              </div>
-              <div className="control-button-wrapper">
-                <ToggleVideoPublishingButton title="Turn camera on/off" />
-                <div className="control-button-tooltip">Camera on/off</div>
-              </div>
-              <div className="control-button-wrapper">
-                <ScreenShareButton title="Share your screen" />
-                <div className="control-button-tooltip">Share screen</div>
-              </div>
-            </div>
-            
-            {/* Separator */}
-            <div className="control-separator"></div>
-            
-            {/* Secondary Controls Group */}
-            <div className="control-group secondary-controls">
-              <div className="participants-counter">
-                <button 
-                  className="participants-btn"
-                  onClick={() => setShowSidebar(!showSidebar)}
-                  aria-label={`Show participants panel (${participants.length} participants)`}
-                  title="Show participants panel"
-                >
-                  <HiUsers className="w-5 h-5" />
-                  <span>Participants ({participants.length})</span>
-                  {participants.length > 1 && (
-                    <div 
-                      className="participant-count-badge"
-                      aria-label={`${participants.length} participants in call`}
-                    >
-                      {participants.length}
-                    </div>
-                  )}
-                </button>
-              </div>
-              <RecordCallButton />
-            </div>
-            
-            {/* Separator */}
-            <div className="control-separator"></div>
-            
-            {/* Utility Controls Group */}
-            <div className="control-group utility-controls">
-              <CancelCallButton onLeave={() => onEndClass()} />
-            </div>
-          </div>
+          <CustomControlBar
+            onToggleParticipants={() => setShowSidebar(!showSidebar)}
+            participantCount={participants.length}
+            onEndCall={onEndClass}
+            showRecording={true}
+          />
         </div>
       </div>
     </StreamTheme>

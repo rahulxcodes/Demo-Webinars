@@ -217,62 +217,176 @@
   z-index: -1;
 }
 
-/* Professional Button Design System */
-.custom-control-bar button {
-  width: 48px !important;
-  height: 48px !important;
-  border-radius: 50% !important;
-  border: none !important;
-  color: white !important;
-  font-size: 18px !important;
+/* Custom Control Button Design System */
+.control-button {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  color: white;
   cursor: pointer;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  position: relative !important;
-  outline: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  outline: none;
+  background-color: #2D2D30;
   
   /* Smooth transitions for all properties */
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  
-  /* Primary button styling - default state */
-  background-color: #2D2D30 !important;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Hover state with scale and enhanced shadow */
-.custom-control-bar button:hover {
-  transform: scale(1.05) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
-  background-color: #3A3A3D !important;
+/* Control Button States */
+.control-button.unmuted {
+  background-color: #00D4AA;
 }
 
-/* Active (pressed) state with inset shadow */
-.custom-control-bar button:active {
-  transform: scale(0.98) !important;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+.control-button.muted {
+  background-color: #FF4757;
+  position: relative;
+}
+
+.control-button.muted::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  background: #FF1744;
+  border-radius: 50%;
+  animation: pulse-red 2s infinite;
+}
+
+.control-button.video-on {
+  background-color: #00D4AA;
+}
+
+.control-button.video-off {
+  background-color: #6B7280;
+}
+
+.control-button.screen-sharing {
+  background-color: #005FFF;
+  position: relative;
+}
+
+.control-button.screen-sharing::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 6px;
+  height: 6px;
+  background: #00D4AA;
+  border-radius: 50%;
+  border: 1px solid white;
+}
+
+.control-button.screen-not-sharing {
+  background-color: #2D2D30;
+}
+
+.control-button.recording {
+  background-color: #FF4757;
+  animation: recording-pulse 2s infinite;
+}
+
+.control-button.not-recording {
+  background-color: #2D2D30;
+}
+
+.control-button.end-call {
+  background-color: #FF4757;
+}
+
+/* Rotate phone icon for end call */
+.rotate-135 {
+  transform: rotate(135deg);
+}
+
+@keyframes recording-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Enhanced Hover Effects */
+.control-button:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.control-button.unmuted:hover {
+  background-color: #00C4A0;
+}
+
+.control-button.muted:hover {
+  background-color: #FF3742;
+}
+
+.control-button.video-on:hover {
+  background-color: #00C4A0;
+}
+
+.control-button.video-off:hover {
+  background-color: #5B6270;
+}
+
+.control-button.screen-sharing:hover {
+  background-color: #0056E6;
+}
+
+.control-button.screen-not-sharing:hover {
+  background-color: #3A3A3D;
+}
+
+.control-button.recording:hover {
+  background-color: #FF3742;
+}
+
+.control-button.not-recording:hover {
+  background-color: #3A3A3D;
+}
+
+.control-button.end-call:hover {
+  background-color: #FF3742;
+  box-shadow: 0 4px 20px rgba(255, 71, 87, 0.4);
+}
+
+/* Active (pressed) state */
+.control-button:active {
+  transform: scale(0.95);
+  transition: transform 100ms ease-out;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Focus state for accessibility */
-.custom-control-bar button:focus {
-  outline: 2px solid #005FFF !important;
-  outline-offset: 2px !important;
-  box-shadow: 0 0 0 4px rgba(0, 95, 255, 0.2) !important;
+.control-button:focus {
+  outline: 2px solid #005FFF;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(0, 95, 255, 0.2);
+  z-index: 10;
 }
 
-.custom-control-bar button:focus-visible {
-  outline: 2px solid #005FFF !important;
-  outline-offset: 2px !important;
+.control-button:focus-visible {
+  outline: 2px solid #005FFF;
+  outline-offset: 2px;
 }
 
-/* Haptic feedback animation */
-@keyframes haptic-pulse {
-  0% { transform: scale(1.05); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1.05); }
+/* Disabled state */
+.control-button:disabled {
+  background-color: #374151;
+  cursor: not-allowed;
+  opacity: 0.6;
+  filter: none;
 }
 
-.custom-control-bar button:active {
-  animation: haptic-pulse 0.1s ease-out !important;
+.control-button:disabled:hover {
+  transform: none;
+  background-color: #374151;
+  box-shadow: none;
+  filter: none;
 }
 
 /* Interactive Participants Counter with Badge */
