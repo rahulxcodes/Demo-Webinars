@@ -1,0 +1,67 @@
+Simple Webinar Creation Form
+Now we'll add just a basic webinar creation form - nothing complex, just the essential fields to create your first webinar.
+
+🤖 Replit AI Agent Prompt #2: Basic Webinar Creation
+text
+Add a simple webinar creation system to the existing Next.js project:
+
+CREATE WEBINAR FORM PAGE:
+Create /app/dashboard/new-webinar/page.tsx with a basic form containing:
+
+FORM FIELDS (keep it simple):
+- Title (text input, required)
+- Description (textarea, optional)
+- Date (date picker)
+- Time (time picker)
+- Duration (dropdown: 30min, 60min, 90min, 120min)
+- "Save Webinar" button
+
+FORM HANDLING:
+- Use react-hook-form for form management
+- Basic client-side validation (title required, date in future)
+- On submit: console.log the form data (we'll add API later)
+- Show success message after form submission
+
+UPDATE DASHBOARD:
+Modify /app/dashboard/page.tsx:
+- Make the "New Webinar" button link to /dashboard/new-webinar
+- Add a simple webinars list (can be empty for now)
+- Style it to look clean and professional
+
+BASIC STYLING:
+- Use Tailwind CSS for clean, modern styling
+- Make forms responsive (mobile-friendly)
+- Add basic hover effects and focus states
+- Keep the design simple but professional
+
+NAVIGATION:
+- Add a simple header/navbar with:
+  * "Webinar Platform" logo/title
+  * "Dashboard" link
+  * "New Webinar" link
+- Add back button on new webinar page to return to dashboard
+
+NO COMPLEX FEATURES YET:
+- No database saving (just console.log for now)
+- No recurring webinars
+- No registration system
+- No advanced settings
+- Just a working form that collects basic webinar info
+
+INSTALL ADDITIONAL PACKAGES IF NEEDED:
+- react-hook-form
+- @hookform/resolvers (if using validation)
+- date-fns (for date handling)
+
+Make sure the form works smoothly and looks good on both desktop and mobile.
+What This Achieves:
+✅ Working webinar creation form
+
+✅ Basic navigation between pages
+
+✅ Form validation and submission
+
+✅ Clean, responsive design
+
+✅ Foundation for more complex features
+
