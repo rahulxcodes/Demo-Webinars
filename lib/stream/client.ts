@@ -1,16 +1,22 @@
 import { StreamVideoClient } from '@stream-io/video-client'
-import jwt from 'jsonwebtoken'
 
-const apiKey = process.env.STREAM_API_KEY!
-const secret = process.env.STREAM_SECRET!
+const apiKey = process.env.STREAM_API_KEY
+const secret = process.env.STREAM_SECRET
 
-export const streamServerClient = new StreamVideoClient(apiKey, {
+if (!apiKey || !secret) {
+  throw new Error('Stream API credentials are not configured. Please check your environment variables.')
+}
+
+export const streamServerClient = new StreamVideoClient({
+  apiKey,
   secret,
 })
 
 export async function generateStreamToken(userId: string) {
   try {
-    // Generate JWT token for Stream
+    // Import jwt dynamically
+    const jwt = await import('jsonwebtoken')
+    
     const payload = {
       user_id: userId,
       iss: 'https://pronto.getstream.io',
@@ -19,10 +25,10 @@ export async function generateStreamToken(userId: string) {
       exp: Math.round(new Date().getTime() / 1000) + 3600, // 1 hour
     }
     
-    const token = jwt.sign(payload, secret, { algorithm: 'HS256' })
+    const token = jwt.sign(payload, secret!, { algorithm: 'HS256' })
     return token
   } catch (error) {
-    console.error('Error generating Stream token:', error)
+    console.error('Failed to generate Stream token:', error)
     throw new Error('Failed to generate Stream token')
   }
 }
@@ -35,38 +41,58 @@ export async function createWebinarCall(
   maxParticipants: number = 1000
 ) {
   try {
-    const call = streamServerClient.call('webinar', callId)
-    await call.getOrCreate({
-      data: {
-        created_by_id: createdByUserId,
-        scheduled_for: scheduledFor.toISOString(),
-        custom: {
-          webinar_title: webinarTitle,
-          max_participants: maxParticipants,
-          call_type: 'webinar'
-        },
-        settings_override: {
-          audio: {
-            mic_default_on: true,
-            default_device: 'earpiece',
-          },
-          video: {
-            camera_default_on: true,
-          },
-        },
-      },
-    })
+    // Connect as a server user first
+    await streamServerClient.connectUser(
+      { id: createdByUserId, name: 'Host' },
+      await generateStreamToken(createdByUserId)
+    )
+
+    const call = streamServerClient.call('default', callId)
+    
+    const callData = {
+      created_by_id: createdByUserId,
+      scheduled_for: scheduledFor.toISOString(),
+      custom: {
+        webinar_title: webinarTitle,
+        max_participants: maxParticipants,
+        call_type: 'webinar'
+      }
+    }
+
+    console.log('Creating Stream call with data:', callData)
+    const callResponse = await call.getOrCreate({ data: callData })
+    console.log('Stream call created successfully:', callResponse)
+    
+    // Disconnect after creating the call
+    await streamServerClient.disconnectUser()
+    
     return call
   } catch (error) {
-    console.error('Error creating webinar call:', error)
-    throw new Error('Failed to create webinar call')
+    console.error('Stream API Error:', error)
+    console.error('Stream Error Details:', {
+      message: error.message,
+      status: error.status,
+      code: error.code,
+      details: error.details
+    })
+    throw new Error(`Failed to create webinar call: ${error.message}`)
   }
 }
 
 export async function startWebinarCall(callId: string) {
   try {
-    const call = streamServerClient.call('webinar', callId)
+    // Connect as a server user first
+    await streamServerClient.connectUser(
+      { id: 'host-system', name: 'System Host' },
+      await generateStreamToken('host-system')
+    )
+
+    const call = streamServerClient.call('default', callId)
     await call.goLive()
+    
+    // Disconnect after starting the call
+    await streamServerClient.disconnectUser()
+    
     return call
   } catch (error) {
     console.error('Error starting webinar call:', error)

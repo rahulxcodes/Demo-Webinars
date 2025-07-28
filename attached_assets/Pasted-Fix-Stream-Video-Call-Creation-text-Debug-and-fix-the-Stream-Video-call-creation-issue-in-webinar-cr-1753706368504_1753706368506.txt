@@ -1,0 +1,375 @@
+Fix Stream Video Call Creation
+text
+Debug and fix the Stream Video call creation issue in webinar creation:
+
+STEP 1 - CHECK ENVIRONMENT VARIABLES:
+First, verify your .env.local file has the correct Stream credentials:
+
+STREAM_API_KEY=your_actual_stream_api_key
+STREAM_SECRET=your_actual_stream_secret
+
+text
+
+Make sure these are the actual values from your Stream dashboard, not placeholders.
+
+STEP 2 - FIX STREAM CLIENT INITIALIZATION:
+Update /lib/stream/client.ts with proper error handling:
+
+import { StreamVideoClient } from '@stream-io/video-client';
+
+const apiKey = process.env.STREAM_API_KEY;
+const secret = process.env.STREAM_SECRET;
+
+if (!apiKey || !secret) {
+throw new Error('Stream API credentials are not configured. Please check your environment variables.');
+}
+
+export const streamServerClient = new StreamVideoClient({
+apiKey,
+secret,
+});
+
+export async function generateStreamToken(userId: string) {
+try {
+const token = streamServerClient.generateUserToken({
+user_id: userId,
+validity_in_seconds: 3600,
+});
+return token;
+} catch (error) {
+console.error('Failed to generate Stream token:', error);
+throw new Error('Failed to generate Stream token');
+}
+}
+
+text
+
+STEP 3 - UPDATE WEBINAR CREATION API WITH BETTER ERROR HANDLING:
+Update /app/api/webinars/route.ts with comprehensive error handling:
+
+import { StreamVideoClient } from '@stream-io/video-client';
+import { generateUniqueSlug } from '@/lib/utils/slug';
+
+// Initialize Stream client with error checking
+let streamClient: StreamVideoClient;
+try {
+streamClient = new StreamVideoClient({
+apiKey: process.env.STREAM_API_KEY!,
+secret: process.env.STREAM_SECRET!,
+});
+} catch (error) {
+console.error('Failed to initialize Stream client:', error);
+}
+
+export async function POST(request: Request) {
+try {
+const data = await request.json();
+console.log('Creating webinar with data:', data);
+
+text
+// Validate required fields
+if (!data.title || !data.startTime || !data.hostId) {
+  return Response.json({ 
+    error: 'Missing required fields: title, startTime, or hostId' 
+  }, { status: 400 });
+}
+
+// Generate unique slug from title
+const slug = await generateUniqueSlug(data.title);
+console.log('Generated slug:', slug);
+
+// Create Stream call ID using webinar slug
+const streamCallId = `webinar-${slug}-${Date.now()}`;
+console.log('Creating Stream call with ID:', streamCallId);
+
+// Check if Stream client is initialized
+if (!streamClient) {
+  console.error('Stream client not initialized');
+  return Response.json({ 
+    error: 'Video service not available. Please check Stream configuration.' 
+  }, { status: 500 });
+}
+
+// Create Stream call with detailed error handling
+let streamCall;
+try {
+  streamCall = streamClient.call('default', streamCallId); // Use 'default' instead of 'webinar'
+  
+  const callData = {
+    created_by_id: data.hostId,
+    scheduled_for: new Date(data.startTime).toISOString(),
+    custom: {
+      webinar_title: data.title,
+      webinar_slug: slug,
+      max_participants: data.maxAttendees || 1000
+    }
+  };
+
+  console.log('Creating Stream call with data:', callData);
+  const callResponse = await streamCall.getOrCreate({ data: callData });
+  console.log('Stream call created successfully:', callResponse);
+  
+} catch (streamError) {
+  console.error('Stream API Error:', streamError);
+  console.error('Stream Error Details:', {
+    message: streamError.message,
+    status: streamError.status,
+    code: streamError.code,
+    details: streamError.details
+  });
+  
+  return Response.json({ 
+    error: `Failed to create video call: ${streamError.message}`,
+    details: process.env.NODE_ENV === 'development' ? streamError.details : undefined
+  }, { status: 500 });
+}
+
+// Create webinar in database
+console.log('Creating webinar in database...');
+const webinar = await prisma.webinar.create({
+  data: {
+    title: data.title,
+    description: data.description || '',
+    hostId: data.hostId,
+    startTime: new Date(data.startTime),
+    duration: data.duration || 60,
+    timezone: data.timezone || 'UTC',
+    slug,
+    streamCallId,
+    requireRegistration: true,
+    maxAttendees: data.maxAttendees,
+    status: 'scheduled',
+    streamStatus: 'created',
+    registrationForm: {
+      create: {
+        autoApprove: true,
+        formSchema: [
+          {
+            id: 'name',
+            type: 'text',
+            label: 'Full Name',
+            placeholder: 'Enter your full name',
+            required: true,
+            order: 1
+          },
+          {
+            id: 'email',
+            type: 'email',
+            label: 'Email Address',
+            placeholder: 'Enter your email address',
+            required: true,
+            order: 2
+          },
+          {
+            id: 'mobile',
+            type: 'phone',
+            label: 'Mobile Number',
+            placeholder: 'Enter your mobile number',
+            required: false,
+            order: 3
+          }
+        ]
+      }
+    }
+  },
+  include: {
+    registrationForm: true
+  }
+});
+
+console.log('Webinar created successfully:', webinar.id);
+
+// Update Stream call with webinar ID
+try {
+  await streamCall.update({
+    custom: {
+      webinar_title: data.title,
+      webinar_id: webinar.id,
+      webinar_slug: slug,
+      max_participants: data.maxAttendees || 1000
+    }
+  });
+  console.log('Stream call updated with webinar ID');
+} catch (updateError) {
+  console.error('Failed to update Stream call:', updateError);
+  // Don't fail the entire request if this update fails
+}
+
+return Response.json({
+  ...webinar,
+  message: 'Webinar created successfully with video call'
+});
+} catch (error) {
+console.error('Webinar creation error:', error);
+console.error('Error stack:', error.stack);
+
+text
+return Response.json({ 
+  error: error.message || 'Failed to create webinar',
+  details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+}, { status: 500 });
+}
+}
+
+text
+
+STEP 4 - ADD STREAM CREDENTIALS VALIDATION ENDPOINT:
+Create /app/api/stream/validate/route.ts to test Stream connection:
+
+import { StreamVideoClient } from '@stream-io/video-client';
+
+export async function GET() {
+try {
+const apiKey = process.env.STREAM_API_KEY;
+const secret = process.env.STREAM_SECRET;
+
+text
+if (!apiKey || !secret) {
+  return Response.json({
+    valid: false,
+    error: 'Stream credentials not configured',
+    apiKey: apiKey ? 'Set' : 'Missing',
+    secret: secret ? 'Set' : 'Missing'
+  });
+}
+
+// Test Stream client initialization
+const streamClient = new StreamVideoClient({
+  apiKey,
+  secret,
+});
+
+// Test token generation
+const testToken = streamClient.generateUserToken({
+  user_id: 'test-user',
+  validity_in_seconds: 60,
+});
+
+return Response.json({
+  valid: true,
+  message: 'Stream credentials are valid',
+  apiKey: apiKey.substring(0, 8) + '...',
+  tokenGenerated: !!testToken
+});
+} catch (error) {
+return Response.json({
+valid: false,
+error: error.message,
+details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+});
+}
+}
+
+text
+
+STEP 5 - UPDATE FRONTEND ERROR HANDLING:
+Update your webinar creation form to show better error messages:
+
+// In your webinar creation form component
+const onSubmit = async (data) => {
+setIsLoading(true);
+setError('');
+
+try {
+console.log('Submitting webinar data:', data);
+
+text
+const response = await fetch('/api/webinars', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    ...data,
+    hostId: 'current-user-id', // Replace with actual user ID
+  }),
+});
+
+const result = await response.json();
+console.log('API Response:', result);
+
+if (!response.ok) {
+  console.error('API Error:', result);
+  throw new Error(result.error || `HTTP ${response.status}: Failed to create webinar`);
+}
+
+console.log('Webinar created successfully:', result);
+
+// Success - redirect to webinar page
+router.push(`/dashboard/webinars/${result.id}`);
+} catch (error) {
+console.error('Form submission error:', error);
+setError(error.message);
+} finally {
+setIsLoading(false);
+}
+};
+
+text
+
+STEP 6 - DEBUGGING CHECKLIST:
+Add this debugging component to test Stream integration:
+
+Create /app/debug/stream/page.tsx:
+'use client';
+import { useState } from 'react';
+
+export default function StreamDebugPage() {
+const [testResult, setTestResult] = useState(null);
+const [loading, setLoading] = useState(false);
+
+const testStreamConnection = async () => {
+setLoading(true);
+try {
+const response = await fetch('/api/stream/validate');
+const result = await response.json();
+setTestResult(result);
+} catch (error) {
+setTestResult({ error: error.message });
+} finally {
+setLoading(false);
+}
+};
+
+return (
+<div className="p-8">
+<h1 className="text-2xl font-bold mb-4">Stream SDK Debug</h1>
+
+text
+  <button
+    onClick={testStreamConnection}
+    disabled={loading}
+    className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+  >
+    {loading ? 'Testing...' : 'Test Stream Connection'}
+  </button>
+
+  {testResult && (
+    <div className="mt-4 p-4 border rounded">
+      <pre>{JSON.stringify(testResult, null, 2)}</pre>
+    </div>
+  )}
+  
+  <div className="mt-8">
+    <h2 className="text-xl font-semibold mb-2">Environment Check:</h2>
+    <p>STREAM_API_KEY: {process.env.NEXT_PUBLIC_STREAM_API_KEY ? 'Set' : 'Not set'}</p>
+    <p>Check server logs for STREAM_SECRET status</p>
+  </div>
+</div>
+);
+}
+
+text
+
+TROUBLESHOOTING STEPS:
+1. Visit /debug/stream to test your Stream credentials
+2. Check the browser console for detailed error messages
+3. Verify your Stream API key and secret are correct
+4. Make sure you're using the correct Stream account (not expired trial)
+5. Check if your Stream app has the Video Calling feature enabled
+
+The most common causes of this error are:
+- Incorrect or missing Stream API credentials
+- Using 'webinar' call type instead of 'default'
+- Network connectivity issues
+- Expired Stream trial/subscription

@@ -35,6 +35,7 @@ export async function POST(
 
     try {
       // Start the Stream call (make it live)
+      console.log('Starting Stream call:', webinar.streamCallId)
       await startWebinarCall(webinar.streamCallId)
 
       // Update webinar status
@@ -46,6 +47,8 @@ export async function POST(
         }
       })
 
+      console.log('Webinar started successfully:', updatedWebinar.id)
+
       return NextResponse.json({ 
         success: true, 
         streamCallId: webinar.streamCallId,
@@ -54,8 +57,14 @@ export async function POST(
       })
     } catch (streamError) {
       console.error('Failed to start Stream call:', streamError)
+      console.error('Stream Error Details:', {
+        message: streamError.message,
+        status: streamError.status,
+        code: streamError.code,
+        details: streamError.details
+      })
       return NextResponse.json(
-        { error: 'Failed to start video stream' },
+        { error: `Failed to start video stream: ${streamError.message}` },
         { status: 500 }
       )
     }

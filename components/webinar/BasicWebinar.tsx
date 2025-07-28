@@ -64,7 +64,7 @@ export default function BasicWebinar({
         setClient(streamClient)
         
         // Join the call
-        const streamCall = streamClient.call('webinar', callId)
+        const streamCall = streamClient.call('default', callId)
         
         // Join the existing call (don't create, it was created when webinar was created)
         await streamCall.join({ create: false })
