@@ -110,7 +110,7 @@ export function RecordingsView({ videoClient }: RecordingsViewProps) {
   // If a recording is selected, show the video player
   if (selectedRecording) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-none w-full overflow-x-hidden">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button onClick={handleBackToList} variant="outline">
@@ -122,17 +122,18 @@ export function RecordingsView({ videoClient }: RecordingsViewProps) {
           </div>
         </div>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-4">
+        <Card className="max-w-none">
+          <CardContent className="p-6 w-full">
+            <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-4 min-h-[400px]">
               <video 
                 controls 
-                width="100%" 
-                height="100%"
                 src={selectedRecording.url}
                 preload="metadata"
-                className="w-full h-full object-contain"
+                className="w-full max-h-[60vh] md:max-h-[70vh] lg:max-h-[80vh] object-cover"
                 autoPlay
+                playsInline={true}
+                disablePictureInPicture={false}
+                controlsList="nodownload"
               >
                 Your browser doesn't support video playback.
               </video>
@@ -164,7 +165,7 @@ export function RecordingsView({ videoClient }: RecordingsViewProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-none w-full overflow-x-hidden">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Class Recordings</h1>
         <Badge variant="outline" className="text-sm">
@@ -208,9 +209,9 @@ export function RecordingsView({ videoClient }: RecordingsViewProps) {
       )}
 
       {recordings.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-4 w-full">
           {recordings.map((recording, index) => (
-            <Card key={`${recording.filename}-${index}`} className="hover:shadow-md transition-shadow">
+            <Card key={`${recording.filename}-${index}`} className="hover:shadow-md transition-shadow max-w-none w-full">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg font-medium">
@@ -221,7 +222,7 @@ export function RecordingsView({ videoClient }: RecordingsViewProps) {
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="pt-0">
+              <CardContent className="pt-0 w-full">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 text-sm text-gray-600 dark:text-gray-400">
                   <div>
                     <span className="font-medium">Started:</span>
