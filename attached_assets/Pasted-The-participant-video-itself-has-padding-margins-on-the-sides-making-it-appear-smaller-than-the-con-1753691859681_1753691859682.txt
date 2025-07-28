@@ -1,0 +1,74 @@
+The participant video itself has padding/margins on the sides, making it appear smaller than the container. The video element is not filling the full width of its allocated space, even though the container layout is correct.
+
+Here are the precise prompts to fix the participant video sizing:
+
+Prompt 1: Remove Video Element Padding and Margins
+Target the actual video element inside the Stream participant view and remove all spacing:
+
+Add this CSS rule: .str-video__participant-view video { width: 100% !important; height: 100% !important; margin: 0 !important; padding: 0 !important; }
+
+Also target: .str-video__video-renderer { width: 100% !important; height: 100% !important; padding: 0 !important; }
+
+Remove any border-radius that might be creating visual spacing: border-radius: 0 !important;
+
+Ensure object-fit covers the full area: object-fit: cover !important;
+
+Prompt 2: Fix Stream Participant Container Spacing
+Remove internal spacing from Stream's participant view containers:
+
+Target the participant container: .str-video__participant-view { padding: 0 !important; margin: 0 !important; border: none !important; }
+
+Remove any internal wrapper padding: .str-video__participant-view > div { padding: 0 !important; margin: 0 !important; }
+
+Ensure the container takes full width: width: 100% !important; height: 100% !important;
+
+Remove any default Stream spacing: gap: 0 !important;
+
+Prompt 3: Override Stream's Default Video Layout
+Override Stream's default video sizing within the main video area:
+
+Target the main video area specifically: .main-video-area .str-video__participant-view { width: 100% !important; height: 100% !important; max-width: none !important; }
+
+Remove aspect ratio constraints: aspect-ratio: unset !important;
+
+Ensure full container utilization: .main-video-area .str-video__speaker-layout { padding: 0 !important; margin: 0 !important; }
+
+Force video to fill completely: .main-video-area video { width: 100vw !important; height: 100vh !important; max-width: none !important; max-height: none !important; }
+
+Prompt 4: Adjust Container to Accommodate Full-Width Video
+Modify the main video container to support edge-to-edge video:
+
+Update .main-video-area to remove any internal spacing: padding: 0; margin: 0; overflow: hidden;
+
+Ensure it takes the full grid area: width: 100%; height: 100%;
+
+Remove any flex centering that might create spacing: align-items: stretch; justify-content: stretch;
+
+Make sure the video stretches to container edges: display: block; instead of flex
+
+Prompt 5: Ensure Controls and Sidebar Don't Interfere
+Verify that the bottom controls and sidebar positioning don't affect video sizing:
+
+Confirm floating controls are positioned outside video area: position: fixed; z-index: 1000;
+
+Ensure sidebar doesn't overlap video: check that grid-template-columns is working correctly
+
+Make sure video container doesn't have bottom padding for controls: remove any padding-bottom
+
+Video should extend fully to the bottom edge, with controls floating over it
+
+Expected Result
+After implementing these changes, your participant video should:
+
+Fill 100% width of the allocated video area with no side margins
+
+Maintain proper aspect ratio while maximizing screen usage
+
+Extend edge-to-edge within the video container
+
+Not interfere with bottom controls or sidebar functionality
+
+Look professional like Zoom/Google Meet with full video utilization
+
+The key is aggressively overriding Stream's default spacing and sizing with !important CSS rules that force the video element to utilize every available pixel of its container.
+

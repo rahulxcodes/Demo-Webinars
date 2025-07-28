@@ -28,11 +28,13 @@
   grid-area: main;
   position: relative;
   background-color: #1f1f23;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
+  width: 100%;
+  height: 100%;
   min-height: 0;
   min-width: 400px;
+  padding: 0;
+  margin: 0;
   overflow: hidden;
 }
 
@@ -151,6 +153,42 @@
   height: 100% !important;
   max-height: 80vh !important;
   background-color: #1f1f23 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Remove Stream participant container spacing */
+.str-video__participant-view {
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+.str-video__participant-view > div {
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Remove video element spacing and force full coverage */
+.str-video__participant-view video {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  object-fit: cover !important;
+}
+
+.str-video__video-renderer {
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 /* Stream theme overrides using CSS variables */
@@ -179,13 +217,33 @@
   box-shadow: 0 0 12px rgba(0, 212, 170, 0.3) !important;
 }
 
-/* Main speaker video container - Remove width constraint */
-.main-video-stage .str-video__participant-view {
-  max-width: 100% !important;
-  max-height: 90% !important;
-  width: auto !important;
-  height: auto !important;
-  aspect-ratio: 16/9 !important;
+/* Main video area participant overrides - Force full utilization */
+.main-video-area .str-video__participant-view {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  aspect-ratio: unset !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.main-video-area .str-video__speaker-layout {
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  gap: 0 !important;
+}
+
+.main-video-area video {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 /* Participant strip styling */
@@ -822,12 +880,14 @@
 
 
 
-/* Ensure video content fits properly */
-.main-video-stage video {
+/* Remove any remaining video styling that could create spacing */
+.zoom-layout-container video {
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
-  border-radius: 8px !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 /* Name label styling like Zoom */
