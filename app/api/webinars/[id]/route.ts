@@ -1,14 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { calculateWebinarStatus } from '@/lib/utils/webinar-status';
 
+// GET single webinar with all details
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const webinarId = params.id;
+
     const webinar = await prisma.webinar.findUnique({
-      where: { id: params.id },
+      where: { id: webinarId },
+      include: {
+        registrationForm: true,
+        registrations: {
+          select: {
+            id: true,
+            status: true,
+            registeredAt: true,
+            approvedAt: true,
+          },
+        },
+      },
     });
 
     if (!webinar) {
@@ -19,8 +32,8 @@ export async function GET(
     }
 
     return NextResponse.json({
-      ...webinar,
-      status: calculateWebinarStatus(webinar.startTime, webinar.duration),
+      success: true,
+      webinar,
     });
   } catch (error) {
     console.error('Error fetching webinar:', error);
@@ -31,56 +44,71 @@ export async function GET(
   }
 }
 
+// PATCH update webinar details
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const webinarId = params.id;
     const body = await request.json();
-    const { title, description, startTime, duration } = body;
 
-    // Validate that webinar exists
-    const existingWebinar = await prisma.webinar.findUnique({
-      where: { id: params.id },
-    });
+    const {
+      title,
+      description,
+      startTime,
+      duration,
+      status,
+    } = body;
 
-    if (!existingWebinar) {
+    // Validate required fields
+    if (!title?.trim()) {
       return NextResponse.json(
-        { error: 'Webinar not found' },
-        { status: 404 }
+        { error: 'Title is required' },
+        { status: 400 }
       );
     }
 
-    // Prepare update data
-    const updateData: any = {};
-    if (title) updateData.title = title;
-    if (description !== undefined) updateData.description = description;
-    if (duration) updateData.duration = duration;
-    
-    if (startTime) {
-      const newStartTime = new Date(startTime);
-      if (newStartTime < new Date()) {
-        return NextResponse.json(
-          { error: 'Start time must be in the future' },
-          { status: 400 }
-        );
-      }
-      updateData.startTime = newStartTime;
-      updateData.status = calculateWebinarStatus(newStartTime, duration || existingWebinar.duration);
+    if (!startTime) {
+      return NextResponse.json(
+        { error: 'Start time is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!duration || duration < 1) {
+      return NextResponse.json(
+        { error: 'Duration must be at least 1 minute' },
+        { status: 400 }
+      );
     }
 
     // Update webinar
     const updatedWebinar = await prisma.webinar.update({
-      where: { id: params.id },
-      data: updateData,
+      where: { id: webinarId },
+      data: {
+        title: title.trim(),
+        description: description?.trim() || null,
+        startTime: new Date(startTime),
+        duration: parseInt(duration),
+        status: status || 'upcoming',
+      },
+      include: {
+        registrationForm: true,
+        registrations: {
+          select: {
+            id: true,
+            status: true,
+            registeredAt: true,
+            approvedAt: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json({
       success: true,
-      webinar: {
-        ...updatedWebinar,
-        status: calculateWebinarStatus(updatedWebinar.startTime, updatedWebinar.duration),
-      },
+      webinar: updatedWebinar,
     });
   } catch (error) {
     console.error('Error updating webinar:', error);
@@ -91,14 +119,17 @@ export async function PATCH(
   }
 }
 
+// DELETE webinar
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const webinarId = params.id;
+
     // Check if webinar exists
     const webinar = await prisma.webinar.findUnique({
-      where: { id: params.id },
+      where: { id: webinarId },
     });
 
     if (!webinar) {
@@ -108,9 +139,9 @@ export async function DELETE(
       );
     }
 
-    // Delete webinar
+    // Delete webinar (cascade will handle related records)
     await prisma.webinar.delete({
-      where: { id: params.id },
+      where: { id: webinarId },
     });
 
     return NextResponse.json({

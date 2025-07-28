@@ -40,9 +40,11 @@ export const WebinarCard = React.memo(({ webinar, onDelete }: WebinarCardProps) 
         </div>
       </div>
       <div className="flex items-center space-x-2">
-        <Button variant="outline" size="sm">
-          <PencilIcon className="h-4 w-4" />
-        </Button>
+        <a href={`/dashboard/webinars/${webinar.id}`}>
+          <Button variant="outline" size="sm">
+            <PencilIcon className="h-4 w-4" />
+          </Button>
+        </a>
         <Button variant="outline" size="sm">
           <DocumentDuplicateIcon className="h-4 w-4" />
         </Button>
