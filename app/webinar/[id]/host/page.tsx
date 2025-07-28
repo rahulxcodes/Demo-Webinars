@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { 
@@ -15,9 +15,9 @@ import {
 import '@stream-io/video-react-sdk/dist/css/styles.css'
 
 interface HostInterfaceProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 // Host Video Interface Component
@@ -69,6 +69,7 @@ function HostVideoInterface({ callId }: { callId: string }) {
 }
 
 export default function HostInterface({ params }: HostInterfaceProps) {
+  const { id } = use(params) // Unwrap params using React.use() for Next.js 15
   const { data: session } = useSession()  
   const router = useRouter()
   const [client, setClient] = useState<StreamVideoClient | null>(null)
@@ -86,7 +87,7 @@ export default function HostInterface({ params }: HostInterfaceProps) {
     async function initializeCall() {
       try {
         // Get Stream token for this user
-        const tokenResponse = await fetch(`/api/stream-token/${params.id}?userId=${session.user.id}&role=host`)
+        const tokenResponse = await fetch(`/api/stream-token/${id}?userId=${session.user.id}&role=host`)
         
         if (!tokenResponse.ok) {
           throw new Error('Failed to get Stream token')
@@ -108,7 +109,7 @@ export default function HostInterface({ params }: HostInterfaceProps) {
         setClient(streamClient)
 
         // Join the call
-        const streamCall = streamClient.call('livestream', params.id)
+        const streamCall = streamClient.call('livestream', id)
         await streamCall.join()
         setCall(streamCall)
 
@@ -121,7 +122,7 @@ export default function HostInterface({ params }: HostInterfaceProps) {
     }
 
     initializeCall()
-  }, [session, params.id, router])
+  }, [session, id, router])
 
   // Show loading state
   if (loading) {
@@ -158,7 +159,7 @@ export default function HostInterface({ params }: HostInterfaceProps) {
     return (
       <StreamVideo client={client}>
         <StreamCall call={call}>
-          <HostVideoInterface callId={params.id} />
+          <HostVideoInterface callId={id} />
         </StreamCall>
       </StreamVideo>
     )

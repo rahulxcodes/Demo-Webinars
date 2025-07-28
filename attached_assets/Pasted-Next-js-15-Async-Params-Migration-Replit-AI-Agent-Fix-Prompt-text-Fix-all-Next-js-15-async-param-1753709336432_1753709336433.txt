@@ -1,0 +1,158 @@
+Next.js 15 Async Params Migration
+🤖 Replit AI Agent Fix Prompt:
+text
+Fix all Next.js 15 async params issues in the webinar host interface:
+
+PROBLEM: Multiple errors in /app/webinar/[id]/host/page.tsx accessing params.id directly when params is now a Promise in Next.js 15.
+
+COMPLETE SOLUTION:
+
+1. UPDATE WEBINAR HOST PAGE COMPONENT TYPE:
+Change the component props type from:
+{ params }: { params: { id: string } }
+
+text
+TO:
+{ params }: { params: Promise<{ id: string }> }
+
+text
+
+2. FOR CLIENT COMPONENTS ('use client'):
+If this is a client component, use React.use() to unwrap the params:
+
+'use client';
+import { use } from 'react';
+import { StreamVideoProvider, StreamCall, StreamVideoClient } from '@stream-io/video-react-sdk';
+import { useSession } from 'next-auth/react';
+import { useEffect, useState } from 'react';
+
+export default function HostWebinarPage({
+params
+}: {
+params: Promise<{ id: string }>
+}) {
+const { id } = use(params); // ✅ Use React.use() for client components
+const { data: session } = useSession();
+const [streamClient, setStreamClient] = useState<StreamVideoClient | null>(null);
+const [call, setCall] = useState(null);
+const [webinar, setWebinar] = useState(null);
+const [isLoading, setIsLoading] = useState(true);
+const [error, setError] = useState('');
+
+useEffect(() => {
+if (!session?.user?.id) return;
+
+text
+async function initializeWebinar() {
+  try {
+    console.log('Initializing webinar:', id); // ✅ Now works without error
+    
+    // Fetch webinar details using the unwrapped id
+    const webinarResponse = await fetch(`/api/webinars/${id}`);
+    // ... rest of your initialization logic
+    
+  } catch (error) {
+    console.error('Failed to initialize webinar:', error);
+    setError(error.message);
+    setIsLoading(false);
+  }
+}
+
+initializeWebinar();
+}, [id, session?.user?.id]); // ✅ Use id directly in dependencies
+
+// ... rest of your component logic
+}
+
+text
+
+3. FOR SERVER COMPONENTS (no 'use client'):
+If this is a server component, use async/await:
+
+export default async function HostWebinarPage({
+params
+}: {
+params: Promise<{ id: string }>
+}) {
+const { id } = await params; // ✅ Await params for server components
+
+// Now you can use id throughout the component
+console.log('Webinar ID:', id);
+
+// ... rest of your component logic
+}
+
+text
+
+4. UPDATE ALL REFERENCES TO params.id:
+Find and replace ALL instances of:
+- `params.id` → `id` (after unwrapping)
+- Any other direct param access → use the unwrapped values
+
+5. FIX TYPESCRIPT TYPES:
+Update any TypeScript interfaces that reference params:
+
+// OLD
+interface Props {
+params: { id: string };
+}
+
+// NEW
+interface Props {
+params: Promise<{ id: string }>;
+}
+
+text
+
+6. UPDATE SIMILAR FILES:
+Apply the same fix to any other dynamic route files that might have the same issue:
+- /app/dashboard/webinars/[id]/page.tsx
+- /app/register/[slug]/page.tsx
+- /app/join/[token]/page.tsx
+- Any API routes in /app/api/webinars/[id]/
+
+For API routes, the pattern is:
+// OLD API route
+export async function GET(request: Request, { params }: { params: { id: string } }) {
+const webinarId = params.id;
+}
+
+// NEW API route
+export async function GET(
+request: Request,
+{ params }: { params: Promise<{ id: string }> }
+) {
+const { id } = await params;
+const webinarId = id;
+}
+
+text
+
+IMPORTANT NOTES:
+- For CLIENT components ('use client'): Use React.use(params)
+- For SERVER components: Use await params
+- Update ALL files with dynamic routes [id], [slug], [token], etc.
+- This is a breaking change in Next.js 15 and is required for future compatibility
+
+After applying these fixes, all the async params warnings will be resolved and your webinar platform will be fully compatible with Next.js 15.
+🎯 Key Points:
+All 4 errors are from the same file accessing params.id directly
+
+Client components need React.use(params)
+
+Server components need await params
+
+Update TypeScript types to Promise<{ id: string }>
+
+Apply to all dynamic routes in your app
+
+After This Fix:
+✅ All param access warnings eliminated
+
+✅ Full Next.js 15 compatibility
+
+✅ Webinar host interface works properly
+
+✅ No more console errors
+
+✅ Future-proof code
