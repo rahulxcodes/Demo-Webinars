@@ -11,11 +11,7 @@ export async function POST(
   try {
     const { id } = await params
 
-    // For testing - skip auth temporarily
-    const session = { user: { id: 'cmdn459og0000ry1pftk5orrc' } } // Temporary test session
-    console.log('Using test session for Stream integration test')
-    
-    /* TODO: Fix authentication 
+    // Check authentication first
     const session = await getServerSession(authOptions)
     console.log('Session check:', { session: !!session, userId: session?.user?.id })
     
@@ -25,7 +21,6 @@ export async function POST(
         { status: 401 }
       )
     }
-    */
 
     // Get webinar with Stream call ID
     const webinar = await prisma.webinar.findUnique({
