@@ -140,14 +140,12 @@ export function CustomControlBar({
             title="Show participants panel"
           >
             <HiUsers className="w-5 h-5" />
-            {participantCount > 1 && (
-              <div 
-                className="participant-count-badge"
-                aria-label={`${participantCount} participants in call`}
-              >
-                {participantCount}
-              </div>
-            )}
+            <div 
+              className="participant-count-badge"
+              aria-label={`${participantCount} participants in call`}
+            >
+              {participantCount}
+            </div>
           </button>
         </div>
         
