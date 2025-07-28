@@ -18,11 +18,12 @@
 
 /* Main Layout Container */
 .zoom-layout-container {
+  position: relative;
+  width: 100vw;
   height: 100vh;
   background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 50%, #2d3748 100%);
   display: flex;
   flex-direction: column;
-  position: relative;
   overflow: hidden;
 }
 
@@ -66,14 +67,23 @@
   top: 60px; /* Space for header only */
   left: 0;
   right: 0;
-  bottom: 0; /* Full height - controls will float over video */
+  bottom: 0 !important; /* Full height - controls will float over video */
   background-color: #1f1f23;
-  display: block !important;
-  padding: 0;
-  margin: 0;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+  margin: 0 !important;
   overflow: hidden;
-  width: calc(100vw - var(--sidebar-width, 0px)) !important;
+  width: 100% !important;
   height: calc(100vh - 60px) !important; /* Full height minus header */
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* When sidebar is open, adjust video width */
+.zoom-layout-container[data-sidebar="open"] .main-video-area {
+  right: var(--sidebar-width, 320px);
+  width: calc(100vw - var(--sidebar-width, 320px)) !important;
 }
 
 /* When sidebar is closed, video takes full width */
@@ -82,29 +92,62 @@
   width: 100vw !important;
 }
 
+/* Force Stream Video components to full height */
+.main-video-area .str-video__speaker-layout,
+.main-video-area .str-video__speaker-layout > div,
+.main-video-area .str-video__participant-view,
+.main-video-area .str-video__video-renderer {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: none !important;
+}
+
+/* Remove any default margins/padding from Stream components */
 .main-video-area .str-video__speaker-layout {
-  height: 100%;
+  padding: 0 !important;
+  margin: 0 !important;
+  gap: 0 !important;
+  border: none !important;
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.str-video__speaker-layout__wrapper {
+  width: 100% !important;
+  height: 100% !important;
+  flex: 1 !important;
+}
+
+.str-video__participant-view__video-wrapper {
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .main-video-area .str-video__participant-view {
   border-radius: 12px;
   overflow: hidden;
   background: var(--background-secondary);
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: none !important;
 }
 
-/* Force video to fill complete available space */
+/* Force video element to fill container completely */
 .main-video-area video {
-  width: calc(100vw - var(--sidebar-width, 0px)) !important;
-  height: calc(100vh - 60px) !important; /* Full height minus header */
-  object-fit: cover !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  min-width: 100% !important;
+  max-height: none !important;
+  max-width: none !important;
+  object-fit: cover !important; /* This crops to fill, no black bars */
+  object-position: center !important;
   padding: 0 !important;
   margin: 0 !important;
-}
-
-/* When sidebar closed, video fills full viewport */
-.zoom-layout-container[data-sidebar="closed"] .main-video-area video {
-  width: 100vw !important;
-  height: calc(100vh - 60px) !important;
+  background-color: #000;
 }
 
 /* Collapsible Sidebar */
@@ -202,6 +245,34 @@
   padding: 0.75rem 1.5rem;
   min-width: 600px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* CSS Variable for sidebar width */
+:root {
+  --sidebar-width: 320px;
+}
+
+/* Temporary debug CSS - remove after confirming fix works */
+.main-video-area {
+  /* border: 2px solid red !important; */ /* Should touch bottom of screen */
+}
+
+.str-video__speaker-layout {
+  /* border: 2px solid green !important; */ /* Should fill red area */
+}
+
+.main-video-area video {
+  /* border: 2px solid blue !important; */ /* Should fill green area */
+}
+
+/* Additional Stream SDK overrides for complete height control */
+.str-video__call-content,
+.str-video__call-layout,
+.str-video__speaker-layout__stage {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  flex: 1 !important;
 }
 
 .control-section-left,

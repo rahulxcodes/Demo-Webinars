@@ -1,0 +1,154 @@
+Fix the video height gap issue in the live webinar layout:
+
+PROBLEM: Video has black gap at bottom and is not filling the full available height in the main video area.
+
+SPECIFIC CSS FIXES NEEDED:
+
+1. FORCE STREAM VIDEO COMPONENTS TO FULL HEIGHT:
+Add these CSS overrides to force Stream SDK components to use full height:
+
+/* Force Stream Video components to full height */
+.main-video-area .str-video__speaker-layout,
+.main-video-area .str-video__speaker-layout > div,
+.main-video-area .str-video__participant-view,
+.main-video-area .str-video__video-renderer {
+width: 100% !importan
+; height: 100% !import
+nt; min-height: 100% !impo
+tant; max-height: none !im
+/* Force video element to fill container completely */
+.main-video-area video {
+width: 100% !importan
+; height: 100% !import
+nt; min-height: 100% !impo
+tant; object-fit: cover !im
+ortant; background-co
+/* Remove any default margins/padding from Stream components */
+.main-video-area .str-video__speaker-layout {
+padding: 0 !importan
+; margin: 0 !import
+nt; gap: 0 !impo
+tant; border: none !im
+/* Ensure main video area uses full available space /
+.main-video-area {
+position: absolute !importan
+Header height /
+left:
+; right
+0; Full height to bottom */
+width: 100% !importan
+; height: calc(100vh - 60px) !import
+nt; display: flex !impo
+tant; flex-direction: column !im
+ortant; background-co
+or: #000; overf
+/* When sidebar is open, adjust video width */
+.zoom-layout-container[data-sidebar="open"] .main-video-area {
+right: var(--sidebar-width
+; width: calc(100vw - var(--sidebar-width)) !import
+/* When sidebar is closed, video takes full width */
+.zoom-layout-container[data-sidebar="closed"] .main-video-area {
+right:
+; width: 100vw !import
+text
+
+2. REMOVE ANY HEIGHT RESTRICTIONS:
+Remove any CSS that might be limiting video height:
+
+/* Remove these restrictions if they exist /
+.main-video-area {
+Remove any bottom padding or margin /
+bottom: 0 !importan Not 120px or any other value */
+padding-bottom: 0 !importan
+; margin-bottom: 0 !import
+/* Ensure no max-height restrictions */
+.main-video-area *,
+.main-video-area video,
+.main-video-area .str-video__participant-view {
+max-height: none !importan
+; max-width: none !import
+text
+
+3. UPDATE CONTAINER LAYOUT:
+Ensure the layout container uses full viewport height:
+
+.zoom-layout-container {
+position: relativ
+; width: 10
+vw; height:
+00vh; background-color:
+1f1f23; overflo
+: hidden; di
+play: flex; flex-dire
+text
+
+4. FORCE STREAM SPEAKER LAYOUT TO EXPAND:
+Add specific CSS for Stream's SpeakerLayout component:
+
+/* Force SpeakerLayout to use full available space */
+.str-video__speaker-layout {
+width: 100% !importan
+; height: 100% !import
+nt; flex: 1 !impo
+tant; display: flex !im
+ortant; flex-direction: column !
+.str-video__speaker-layout__wrapper {
+width: 100% !importan
+; height: 100% !import
+nt; flex: 1 !impo
+.str-video__participant-view__video-wrapper {
+width: 100% !importan
+; height: 100% !import
+text
+
+5. ADD INLINE STYLES TO SPEAKERLAYOUT:
+Update your SpeakerLayout component with inline styles:
+
+// In your LiveWebinarLayout component
+
+<div className="main-video-area"> <SpeakerLayout participantsBarLimit={0} style={{ width: '100%', height: '100%', minHeight: '100%', flex: 1 }} /> </div> ```
+FORCE VIDEO ASPECT RATIO AND SIZING:
+Add CSS to e
+
+text
+/* Force video to fill container without letterboxing */
+.main-video-area video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important; /* This crops to fill, no black bars */
+  object-position: center !important;
+  min-height: 100% !important;
+  min-width: 100% !important;
+}
+
+/* Alternative: use object-fit: contain if you want to see full video */
+/* .main-video-area video {
+  object-fit: contain !important;
+} */
+DEBUG CSS TO VERIFY LAYOUT:
+Add temporary debugging CSS t
+
+text
+/* Temporary debug CSS - remove after fixing */
+.main-video-area {
+  border: 2px solid red !important; /* Should touch bottom of screen */
+}
+
+.str-video__speaker-layout {
+  border: 2px solid green !important; /* Should fill red area */
+}
+
+.main-video-area video {
+  border: 2px solid blue !important; /* Should fill green area */
+}
+TESTING STEPS:
+
+Apply the CSS overrides
+
+Refresh the webinar page
+
+Check if video now fills the entire height
+
+Remove debug borders once confirmed working
+
+Test with sidebar open/closed to ensure it works in both states
