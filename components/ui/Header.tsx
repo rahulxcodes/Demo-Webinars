@@ -2,21 +2,24 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useSession, signOut } from 'next-auth/react'
 import { 
   VideoCameraIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  UserCircleIcon
 } from '@heroicons/react/24/outline'
 import { useState } from 'react'
 
 export function Header() {
   const pathname = usePathname()
+  const { data: session, status } = useSession()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  const navigation = [
+  const navigation = session ? [
     { name: 'Dashboard', href: '/dashboard' },
     { name: 'New Webinar', href: '/dashboard/new-webinar' },
-  ]
+  ] : []
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
@@ -35,26 +38,65 @@ export function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            {navigation.map((item) => {
-              const isActive = pathname === item.href || 
-                (item.href === '/dashboard' && pathname.startsWith('/dashboard'))
-              
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors duration-200 ${
-                    isActive
-                      ? 'text-primary-600 border-b-2 border-primary-600'
-                      : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+          <div className="hidden md:flex items-center space-x-8">
+            {session && (
+              <nav className="flex space-x-8">
+                {navigation.map((item) => {
+                  const isActive = pathname === item.href || 
+                    (item.href === '/dashboard' && pathname.startsWith('/dashboard'))
+                  
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors duration-200 ${
+                        isActive
+                          ? 'text-primary-600 border-b-2 border-primary-600'
+                          : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      {item.name}
+                    </Link>
+                  )
+                })}
+              </nav>
+            )}
+
+            {/* Authentication buttons */}
+            {status === 'loading' ? (
+              <div className="animate-pulse">
+                <div className="h-8 w-20 bg-gray-200 rounded"></div>
+              </div>
+            ) : session ? (
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <UserCircleIcon className="h-6 w-6 text-gray-400" />
+                  <span className="text-sm text-gray-700">{session.user?.name}</span>
+                </div>
+                <button
+                  onClick={() => signOut()}
+                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                 >
-                  {item.name}
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Link
+                  href="/auth/signin"
+                  className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium"
+                >
+                  Sign in
                 </Link>
-              )
-            })}
-          </nav>
+                <Link
+                  href="/auth/signup"
+                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                >
+                  Sign up
+                </Link>
+              </div>
+            )}
+          </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden">

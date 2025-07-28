@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -23,6 +24,29 @@ import { useDebounce } from '@/lib/hooks/useDebounce'
 import { WebinarCard } from '@/components/ui/WebinarCard'
 
 export default function DashboardPage() {
+  const { data: session, status } = useSession()
+  
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
+      </div>
+    )
+  }
+
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
+          <p className="text-gray-600 mb-8">You need to be logged in to access the dashboard.</p>
+          <Link href="/auth/signin">
+            <Button>Sign In</Button>
+          </Link>
+        </div>
+      </div>
+    )
+  }
   const [webinars, setWebinars] = useState<Webinar[]>([])
   const [stats, setStats] = useState<WebinarStats>({ total: 0, upcoming: 0, past: 0, live: 0 })
   const [loading, setLoading] = useState(true)

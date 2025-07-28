@@ -1,10 +1,13 @@
+'use client'
 import React from 'react'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardBody } from '@/components/ui/card'
 import { VideoCameraIcon, UserGroupIcon, ChartBarIcon, PlayIcon, SparklesIcon } from '@heroicons/react/24/outline'
 
 export default function HomePage() {
+  const { data: session, status } = useSession()
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Hero Section */}
@@ -28,17 +31,35 @@ export default function HomePage() {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/dashboard">
-              <Button size="lg" className="w-full sm:w-auto">
-                <PlayIcon className="h-5 w-5 mr-2" />
-                Get Started Free
-              </Button>
-            </Link>
-            <Link href="/dashboard/new-webinar">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                Create Your First Webinar
-              </Button>
-            </Link>
+            {session ? (
+              <>
+                <Link href="/dashboard">
+                  <Button size="lg" className="w-full sm:w-auto">
+                    <PlayIcon className="h-5 w-5 mr-2" />
+                    Go to Dashboard
+                  </Button>
+                </Link>
+                <Link href="/dashboard/new-webinar">
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                    Create New Webinar
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/auth/signup">
+                  <Button size="lg" className="w-full sm:w-auto">
+                    <PlayIcon className="h-5 w-5 mr-2" />
+                    Get Started Free
+                  </Button>
+                </Link>
+                <Link href="/auth/signin">
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                    Sign In
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
         
@@ -97,9 +118,9 @@ export default function HomePage() {
               <p className="text-primary-100 text-lg mb-8 max-w-2xl mx-auto">
                 Join thousands of creators, educators, and businesses who trust our platform for their webinar needs.
               </p>
-              <Link href="/dashboard/new-webinar">
+              <Link href={session ? "/dashboard/new-webinar" : "/auth/signup"}>
                 <Button size="lg" variant="secondary" className="bg-white text-primary-600 hover:bg-gray-50">
-                  Create Your First Webinar Now
+                  {session ? "Create Your First Webinar Now" : "Get Started Free"}
                 </Button>
               </Link>
             </CardBody>
