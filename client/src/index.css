@@ -246,6 +246,15 @@
   margin: 0 !important;
 }
 
+/* Ensure participant details don't overlap video controls */
+.main-video-area .str-video__participant-view {
+  position: relative !important;
+}
+
+.main-video-area .str-video__participant-view .str-video__participant-details {
+  z-index: 5 !important;
+}
+
 /* Participant strip styling */
 .participants-bottom-strip .str-video__participant-view {
   width: 96px !important;
@@ -890,17 +899,28 @@
   margin: 0 !important;
 }
 
-/* Name label styling like Zoom */
+/* Name label styling like Zoom - Properly positioned */
 .str-video__participant-details {
   position: absolute !important;
-  bottom: 8px !important;
-  left: 8px !important;
-  background-color: rgba(0, 0, 0, 0.7) !important;
+  bottom: 12px !important;
+  left: 12px !important;
+  background-color: rgba(0, 0, 0, 0.8) !important;
   color: white !important;
-  padding: 4px 8px !important;
-  border-radius: 4px !important;
-  font-size: 12px !important;
+  padding: 6px 12px !important;
+  border-radius: 6px !important;
+  font-size: 14px !important;
   font-weight: 500 !important;
+  z-index: 10 !important;
+  pointer-events: none !important;
+}
+
+/* Hide participant details in main video area if they interfere */
+.main-video-area .str-video__participant-details {
+  bottom: 60px !important;
+  left: 20px !important;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Smart Button Layout System */
