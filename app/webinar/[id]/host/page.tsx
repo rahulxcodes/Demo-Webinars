@@ -113,12 +113,7 @@ function HostVideoInterface({ callId }: { callId: string }) {
       {/* Video Layout with improved styling */}
       <div className="flex-1 relative bg-black">
         <SpeakerLayout 
-          participantsBarPosition="bottom" 
-          ParticipantViewUISpotlight={{
-            muteButton: true,
-            videoMuteButton: true,
-            screenShareButton: true,
-          }}
+          participantsBarPosition="bottom"
         />
         
         {/* Overlay for empty state */}
