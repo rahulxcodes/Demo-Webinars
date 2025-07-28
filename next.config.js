@@ -8,6 +8,24 @@ const nextConfig = {
   transpilePackages: ['@stream-io/video-react-sdk'],
   // Configure for Replit environment  
   serverExternalPackages: [],
+  // Fix cross-origin warnings and ensure proper loading
+  experimental: {
+    allowedDevOrigins: ['127.0.0.1', 'localhost', '.replit.dev'],
+  },
+  // Disable caching for development
+  headers: async () => {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+        ],
+      },
+    ]
+  },
 }
 
 export default nextConfig
