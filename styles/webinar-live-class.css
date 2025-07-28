@@ -26,19 +26,28 @@
   overflow: hidden;
 }
 
-/* Webinar Header */
+/* Webinar Header - Compact for maximum video space */
 .webinar-header {
   position: relative;
   z-index: 100;
-  background: var(--glass-bg);
+  height: 60px;
+  min-height: 60px;
+  background: #2d2d30;
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--glass-border);
 }
 
 .webinar-header h1 {
-  color: var(--text-primary);
+  color: #ffffff !important;
   font-weight: 600;
   font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.webinar-header h1,
+.webinar-header span,
+.webinar-header div {
+  color: #ffffff !important;
 }
 
 .webinar-header .live-badge {
@@ -51,12 +60,26 @@
   animation: pulse 2s infinite;
 }
 
-/* Main Video Area */
+/* Main Video Area - Full height without bottom space for participant strip */
 .main-video-area {
-  flex: 1;
-  position: relative;
-  background: #000;
+  position: absolute !important;
+  top: 60px; /* Space for header only */
+  left: 0;
+  right: 0;
+  bottom: 0; /* Full height - controls will float over video */
+  background-color: #1f1f23;
+  display: block !important;
+  padding: 0;
+  margin: 0;
   overflow: hidden;
+  width: calc(100vw - var(--sidebar-width, 0px)) !important;
+  height: calc(100vh - 60px) !important; /* Full height minus header */
+}
+
+/* When sidebar is closed, video takes full width */
+.zoom-layout-container[data-sidebar="closed"] .main-video-area {
+  right: 0;
+  width: 100vw !important;
 }
 
 .main-video-area .str-video__speaker-layout {
@@ -67,6 +90,21 @@
   border-radius: 12px;
   overflow: hidden;
   background: var(--background-secondary);
+}
+
+/* Force video to fill complete available space */
+.main-video-area video {
+  width: calc(100vw - var(--sidebar-width, 0px)) !important;
+  height: calc(100vh - 60px) !important; /* Full height minus header */
+  object-fit: cover !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* When sidebar closed, video fills full viewport */
+.zoom-layout-container[data-sidebar="closed"] .main-video-area video {
+  width: 100vw !important;
+  height: calc(100vh - 60px) !important;
 }
 
 /* Collapsible Sidebar */
@@ -100,7 +138,7 @@
 }
 
 .sidebar-header h3 {
-  color: var(--text-primary);
+  color: #ffffff !important; /* White text for sidebar */
   font-weight: 600;
   font-size: 1rem;
 }
@@ -126,59 +164,30 @@
   padding: 1rem;
 }
 
-/* Participants Bottom Strip */
+.sidebar-content * {
+  color: #ffffff !important; /* White text for all sidebar content */
+}
+
+/* Participant names in sidebar */
+.sidebar-content .str-video__participant-name {
+  color: #ffffff !important;
+  font-weight: 500;
+}
+
+/* Remove the participants bottom strip entirely */
 .participants-bottom-strip {
-  position: absolute;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  padding: 0.75rem;
-  z-index: 150;
-  transition: all 0.3s ease;
+  display: none !important; /* HIDE COMPLETELY */
 }
 
-.participants-preview {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
 
-.participant-tile {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--primary-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: 600;
-  font-size: 0.875rem;
-  border: 2px solid var(--glass-border);
-  transition: transform 0.2s;
-}
 
-.participant-tile:hover {
-  transform: scale(1.1);
-}
-
-.participant-tile.more-count {
-  background: var(--background-tertiary);
-  color: var(--text-secondary);
-  font-size: 0.75rem;
-}
-
-/* Floating Controls */
+/* Update floating controls positioning */
 .floating-controls {
   position: absolute;
-  bottom: 20px;
+  bottom: 20px; /* Float directly over video */
   left: 50%;
   transform: translateX(-50%);
-  z-index: 300;
+  z-index: 30; /* Higher z-index to float over video */
 }
 
 /* Custom Control Bar */
@@ -268,6 +277,31 @@
   background: var(--primary-color);
   border-color: var(--primary-color);
   color: white;
+}
+
+/* Control bar text and icons */
+.custom-control-bar * {
+  color: #ffffff !important;
+}
+
+/* Tooltips with proper contrast */
+.control-button-tooltip {
+  background: rgba(0, 0, 0, 0.9) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Recording status text */
+.webinar-header .animate-pulse,
+.webinar-header .text-sm {
+  color: #ffffff !important;
+}
+
+/* Any other text elements */
+.text-gray-300,
+.text-gray-400,
+.text-gray-500 {
+  color: #e5e7eb !important; /* Light gray instead of dark */
 }
 
 .control-button.sharing {

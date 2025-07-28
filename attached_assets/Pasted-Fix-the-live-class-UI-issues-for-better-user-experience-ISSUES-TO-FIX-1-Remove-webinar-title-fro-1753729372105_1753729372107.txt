@@ -1,0 +1,253 @@
+Fix the live class UI issues for better user experience:
+
+ISSUES TO FIX:
+1. Remove webinar title from bottom control bar
+2. Remove "End Webinar" text, keep only the icon
+3. Remove the unwanted participants preview bar above controls
+4. Maximize video height to fill all available space
+5. Fix black text on black background visibility issues
+
+SPECIFIC FIXES NEEDED:
+
+1. REMOVE WEBINAR TITLE FROM CONTROL BAR:
+Update your CustomControlBar component to remove any title display:
+
+// In CustomControlBar.tsx - Remove webinar title display
+export function CustomControlBar({
+onToggleParticipan
+s, participant
+ount, o
+EndCall, showRecordi
+g = false, isRecor
+ing = false, onT
+ggleRecording, // webinarTitle ← REMOVE THIS
+// Remove any webinar title rendering in the control bar
+// Keep only the essential controls: mic, camera, screen share, participants, recording, end ca
+text
+
+2. REMOVE "END WEBINAR" TEXT - ICON ONLY:
+Update the end call button to show only the icon:
+
+{/* End Call Button - Icon only, no text */}
+
+<div className="control-button-wrapper"> <button className="control-button end-call" onClick={handleEndCall} title="End webinar" // Tooltip only aria-label="End webinar" > <Phone size={20} className="rotate-135" /> </button> {/* Remove any text, tooltip will show on hover */} </div> ```
+COMPLETELY REMOVE PARTICIPANTS PREVIEW BAR:
+Remove the participants
+
+text
+// In your LiveWebinarLayout component - REMOVE this entire section:
+{/* 
+<div className="participants-bottom-strip">
+  <div className="participants-preview">
+    {participants.slice(0, 4).map((participant, index) => (
+      <div key={participant.sessionId} className="participant-tile">
+        <span>{participant.name?. || 'A'}</span>
+      </div>
+    ))}
+    {participants.length > 4 && (
+      <div className="participant-tile more-count">
+        +{participants.length - 4}
+      </div>
+    )}
+  </div>
+</div>
+*/}
+// DELETE THE ENTIRE SECTION ABOVE
+MAXIMIZE VIDEO HEIGHT - FILL ALL SPACE:
+Update your CSS to
+
+text
+/* Update these CSS classes in your webinar styles */
+
+/* Main video area - Full height without bottom space for participant strip */
+.main-video-area {
+  position: absolute !important;
+  top: 60px; /* Space for header only */
+  left: 0;
+  right: 0;
+  bottom: 0; /* Full height - controls will float over video */
+  background-color: #1f1f23;
+  display: block !important;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  width: calc(100vw - var(--sidebar-width)) !important;
+  height: calc(100vh - 60px) !important; /* Full height minus header */
+}
+
+/* When sidebar is closed, video takes full width */
+.zoom-layout-container[data-sidebar="closed"] .main-video-area {
+  right: 0;
+  width: 100vw !important;
+}
+
+/* Remove the participants bottom strip entirely */
+.participants-bottom-strip {
+  display: none !important; /* HIDE COMPLETELY */
+}
+
+/* Update floating controls positioning */
+.floating-controls {
+  position: absolute;
+  bottom: 20px; /* Float directly over video */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30; /* Higher z-index to float over video */
+}
+
+/* Force video to fill complete available space */
+.main-video-area video {
+  width: calc(100vw - var(--sidebar-width)) !important;
+  height: calc(100vh - 60px) !important; /* Full height minus header */
+  object-fit: cover !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* When sidebar closed, video fills full viewport */
+.zoom-layout-container[data-sidebar="closed"] .main-video-area video {
+  width: 100vw !important;
+  height: calc(100vh - 60px) !important;
+}
+FIX BLACK TEXT ON BLACK BACKGROUND:
+Updat
+
+text
+/* Fix text visibility on black backgrounds */
+.webinar-header {
+  background-color: #2d2d30 !important; /* Slightly lighter than pure black */
+}
+
+.webinar-header h1,
+.webinar-header span,
+.webinar-header div {
+  color: #ffffff !important; /* Force white text */
+}
+
+.sidebar-header h3 {
+  color: #ffffff !important; /* White text for sidebar */
+}
+
+.sidebar-content * {
+  color: #ffffff !important; /* White text for all sidebar content */
+}
+
+/* Control bar text and icons */
+.custom-control-bar * {
+  color: #ffffff !important;
+}
+
+/* Tooltips with proper contrast */
+.control-button-tooltip {
+  background: rgba(0, 0, 0, 0.9) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Recording status text */
+.webinar-header .animate-pulse,
+.webinar-header .text-sm {
+  color: #ffffff !important;
+}
+
+/* Participant names in sidebar */
+.sidebar-content .str-video__participant-name {
+  color: #ffffff !important;
+  font-weight: 500;
+}
+
+/* Any other text elements */
+.text-gray-300,
+.text-gray-400,
+.text-gray-500 {
+  color: #e5e7eb !important; /* Light gray instead of dark */
+}
+UPDATE HEADER HEIGHT FOR MAXIMUM VIDEO SPACE:
+Reduce header height to maximize video are
+
+text
+/* Compact header for more video space */
+.webinar-header {
+  height: 60px; /* Reduced from default */
+  min-height: 60px;
+}
+
+.webinar-header .flex {
+  padding: 12px 16px; /* Reduced padding */
+}
+
+.webinar-header h1 {
+  font-size: 1.25rem; /* Slightly smaller title */
+  line-height: 1.2;
+}
+CLEAN UP LAYOUT STRUCTURE:
+Update your LiveWebinar
+
+text
+return (
+  <StreamTheme className="custom-dark-theme">
+    <div className="zoom-layout-container" data-sidebar={showSidebar ? 'open' : 'closed'}>
+      {/* Compact Header */}
+      <div className="webinar-header">
+        <div className="flex justify-between items-center p-3 bg-gray-800 text-white">
+          <h1 className="text-xl font-semibold text-white">{webinar?.title}</h1>
+          <div className="flex items-center space-x-4">
+            {isRecordingActive && (
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                <span className="text-sm text-white">Recording</span>
+              </div>
+            )}
+            <span className="px-3 py-1 bg-red-500 text-white rounded-full text-sm animate-pulse">
+              🔴 LIVE
+            </span>
+            <span className="text-sm text-white">
+              {participants.length} attendees
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Full Height Video Area */}
+      <div className="main-video-area">
+        <SpeakerLayout participantsBarLimit={0} />
+      </div>
+
+      {/* Collapsible Sidebar */}
+      <div className={`collapsible-sidebar ${showSidebar ? 'sidebar-open' : 'sidebar-closed'}`}>
+        <div className="sidebar-header">
+          <h3 className="text-white">Attendees ({participants.length})</h3>
+          <button 
+            className="sidebar-close-btn text-white hover:text-gray-300"
+            onClick={() => setShowSidebar(false)}
+          >
+            ✕
+          </button>
+        </div>
+        <div className="sidebar-content">
+          <CallParticipantsList onClose={() => setShowSidebar(false)} />
+        </div>
+      </div>
+
+      {/* Floating Controls - No participant preview bar */}
+      <div className="floating-controls">
+        <CustomControlBar
+          onToggleParticipants={() => setShowSidebar(!showSidebar)}
+          participantCount={participants.length}
+          onEndCall={onEndWebinar}
+          showRecording={true}
+          isRecording={isRecordingActive}
+          onToggleRecording={handleToggleRecording}
+          // No webinar title prop needed
+        />
+      </div>
+    </div>
+  </StreamTheme>
+);
+SUMMARY OF CHANGES:
+✅ Removed webinar title from control bar (keep in header only)
+✅ End call button shows only phone icon (no text)
+✅ Completely removed participants preview bar above controls
+✅ Video now fills maximum available height (full screen minus header)
+✅ Fixed all text visibility issues on black background
+✅ Cleaner, more professional layout

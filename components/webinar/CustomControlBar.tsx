@@ -22,7 +22,6 @@ interface CustomControlBarProps {
   participantCount: number
   onEndCall: () => void
   showRecording?: boolean
-  webinarTitle?: string
   isRecording?: boolean
   onToggleRecording?: () => void
 }
@@ -32,7 +31,6 @@ export function CustomControlBar({
   participantCount,
   onEndCall,
   showRecording = true,
-  webinarTitle,
   isRecording = false,
   onToggleRecording
 }: CustomControlBarProps) {
@@ -115,11 +113,6 @@ export function CustomControlBar({
           <div className="call-duration">
             <span className="text-sm text-gray-300">{formatDuration(duration)}</span>
           </div>
-          {webinarTitle && (
-            <div className="webinar-title">
-              <span className="text-sm text-gray-300 truncate max-w-48">{webinarTitle}</span>
-            </div>
-          )}
         </div>
       </div>
 
@@ -160,7 +153,7 @@ export function CustomControlBar({
           {showRecording && (
             <div className="control-button-wrapper">
               <Button
-                variant={isCallRecordingInProgress ? "destructive" : "secondary"}
+                variant={isCallRecordingInProgress ? "outline" : "secondary"}
                 size="sm"
                 className={`control-button recording ${isCallRecordingInProgress ? 'recording-active' : ''}`}
                 onClick={handleToggleRecording}
@@ -189,17 +182,20 @@ export function CustomControlBar({
         </div>
       </div>
 
-      {/* Right section - End call */}
+      {/* Right section - End call (Icon only) */}
       <div className="control-section-right">
-        <Button
-          variant="outline"
-          size="sm"
-          className="end-call-button bg-red-600 hover:bg-red-700 text-white border-red-600"
-          onClick={onEndCall}
-        >
-          <Phone className="w-4 h-4 rotate-180" />
-          <span className="ml-2 text-sm font-medium">End Webinar</span>
-        </Button>
+        <div className="control-button-wrapper">
+          <Button
+            variant="outline"
+            size="sm"
+            className="control-button end-call bg-red-600 hover:bg-red-700 text-white border-red-600"
+            onClick={onEndCall}
+            title="End webinar"
+            aria-label="End webinar"
+          >
+            <Phone className="w-4 h-4 rotate-[135deg]" />
+          </Button>
+        </div>
       </div>
     </div>
   )

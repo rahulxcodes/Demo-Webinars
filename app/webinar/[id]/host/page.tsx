@@ -99,22 +99,22 @@ function LiveWebinarLayout({
   return (
     <StreamTheme className="custom-dark-theme">
       <div className="zoom-layout-container" data-sidebar={showSidebar ? 'open' : 'closed'}>
-        {/* Webinar Header */}
+        {/* Compact Header */}
         <div className="webinar-header">
-          <div className="flex justify-between items-center p-4 bg-gray-800 text-white">
-            <h1 className="text-xl font-semibold">{webinar?.title}</h1>
+          <div className="flex justify-between items-center p-3 bg-gray-800 text-white">
+            <h1 className="text-xl font-semibold text-white">{webinar?.title}</h1>
             <div className="flex items-center space-x-4">
               {/* Recording Status Indicator */}
               {isRecordingActive && (
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm">Recording</span>
+                  <span className="text-sm text-white">Recording</span>
                 </div>
               )}
               <span className="px-3 py-1 bg-red-500 text-white rounded-full text-sm animate-pulse">
                 🔴 LIVE
               </span>
-              <span className="text-sm text-gray-300">
+              <span className="text-sm text-white">
                 {participants.length} attendees
               </span>
             </div>
@@ -127,11 +127,12 @@ function LiveWebinarLayout({
           />
         </div>
 
+        {/* Collapsible Sidebar */}
         <div className={`collapsible-sidebar ${showSidebar ? 'sidebar-open' : 'sidebar-closed'}`}>
           <div className="sidebar-header">
-            <h3>Attendees ({participants.length})</h3>
+            <h3 className="text-white">Attendees ({participants.length})</h3>
             <button 
-              className="sidebar-close-btn"
+              className="sidebar-close-btn text-white hover:text-gray-300"
               onClick={() => setShowSidebar(false)}
             >
               ✕
@@ -144,20 +145,7 @@ function LiveWebinarLayout({
           </div>
         </div>
 
-        <div className="participants-bottom-strip">
-          <div className="participants-preview">
-            {participants.slice(0, 4).map((participant, index) => (
-              <div key={participant.sessionId} className="participant-tile">
-                <span>{participant.name?.charAt(0) || 'A'}</span>
-              </div>
-            ))}
-            {participants.length > 4 && (
-              <div className="participant-tile more-count">
-                +{participants.length - 4}
-              </div>
-            )}
-          </div>
-        </div>
+
 
         <div className="floating-controls">
           <CustomControlBar
@@ -165,7 +153,6 @@ function LiveWebinarLayout({
             participantCount={participants.length}
             onEndCall={onEndWebinar}
             showRecording={true}
-            webinarTitle={webinar?.title}
             isRecording={isRecordingActive}
             onToggleRecording={handleToggleRecording}
           />
