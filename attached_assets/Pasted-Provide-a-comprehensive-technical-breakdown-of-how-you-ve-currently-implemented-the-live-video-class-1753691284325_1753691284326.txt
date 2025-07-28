@@ -1,0 +1,65 @@
+Provide a comprehensive technical breakdown of how you've currently implemented the live video class functionality:
+
+Live Class Component Structure:
+
+Which files contain the live class logic? (AdminClassView.tsx, UserClassView.tsx)
+
+How is the video layout structured within these components?
+
+Stream Component Usage:
+
+Which Stream components are you currently using? (SpeakerLayout, StreamCall, StreamVideo, etc.)
+
+What props are being passed to each Stream component?
+
+Are you using any custom Stream component configurations?
+
+Video Container Layout:
+
+What CSS classes and styling are applied to the main video area?
+
+How is the video sizing handled in the live class vs. recordings?
+
+Are there any container constraints affecting video display?
+
+Custom Control Bar Integration:
+
+How is the custom control bar positioned relative to the video?
+
+Is it overlaying the video or positioned outside the video container?
+
+Could the control bar positioning be affecting video dimensions?
+
+Sidebar Integration Impact:
+
+When the participants sidebar is open/closed, how does it affect video sizing?
+
+Are there any CSS Grid or Flexbox constraints that might limit video width?
+
+Is the video container properly responsive to sidebar state changes?
+
+Stream Video Client Configuration:
+
+How is the StreamVideoClient initialized?
+
+What video quality settings are being used?
+
+Are there any video constraints or settings that might affect display?
+
+Recent Changes Impact:
+
+Have any of the recent UI changes (control bar, sidebar, layout) affected the video display?
+
+Are there any CSS conflicts between the live class and recordings implementations?
+
+Once you get this diagnostic information, I'll be able to identify if there are specific issues with:
+
+Video container sizing in live mode vs. recordings
+
+CSS conflicts between different video display contexts
+
+Stream component configuration that might be limiting video quality or size
+
+Layout constraints from the sidebar or control bar implementations
+
+This will help us pinpoint whether the 60% video issue is affecting both live classes and recordings, or if it's specific to one context, allowing us to provide targeted fixes.
