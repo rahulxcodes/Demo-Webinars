@@ -1,0 +1,56 @@
+DIAGNOSTIC REQUEST: Analyze duplicate participant issue in webinar
+
+Please provide a comprehensive analysis of why the webinar is showing 3 participants that are all the same user (admin) instead of just 1 participant.
+
+SHOW ME THE CURRENT STATE:
+
+1. STREAM CLIENT INITIALIZATION:
+   - Show me how the StreamVideoClient is initialized in the host interface
+   - What user ID and user data is being passed to Stream?
+   - Are we creating multiple Stream clients accidentally?
+
+2. CALL JOINING LOGIC:
+   - Show me the exact code where the host joins the Stream call
+   - Are we calling call.join() multiple times?
+   - Is the call being created and joined in multiple places?
+
+3. USER IDENTIFICATION:
+   - What user ID is being used for the Stream user object?
+   - Show me the complete user object being passed to StreamVideoClient
+   - Are we using session.user.id consistently?
+
+4. TOKEN GENERATION:
+   - Show me the /app/api/webinars/[id]/stream-token/route.ts endpoint
+   - What user ID is being used to generate the Stream token?
+   - Are multiple tokens being generated for the same user?
+
+5. COMPONENT LIFECYCLE:
+   - Are there multiple useEffect hooks calling initializeWebinar?
+   - Is the component re-rendering and rejoining the call multiple times?
+   - Show me the complete dependency array for the useEffect
+
+6. STREAM CALL CREATION:
+   - How many times is the Stream call being created?
+   - Are we using call.join({ create: true }) or call.join({ create: false })?
+   - Is the same streamCallId being used consistently?
+
+7. BROWSER DEV TOOLS CHECK:
+   - Check Network tab: How many requests to /stream-token endpoint?
+   - Check Console: Are there multiple "joining call" or "user connected" messages?
+   - Check Application tab: Are there multiple sessions or tokens stored?
+
+8. DATABASE VERIFICATION:
+   - What is the actual user ID in the database for this session?
+   - Are there duplicate user records or sessions?
+
+SPECIFIC DEBUGGING REQUESTS:
+- Add console.log to show user ID being used for Stream client
+- Add console.log to show how many times call.join() is called
+- Add console.log to show the complete user object passed to Stream
+- Check if there are multiple Stream clients being created
+
+Please provide the exact code causing this duplication so I can identify whether it's:
+- Multiple call joins
+- Incorrect user identification  
+- Component re-rendering issues
+- Stream SDK configuration problems

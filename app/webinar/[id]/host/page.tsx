@@ -1,6 +1,6 @@
 'use client'
 
-import { use, useEffect, useState } from 'react'
+import { use, useEffect, useState, useCallback, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { 
@@ -136,81 +136,96 @@ export default function HostWebinarPage({ params }: HostInterfaceProps) {
   const [isWebinarStarted, setIsWebinarStarted] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const initializationRef = useRef(false) // Track initialization to prevent duplicates
 
-  useEffect(() => {
+  const initializeWebinar = useCallback(async () => {
+    if (initializationRef.current) {
+      console.log('🚫 DUPLICATE PREVENTION: Already initialized, skipping')
+      return
+    }
+    
     if (!session?.user?.id) {
       router.push('/auth/signin')
       return
     }
 
-    async function initializeWebinar() {
-      try {
-        console.log('🔍 DEBUGGING: Fetching webinar with ID:', id)
-        
-        // Fetch webinar details using webinar ID
-        const webinarResponse = await fetch(`/api/webinars/${id}`)
-        const webinarData = await webinarResponse.json()
-        
-        console.log('📝 DEBUGGING: Webinar API response:', webinarData)
-        
-        if (!webinarResponse.ok) {
-          console.error('❌ DEBUGGING: Webinar fetch failed:', webinarData)
-          throw new Error(webinarData.error || 'Failed to fetch webinar')
-        }
+    initializationRef.current = true
+    console.log('🔍 DUPLICATE FIX: Starting single initialization for webinar:', id)
+    console.log('👤 DUPLICATE FIX: Session user ID:', session.user.id)
 
-        // Extract webinar from response structure
-        const webinar = webinarData.webinar || webinarData
-        setWebinar(webinar)
-        
-        console.log('✅ DEBUGGING: Webinar loaded successfully:', webinar?.title)
-
-        // Get Stream token for host using streamCallId
-        const streamCallId = webinar.streamCallId || id
-        console.log('🎥 DEBUGGING: Using Stream Call ID:', streamCallId)
-        
-        const tokenResponse = await fetch(`/api/stream-token/${streamCallId}?userId=${session.user.id}&role=host`)
-        const { token, apiKey } = await tokenResponse.json()
-
-        // Initialize Stream client with getOrCreateInstance to prevent duplicates
-        const client = StreamVideoClient.getOrCreateInstance({
-          apiKey,
-          user: {
-            id: session.user.id,
-            name: session.user.name || 'Host',
-            role: 'host'
-          },
-          token,
-        })
-
-        // Join the existing Stream call using streamCallId
-        const streamCall = client.call('livestream', streamCallId)
-        await streamCall.join({ create: false })
-
-        setStreamClient(client)
-        setCall(streamCall)
-        
-        // Check if webinar is already live
-        if (webinar.status === 'live') {
-          setIsWebinarStarted(true)
-        }
-        
-        setIsLoading(false)
-      } catch (error) {
-        console.error('Failed to initialize webinar:', error)
-        setError(error.message)
-        setIsLoading(false)
+    try {
+      // Fetch webinar details using webinar ID
+      const webinarResponse = await fetch(`/api/webinars/${id}`)
+      const webinarData = await webinarResponse.json()
+      
+      if (!webinarResponse.ok) {
+        throw new Error(webinarData.error || 'Failed to fetch webinar')
       }
-    }
 
+      // Extract webinar from response structure
+      const webinar = webinarData.webinar || webinarData
+      setWebinar(webinar)
+      
+      console.log('✅ DUPLICATE FIX: Webinar loaded:', webinar?.title)
+
+      // Get Stream token for host using streamCallId
+      const streamCallId = webinar.streamCallId || id
+      console.log('🎥 DUPLICATE FIX: Stream Call ID:', streamCallId)
+      
+      const tokenResponse = await fetch(`/api/stream-token/${streamCallId}?userId=${session.user.id}&role=host`)
+      const { token, apiKey } = await tokenResponse.json()
+
+      console.log('🔑 DUPLICATE FIX: Token generated for user:', session.user.id)
+      
+      // Initialize Stream client with getOrCreateInstance to prevent duplicates
+      const client = StreamVideoClient.getOrCreateInstance({
+        apiKey,
+        user: {
+          id: session.user.id, // Use actual user ID
+          name: session.user.name || 'Host',
+          role: 'host'
+        },
+        token,
+      })
+
+      console.log('🌊 DUPLICATE FIX: Stream client created for user:', session.user.id)
+
+      // Join the existing Stream call using streamCallId
+      const streamCall = client.call('livestream', streamCallId)
+      
+      console.log('📞 DUPLICATE FIX: Attempting to join call:', streamCallId)
+      await streamCall.join({ create: false })
+      console.log('✅ DUPLICATE FIX: Successfully joined call')
+
+      setStreamClient(client)
+      setCall(streamCall)
+      
+      // Check if webinar is already live
+      if (webinar.status === 'live') {
+        setIsWebinarStarted(true)
+      }
+      
+      setIsLoading(false)
+    } catch (error) {
+      console.error('❌ DUPLICATE FIX: Failed to initialize webinar:', error)
+      setError(error.message)
+      setIsLoading(false)
+      initializationRef.current = false // Reset on error
+    }
+  }, [id, session?.user?.id, router])
+
+  useEffect(() => {
     initializeWebinar()
 
     // Cleanup function to properly disconnect when component unmounts
     return () => {
       if (streamClient) {
+        console.log('🧹 DUPLICATE FIX: Cleaning up Stream client')
         streamClient.disconnectUser()
+        initializationRef.current = false // Reset initialization flag
       }
     }
-  }, [id, session?.user?.id, router, streamClient])
+  }, [initializeWebinar, streamClient])
 
   const handleStartWebinar = async () => {
     setIsLoading(true)
