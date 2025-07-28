@@ -1,0 +1,152 @@
+Stream Video SDK Basic Integration
+text
+Integrate Stream Video SDK for basic live webinar functionality:
+
+STEP 1 - INSTALL STREAM SDK:
+Add Stream Video SDK dependencies:
+- @stream-io/video-react-sdk
+- @stream-io/video-client
+
+STEP 2 - ENVIRONMENT SETUP:
+Add to .env.local:
+STREAM_API_KEY=your_stream_api_key
+STREAM_SECRET=your_stream_secret
+
+text
+
+STEP 3 - STREAM CLIENT SETUP:
+Create /lib/stream/client.ts:
+
+import { StreamVideoClient, User } from '@stream-io/video-client';
+
+const apiKey = process.env.STREAM_API_KEY!;
+const secret = process.env.STREAM_SECRET!;
+
+export const streamServerClient = new StreamVideoClient({
+apiKey,
+secret,
+});
+
+export async function generateStreamToken(userId: string) {
+const token = streamServerClient.generateUserToken({
+user_id: userId,
+validity_in_seconds: 3600, // 1 hour
+});
+return token;
+}
+
+text
+
+STEP 4 - BASIC HOST INTERFACE:
+Create /app/webinar/[id]/host/page.tsx:
+
+Simple host interface with:
+- Start/Join webinar button
+- Basic video display
+- Camera on/off toggle
+- Microphone on/off toggle  
+- End webinar button
+- Participant count display
+
+STEP 5 - BASIC ATTENDEE INTERFACE:
+Create /app/join/[token]/page.tsx:
+
+Simple attendee interface with:
+- Join webinar button
+- View-only video stream
+- Basic chat functionality
+- Leave webinar button
+
+STEP 6 - API ENDPOINTS:
+Create /app/api/webinars/[id]/stream-token/route.ts:
+
+export async function GET(request: Request, { params }: { params: { id: string } }) {
+try {
+// Get user from session
+const userId = 'user123'; // Replace with actual user ID from session
+
+text
+// Generate Stream token
+const token = await generateStreamToken(userId);
+
+return Response.json({ 
+  token,
+  apiKey: process.env.STREAM_API_KEY 
+});
+} catch (error) {
+return Response.json({ error: 'Failed to generate token' }, { status: 500 });
+}
+}
+
+text
+
+STEP 7 - BASIC WEBINAR COMPONENT:
+Create /components/webinar/BasicWebinar.tsx:
+
+'use client';
+import { StreamVideoProvider, StreamCall, StreamVideo } from '@stream-io/video-react-sdk';
+import { useEffect, useState } from 'react';
+
+export default function BasicWebinar({ webinarId, userRole }) {
+const [streamClient, setStreamClient] = useState(null);
+const [call, setCall] = useState(null);
+
+useEffect(() => {
+// Initialize Stream client
+// Join webinar call
+// Set up basic video functionality
+}, []);
+
+return (
+<div className="webinar-container">
+{streamClient && (
+<StreamVideoProvider client={streamClient}>
+<StreamCall call={call}>
+<div className="video-layout">
+{/* Basic video layout /}
+<div className="main-video">
+{/ Main video area /}
+</div>
+<div className="controls">
+{/ Basic controls */}
+</div>
+</div>
+</StreamCall>
+</StreamVideoProvider>
+)}
+</div>
+);
+}
+
+text
+
+REQUIREMENTS:
+- Keep it simple for now - just basic video calling
+- Host can turn camera/mic on/off
+- Attendees can view the host's video stream
+- Basic chat functionality
+- No advanced features yet
+- Focus on getting Stream SDK working first
+
+Make sure this basic Stream integration works before we add any advanced features like pre-recorded videos.
+What This Basic Integration Gives Us:
+🎥 Basic live video streaming - Host can go live
+
+👥 Attendee viewing - People can watch the host
+
+🎤 Audio/video controls - Basic on/off toggles
+
+💬 Simple chat - Text messaging during webinar
+
+🔗 Join links - Attendees can join via registration tokens
+
+After This Works:
+Once we have basic Stream video calling working, then we can add:
+
+Pre-recorded video system (Phase 4A)
+
+Advanced controls (screen sharing, recording)
+
+Demo attendance tracking (Phase 4B)
+
+Webhook integrations (Phase 5)
