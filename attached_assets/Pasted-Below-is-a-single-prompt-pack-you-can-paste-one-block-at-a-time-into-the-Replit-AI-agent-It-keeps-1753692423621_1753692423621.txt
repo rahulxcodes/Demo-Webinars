@@ -1,0 +1,110 @@
+Below is a single “prompt pack” you can paste—one block at a time—into the Replit AI agent.
+It keeps every other layout exactly as-is, but makes the participants sidebar a slim, 10% strip with smaller avatars / text for a clean, unobtrusive look.
+
+Prompt 1 – Define a re-usable CSS variable for sidebar width
+
+text
+1. In any global stylesheet (e.g. src/styles/sidebar.css) add  
+   :root { --sidebar-width: clamp(160px, 10vw, 240px); }  
+   /*  ≥160 px so names never wrap, but never wider than 10 % of viewport
+      and never more than 240 px on very large monitors              */
+2. Import this file once in src/main.tsx (after theme import).  
+Return “✅ variable added” when build passes.
+Prompt 2 – Shrink the grid column when the sidebar is open
+
+text
+Update zoom-layout-container rules:
+
+.zoom-layout-container[data-sidebar="open"]  {
+  grid-template-columns: calc(100vw - var(--sidebar-width)) var(--sidebar-width);
+}
+
+.zoom-layout-container[data-sidebar="closed"] {
+  grid-template-columns: 1fr 0;
+}
+
+Add  transition: grid-template-columns 0.25s ease-out;  to .zoom-layout-container.
+Return “✅ grid updated”.
+Prompt 3 – Resize the sidebar itself
+
+text
+.participants-sidebar {
+  width:  var(--sidebar-width) !important;
+  min-width: var(--sidebar-width) !important;
+  max-width: var(--sidebar-width) !important;
+  padding: 6px 8px;
+  overflow-y: auto;
+}
+/* hide horizontal scroll just in case */
+.participants-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+Prompt 4 – Create a “compact” participant list style
+
+text
+1. Inside participants-sidebar, target Stream’s list items:
+
+.str-video__participant-item            { padding: 4px 4px !important; }
+.str-video__participant-item:hover      { background: rgba(255,255,255,0.05); }
+
+2. Shrink avatars & status icons:
+
+/* avatar sizes */
+.str-video__avatar--md,
+.str-video__avatar--sm,
+.str-video__avatar   { width: 24px !important; height: 24px !important; }
+
+/* mic / cam / screen icons */
+.str-video__participant-status-icon     { font-size: 14px !important; }
+
+/* hide role / extra labels */
+.str-video__participant-role,
+.str-video__quality-indicator,
+.str-video__connection-indicator        { display: none !important; }
+
+3. Compress text:
+
+.str-video__participant-name            { 
+  font-size: 12px !important;            /* smaller font */
+  line-height: 16px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+Return “✅ compact list styles”.
+Prompt 5 – Make the participants-toggle button show live count in a smaller badge
+
+text
+1. Inside CustomControlBar, locate ParticipantsButton.
+2. Replace its badge CSS with:
+
+.compact-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px; height: 18px;
+  font-size: 10px; line-height: 18px;
+  border-radius: 50%;
+  background: #10B981; color: #fff;
+}
+
+3. Ensure the button itself keeps a 44-48 px diameter to stay tappable.
+Return “✅ badge updated”.
+Prompt 6 – Verify & fine-tune
+
+text
+1. Run the app, join a call as Admin and as Student.
+2. Open / close the sidebar; confirm:
+   • Video now keeps ~90 % width.  
+   • Sidebar never exceeds 10 % (≥160 px, ≤240 px).  
+   • Avatars 24 px; text 12 px; icons 14 px.  
+   • Scrollbar appears only when list > viewport height.
+3. Capture a screenshot and post “✅ sidebar compact” on success.
+These six prompts:
+
+Reduce the sidebar to ±10% of the viewport without breaking the grid.
+
+Shrink avatars, icons, labels, and font size for a minimalist look.
+
+Preserve full functionality (mute icons, count badge, scroll) and keep the bottom control bar & video layout untouched.
