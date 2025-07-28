@@ -39,16 +39,39 @@ export default function NewWebinarPage() {
 
   const onSubmit = async (data: WebinarFormData) => {
     setIsSubmitting(true)
+    
     try {
-      // Simulate API call
-      console.log('Webinar Form Data:', data)
+      // Combine date and time into ISO string
+      const startTime = new Date(`${data.date}T${data.time}`).toISOString()
       
-      // Simulate delay
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const webinarData = {
+        title: data.title,
+        description: data.description,
+        startTime,
+        duration: parseInt(data.duration),
+      }
+      
+      console.log('Creating webinar:', webinarData)
+      
+      const response = await fetch('/api/webinars', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(webinarData),
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create webinar')
+      }
+      
+      const result = await response.json()
+      console.log('Webinar created:', result)
       
       setSubmitSuccess(true)
       
-      // Reset form after successful submission
+      // Reset form and redirect after successful submission
       setTimeout(() => {
         reset()
         setSubmitSuccess(false)
@@ -57,6 +80,7 @@ export default function NewWebinarPage() {
       
     } catch (error) {
       console.error('Error creating webinar:', error)
+      // You could add an error state here to show to the user
     } finally {
       setIsSubmitting(false)
     }

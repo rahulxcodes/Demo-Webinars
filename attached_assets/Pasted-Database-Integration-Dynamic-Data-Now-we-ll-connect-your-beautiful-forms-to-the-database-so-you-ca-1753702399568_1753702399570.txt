@@ -1,0 +1,138 @@
+Database Integration & Dynamic Data
+Now we'll connect your beautiful forms to the database so you can actually create, save, and display real webinars.
+
+🤖 Replit AI Agent Prompt #4: Database Integration
+text
+Add full database integration to the webinar platform with proper API endpoints and data display:
+
+DATABASE CONNECTION SETUP:
+- Configure Prisma properly with PostgreSQL
+- Add database connection utilities in /lib/db.ts
+- Create proper error handling for database operations
+
+API ENDPOINTS:
+Create /app/api/webinars/route.ts:
+
+POST endpoint (Create Webinar):
+- Accept webinar data from the form
+- Validate all required fields
+- Save to database using Prisma
+- Return success/error response with proper status codes
+- Include proper TypeScript types
+
+GET endpoint (List Webinars):
+- Fetch all webinars from database
+- Sort by creation date (newest first)
+- Return webinars with proper formatting
+- Add pagination support (limit 10 per page)
+
+CREATE INDIVIDUAL WEBINAR API:
+Create /app/api/webinars/[id]/route.ts:
+- GET: Fetch single webinar by ID
+- PATCH: Update webinar details
+- DELETE: Delete webinar with confirmation
+
+UPDATE WEBINAR CREATION FORM:
+Modify /app/dashboard/new-webinar/page.tsx:
+
+Form Submission:
+- Replace console.log with actual API call to POST /api/webinars
+- Add proper loading state during submission
+- Show success message and redirect to dashboard
+- Display error messages if submission fails
+- Form validation before API call
+
+Form Enhancement:
+- Add form reset after successful submission
+- Prevent double submission with loading state
+- Client-side validation with proper error display
+
+UPDATE DASHBOARD TO SHOW REAL DATA:
+Modify /app/dashboard/page.tsx:
+
+Data Fetching:
+- Fetch real webinars from GET /api/webinars
+- Use React state to manage webinars list
+- Add loading skeleton while data loads
+- Handle empty state when no webinars exist
+
+Dynamic Stats Cards:
+- Calculate real statistics from webinar data
+- Total webinars count
+- Upcoming webinars (future dates)
+- Past webinars (completed)
+- Show actual numbers instead of placeholders
+
+Webinar Display:
+- Show webinars in a beautiful card/table layout
+- Display: Title, Date/Time, Status, Duration
+- Add quick action buttons: Edit, Duplicate, Delete
+- Color-code by status (upcoming = blue, past = gray, live = green)
+
+WEBINAR STATUS LOGIC:
+Add automatic status calculation:
+- "upcoming" - start time is in the future
+- "live" - currently between start time and end time
+- "ended" - past the end time
+- Update status dynamically based on current time
+
+FORM ENHANCEMENTS:
+Add these improvements to the webinar form:
+- Time zone selection (default to user's timezone)
+- Duration calculation (show end time automatically)
+- Form auto-save as draft (optional)
+- Better date/time validation (no past dates)
+
+REAL-TIME UPDATES:
+- Auto-refresh dashboard data periodically
+- Update webinar status in real-time
+- Show live indicator for ongoing webinars
+
+ERROR HANDLING:
+- Proper error boundaries for React components
+- Database connection error handling
+- User-friendly error messages
+- Retry mechanisms for failed operations
+
+DATA VALIDATION:
+Create proper TypeScript types in /lib/types.ts:
+export interface Webinar {
+id: string;
+title: string;
+description?: string;
+startTime: Date;
+duration: number;
+status: 'upcoming' | 'live' | 'ended' | 'cancelled';
+hostId: string;
+createdAt: Date;
+updatedAt: Date;
+}
+
+export interface CreateWebinarRequest {
+title: string;
+description?: string;
+startTime: string;
+duration: number;
+}
+
+text
+
+LOADING STATES:
+- Skeleton loading for webinar cards
+- Button loading spinners during form submission
+- Page-level loading indicators
+- Smooth transitions between loading and loaded states
+
+Make sure everything works smoothly with proper error handling, loading states, and a great user experience when creating and viewing webinars.
+What This Achieves:
+💾 Real database integration - webinars are actually saved
+
+🔄 Dynamic data display - dashboard shows real webinars
+
+⚡ Working API endpoints for all webinar operations
+
+📊 Live statistics calculated from real data
+
+🎯 Proper error handling and loading states
+
+🔥 Real-time status updates (upcoming/live/ended)

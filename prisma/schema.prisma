@@ -21,13 +21,15 @@ model User {
 }
 
 model Webinar {
-  id        String   @id @default(cuid())
-  hostId    String
-  title     String
-  startTime DateTime
-  duration  Int      @default(60)
-  status    String   @default("scheduled")
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  hostId      String
+  title       String
+  description String?
+  startTime   DateTime
+  duration    Int      @default(60)
+  status      String   @default("upcoming")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("webinars")
 }
