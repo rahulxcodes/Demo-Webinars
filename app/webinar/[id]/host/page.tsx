@@ -50,8 +50,26 @@ export default function HostWebinarPage() {
     }
   }, [webinarId])
 
-  const handleStartWebinar = () => {
-    setIsLive(true)
+  const handleStartWebinar = async () => {
+    try {
+      const response = await fetch(`/api/webinars/${webinarId}/start`, {
+        method: 'POST'
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setIsLive(true)
+        // Show success message
+        console.log('Webinar started successfully:', data)
+      } else {
+        const error = await response.json()
+        console.error('Failed to start webinar:', error)
+        alert('Failed to start webinar: ' + error.error)
+      }
+    } catch (error) {
+      console.error('Network error starting webinar:', error)
+      alert('Network error starting webinar')
+    }
   }
 
   const handleEndWebinar = () => {

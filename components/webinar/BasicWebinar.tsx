@@ -64,29 +64,10 @@ export default function BasicWebinar({
         setClient(streamClient)
         
         // Join the call
-        const streamCall = streamClient.call('default', callId)
+        const streamCall = streamClient.call('webinar', callId)
         
-        if (userRole === 'host') {
-          // Host creates/joins the call
-          await streamCall.getOrCreate({
-            data: {
-              created_by_id: userId,
-              settings_override: {
-                audio: {
-                  mic_default_on: true,
-                },
-                video: {
-                  camera_default_on: true,
-                },
-              },
-            },
-          })
-        } else {
-          // Attendee joins existing call
-          await streamCall.get()
-        }
-        
-        await streamCall.join()
+        // Join the existing call (don't create, it was created when webinar was created)
+        await streamCall.join({ create: false })
         setCall(streamCall)
         
       } catch (err) {

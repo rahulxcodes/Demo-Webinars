@@ -21,15 +21,27 @@ model User {
 }
 
 model Webinar {
-  id          String   @id @default(cuid())
-  hostId      String
-  title       String
-  description String?
-  startTime   DateTime
-  duration    Int      @default(60)
-  status      String   @default("upcoming")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(cuid())
+  hostId          String
+  title           String
+  slug            String   @unique
+  streamCallId    String   @unique
+  description     String?
+  timezone        String   @default("UTC")
+  startTime       DateTime
+  duration        Int      @default(60)
+  isRecurring     Boolean  @default(false)
+  recurrenceRule  Json?
+  requireRegistration Boolean @default(true)
+  registrationDeadline Int?
+  maxAttendees    Int?
+  capacity        Int?
+  status          String   @default("scheduled")
+  streamStatus    String   @default("created")
+  settings        Json?
+  demoAttendanceThreshold Int @default(600)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   // Relations
   registrationForm RegistrationForm?
@@ -39,6 +51,8 @@ model Webinar {
   @@index([hostId])
   @@index([startTime])
   @@index([status])
+  @@index([streamCallId])
+  @@index([slug])
   @@index([createdAt])
   @@index([hostId, startTime])
   @@index([status, startTime])

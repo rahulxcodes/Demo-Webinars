@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { CreateWebinarRequest } from '@/lib/types';
 import { calculateWebinarStatus } from '@/lib/utils/webinar-status';
+import { createWebinarCall, generateUniqueSlug } from '@/lib/stream/client';
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,14 +30,39 @@ export async function POST(request: NextRequest) {
     // Calculate initial status
     const status = calculateWebinarStatus(startTime, body.duration);
 
-    // Create webinar in database with default registration form
+    // Generate unique slug and Stream call ID
+    const slug = generateUniqueSlug(body.title);
+    const streamCallId = `webinar-${slug}`;
+
+    // Create Stream call first
+    try {
+      await createWebinarCall(
+        streamCallId,
+        'default-host',
+        body.title,
+        startTime,
+        1000
+      );
+    } catch (streamError) {
+      console.error('Failed to create Stream call:', streamError);
+      return NextResponse.json(
+        { error: 'Failed to create video call' },
+        { status: 500 }
+      );
+    }
+
+    // Create webinar in database with Stream integration
     const webinar = await prisma.webinar.create({
       data: {
         title: body.title,
+        slug,
+        streamCallId,
         description: body.description || null,
         startTime,
         duration: body.duration,
         status,
+        streamStatus: 'created',
+        maxAttendees: 1000,
         hostId: 'default-host', // TODO: Replace with actual user ID from auth
         registrationForm: {
           create: {
