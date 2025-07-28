@@ -35,12 +35,14 @@ export function CustomControlBar({
     useParticipants, 
     useMicrophoneState, 
     useCameraState,
+    useScreenShareState,
     useIsCallRecordingInProgress 
   } = useCallStateHooks();
   
   const participants = useParticipants();
   const { microphone, isMute } = useMicrophoneState();
   const { camera, isMute: isCameraOff } = useCameraState();
+  const { screenShare, isMute: isScreenShareOff } = useScreenShareState();
   const isRecording = useIsCallRecordingInProgress();
   
   const handleMuteToggle = async () => {
@@ -52,9 +54,11 @@ export function CustomControlBar({
   };
   
   const handleScreenShareToggle = async () => {
-    // Screen share functionality - using call.camera for now as fallback
-    // This will be handled by the StreamVideo SDK automatically
-    console.log('Screen share toggle - functionality to be implemented');
+    try {
+      await screenShare.toggle();
+    } catch (error) {
+      console.error('Screen share toggle failed:', error);
+    }
   };
   
   const handleRecordingToggle = async () => {
@@ -113,15 +117,15 @@ export function CustomControlBar({
         {/* Screen Share Button */}
         <div className="control-button-wrapper">
           <button
-            className="control-button screen-not-sharing"
+            className={`control-button ${!isScreenShareOff ? 'screen-sharing' : 'screen-not-sharing'}`}
             onClick={handleScreenShareToggle}
-            title="Share your screen"
-            aria-label="Share your screen"
+            title={!isScreenShareOff ? 'Stop sharing screen' : 'Share your screen'}
+            aria-label={!isScreenShareOff ? 'Stop sharing screen' : 'Share your screen'}
           >
-            <Monitor size={20} />
+            {!isScreenShareOff ? <MonitorStop size={20} /> : <Monitor size={20} />}
           </button>
           <div className="control-button-tooltip">
-            Share screen
+            {!isScreenShareOff ? 'Stop sharing' : 'Share screen'}
           </div>
         </div>
       </div>
