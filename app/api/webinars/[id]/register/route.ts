@@ -5,10 +5,10 @@ import { FormField } from '@/lib/types/registration';
 // POST registration submission
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const webinarId = params.id;
+    const { id: webinarId } = await params;
     const body = await request.json();
 
     // Get registration form configuration

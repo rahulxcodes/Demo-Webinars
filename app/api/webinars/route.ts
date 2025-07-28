@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     // Calculate initial status
     const status = calculateWebinarStatus(startTime, body.duration);
 
-    // Create webinar in database
+    // Create webinar in database with default registration form
     const webinar = await prisma.webinar.create({
       data: {
         title: body.title,
@@ -38,6 +38,44 @@ export async function POST(request: NextRequest) {
         duration: body.duration,
         status,
         hostId: 'default-host', // TODO: Replace with actual user ID from auth
+        registrationForm: {
+          create: {
+            requireRegistration: true,
+            autoApprove: true,
+            formSchema: {
+              fields: [
+                {
+                  id: 'name',
+                  type: 'text',
+                  label: 'Full Name',
+                  placeholder: 'Enter your full name',
+                  required: true,
+                  order: 0,
+                },
+                {
+                  id: 'email',
+                  type: 'email',
+                  label: 'Email Address',
+                  placeholder: 'Enter your email address',
+                  required: true,
+                  order: 1,
+                },
+                {
+                  id: 'phone',
+                  type: 'phone',
+                  label: 'Mobile Number',
+                  placeholder: 'Enter your mobile number',
+                  required: false,
+                  order: 2,
+                },
+              ],
+              version: 1,
+            },
+          },
+        },
+      },
+      include: {
+        registrationForm: true,
       },
     });
 

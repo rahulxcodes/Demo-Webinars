@@ -471,10 +471,11 @@ export default function WebinarDetailsPage() {
                 </div>
                 <div>
                   <Label htmlFor="duration">Duration (minutes)</Label>
-                  <Select
+                  <select
                     id="duration"
                     value={editForm.duration.toString()}
                     onChange={(e) => handleEditFormChange('duration', parseInt(e.target.value))}
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
                   >
                     <option value="15">15 minutes</option>
                     <option value="30">30 minutes</option>
@@ -483,7 +484,7 @@ export default function WebinarDetailsPage() {
                     <option value="90">1.5 hours</option>
                     <option value="120">2 hours</option>
                     <option value="180">3 hours</option>
-                  </Select>
+                  </select>
                 </div>
               </div>
 
@@ -642,19 +643,19 @@ export default function WebinarDetailsPage() {
                   <div className="space-y-4">
                     <div>
                       <Label>Recording Mode</Label>
-                      <Select className="mt-1">
+                      <select className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
                         <option value="auto">Auto-Record</option>
                         <option value="manual">Manual Recording</option>
                         <option value="off">No Recording</option>
-                      </Select>
+                      </select>
                     </div>
                     <div>
                       <Label>Recording Quality</Label>
-                      <Select className="mt-1">
+                      <select className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
                         <option value="hd">HD (1080p)</option>
                         <option value="sd">SD (720p)</option>
                         <option value="low">Low (480p)</option>
-                      </Select>
+                      </select>
                     </div>
                   </div>
                 </div>

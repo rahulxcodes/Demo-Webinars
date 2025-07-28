@@ -189,14 +189,14 @@ export default function RegisterPage() {
 
       case 'select':
         return (
-          <Select {...commonProps}>
+          <select {...commonProps} className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
             <option value="">Select an option...</option>
             {field.options?.map((option, index) => (
               <option key={index} value={option}>
                 {option}
               </option>
             ))}
-          </Select>
+          </select>
         )
 
       case 'radio':

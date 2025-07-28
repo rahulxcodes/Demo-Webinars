@@ -1,0 +1,311 @@
+I see the issues! The registration system isn't properly configured yet, and the form builder is missing. Let me give you the exact fix for both problems.
+
+# **🤖 Replit AI Agent Prompt: Fix Registration System & Add Form Builder**
+
+```
+Fix the webinar registration system and add a comprehensive form builder with the following specifications:
+
+ISSUE 1 - FIX REGISTRATION AVAILABILITY:
+Update the webinar registration logic to properly handle registration settings:
+
+Database Schema Fix:
+Add registration settings to the Webinar model in schema.prisma:
+```
+model Webinar {
+  id                      String   @id @default(cuid())
+  hostId                  String
+  title                   String
+  description             String?
+  timezone                String   @default("UTC")
+  startTime               DateTime
+  duration                Int      @default(60)
+  isRecurring            Boolean  @default(false)
+  recurrenceRule         Json?
+  requireRegistration    Boolean  @default(true)  // Enable by default
+  registrationDeadline   Int?     // hours before webinar
+  maxAttendees           Int?
+  capacity               Int?
+  status                 String   @default("scheduled")
+  settings               Json?
+  demoAttendanceThreshold Int     @default(600)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  
+  // Add registration form relation
+  registrationForm       RegistrationForm?
+  registrations          Registration[]
+  attendance             Attendance[]
+  videos                 WebinarVideo[]
+}
+
+model RegistrationForm {
+  id              String    @id @default(cuid())
+  webinarId       String    @unique
+  autoApprove     Boolean   @default(true)
+  formSchema      Json      @default("[]") // Default empty form
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  webinar         Webinar   @relation(fields: [webinarId], references: [id], onDelete: Cascade)
+  registrations   Registration[]
+}
+```
+
+ISSUE 2 - CREATE DEFAULT REGISTRATION FORM:
+When creating a webinar, automatically create a default registration form:
+
+Update /app/api/webinars/route.ts POST endpoint:
+```
+export async function POST(request: Request) {
+  try {
+    const data = await request.json();
+    
+    // Create webinar with registration enabled by default
+    const webinar = await prisma.webinar.create({
+      data: {
+        ...data,
+        requireRegistration: true, // Enable by default
+        registrationForm: {
+          create: {
+            autoApprove: true,
+            formSchema: [
+              {
+                id: 'name',
+                type: 'text',
+                label: 'Full Name',
+                placeholder: 'Enter your full name',
+                required: true,
+                order: 1
+              },
+              {
+                id: 'email',
+                type: 'email',
+                label: 'Email Address',
+                placeholder: 'Enter your email address',
+                required: true,
+                order: 2
+              },
+              {
+                id: 'mobile',
+                type: 'phone',
+                label: 'Mobile Number',
+                placeholder: 'Enter your mobile number',
+                required: false,
+                order: 3
+              }
+            ]
+          }
+        }
+      },
+      include: {
+        registrationForm: true
+      }
+    });
+
+    return Response.json(webinar);
+  } catch (error) {
+    return Response.json({ error: 'Failed to create webinar' }, { status: 500 });
+  }
+}
+```
+
+ISSUE 3 - BUILD COMPREHENSIVE FORM BUILDER:
+Create /components/FormBuilder/RegistrationFormBuilder.tsx:
+
+Form Builder Interface:
+- Default fields section (Name, Email, Mobile) - always included
+- Custom fields section with "Add Field" button
+- Drag and drop reordering
+- Field type selector with all options
+- Live form preview
+- Save/Cancel actions
+
+Available Field Types:
+```
+const FIELD_TYPES = [
+  { value: 'text', label: 'Text Input', icon: 'TextIcon' },
+  { value: 'email', label: 'Email Address', icon: 'EmailIcon' },
+  { value: 'phone', label: 'Phone Number', icon: 'PhoneIcon' },
+  { value: 'textarea', label: 'Long Text', icon: 'TextAreaIcon' },
+  { value: 'select', label: 'Dropdown', icon: 'SelectIcon' },
+  { value: 'radio', label: 'Radio Buttons', icon: 'RadioIcon' },
+  { value: 'checkbox', label: 'Checkboxes', icon: 'CheckboxIcon' },
+  { value: 'number', label: 'Number', icon: 'NumberIcon' },
+  { value: 'date', label: 'Date Picker', icon: 'DateIcon' },
+  { value: 'url', label: 'Website URL', icon: 'LinkIcon' },
+  { value: 'file', label: 'File Upload', icon: 'FileIcon' }
+];
+```
+
+Field Configuration Options:
+For each field, allow configuration of:
+- Field Label (required)
+- Placeholder text
+- Help text/description
+- Required/Optional toggle
+- Validation rules (min/max length, pattern, etc.)
+- Default value
+- Options list (for select, radio, checkbox fields)
+
+ISSUE 4 - FIX REGISTRATION PAGE:
+Update /app/register/[webinarId]/page.tsx:
+
+Registration Page Logic:
+```
+export default async function RegistrationPage({ params }: { params: { webinarId: string } }) {
+  // Fetch webinar with registration form
+  const webinar = await prisma.webinar.findUnique({
+    where: { id: params.webinarId },
+    include: {
+      registrationForm: true
+    }
+  });
+
+  // Check if registration is available
+  if (!webinar) {
+    return ;
+  }
+
+  if (!webinar.requireRegistration) {
+    return ;
+  }
+
+  // Check registration deadline
+  const now = new Date();
+  const registrationDeadline = webinar.registrationDeadline 
+    ? new Date(webinar.startTime.getTime() - (webinar.registrationDeadline * 60 * 60 * 1000))
+    : webinar.startTime;
+
+  if (now > registrationDeadline) {
+    return ;
+  }
+
+  // Check capacity
+  const registrationCount = await prisma.registration.count({
+    where: { 
+      webinarId: webinar.id,
+      status: 'approved'
+    }
+  });
+
+  if (webinar.maxAttendees && registrationCount >= webinar.maxAttendees) {
+    return ;
+  }
+
+  return ;
+}
+```
+
+Dynamic Form Rendering:
+Create a component that renders forms based on the formSchema:
+
+```
+const DynamicRegistrationForm = ({ formSchema, onSubmit }) => {
+  const { register, handleSubmit, formState: { errors } } = useForm();
+
+  return (
+    
+      {formSchema.map((field) => (
+        
+          
+            {field.label}
+            {field.required && *}
+          
+          
+          {field.type === 'text' && (
+            
+          )}
+          
+          {field.type === 'email' && (
+            
+          )}
+          
+          {field.type === 'phone' && (
+            
+          )}
+          
+          {field.type === 'select' && (
+            
+              Select an option
+              {field.options?.map((option) => (
+                
+                  {option.label}
+                
+              ))}
+            
+          )}
+          
+          {/* Add more field types as needed */}
+          
+          {errors[field.id] && (
+            This field is required
+          )}
+        
+      ))}
+      
+      
+        Register for Webinar
+      
+    
+  );
+};
+```
+
+ISSUE 5 - ADD REGISTRATION SETTINGS TAB:
+Update the webinar detail page to include proper registration settings:
+
+Registration Settings Interface:
+- Toggle "Require Registration" with immediate save
+- Registration deadline settings
+- Maximum attendees limit
+- Auto-approve vs manual approval
+- Form builder interface
+- Registration analytics
+- Export registrants button
+
+API Endpoints:
+Create /app/api/webinars/[id]/registration-form/route.ts:
+- GET: Fetch current registration form
+- POST: Update registration form schema
+- DELETE: Reset to default form
+
+ISSUE 6 - FIX REGISTRATION URL GENERATION:
+Ensure each webinar has a proper registration URL:
+- Format: /register/[webinarId]
+- Display registration link in webinar settings
+- Add copy to clipboard functionality
+- Generate QR code for easy sharing
+
+TESTING CHECKLIST:
+After implementation, verify:
+1. New webinars automatically have registration enabled
+2. Default form with Name, Email, Mobile is created
+3. Registration page shows form instead of "Not Available"
+4. Form builder allows adding/removing/reordering fields
+5. Registration submissions work properly
+6. All field types render and validate correctly
+
+Make sure the registration system works seamlessly with proper validation, error handling, and user-friendly interfaces.
+```
+
+## **What This Fixes:**
+
+- ✅ **Registration availability** - No more "Registration Not Available" errors
+- ✅ **Default registration form** - Automatic Name, Email, Mobile fields
+- ✅ **Full form builder** - Add any type of custom field
+- ✅ **Drag-and-drop ordering** - Customize field sequence
+- ✅ **Field validation** - Required/optional settings
+- ✅ **Registration settings** - Complete configuration panel
+- ✅ **Dynamic form rendering** - Forms work based on your configuration
+
+## **After Running This Prompt:**
+
+1. **Every new webinar** will automatically have registration enabled
+2. **Registration links** will show working forms instead of error messages
+3. **Form builder** will be available in webinar settings
+4. **Full customization** - add text, dropdowns, checkboxes, etc.
+5. **Professional registration experience** for your attendees
+
+**Run this comprehensive fix in your Replit AI agent to resolve both the registration availability issue and add the complete form builder functionality!** 🔧✨
+
+[1] https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/images/85153307/c9e4958b-73f0-4f9e-b707-2cf075315b4b/image.jpg?AWSAccessKeyId=ASIA2F3EMEYETFYESNXU&Signature=nlY9mqNqfjLAd%2FqsY0KIkHqhAQY%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEGQaCXVzLWVhc3QtMSJHMEUCIQC9Rj5gkJS%2BqFmsj1u8csx%2F5UJ2dx9eO1Au3lGqUIp0zQIgeq0KSHbcYPq4oVojd%2BMPIwO6CCnBxvRMiLxQOLT6ticq%2BgQIjf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARABGgw2OTk3NTMzMDk3MDUiDLRHxCvycjLb178uESrOBNk70iNwApSKH9cwH%2BSFTk5piwaAqMOfnz4ttnrgbqClvJvJqfSDFist%2FwZ3imoHfCxsEK6dBS6nhrEjlPyvcEr%2FVaGxUsRbljmMeCkst5DHW%2BslV6E0kQ%2BaPAb9sITP7el%2FVUROi%2FeFGiDqJDhxkYzn2lT3sAq55lI32wAG1OlGF9L%2FXj16CmISsApNamhrkaVbh%2B94nag5Ie8VUOT4an04q91IqSckSPg8T2b6RAcRgQZlL1In3cij9xzscEhVT05C5ytQ6IhCSIgcNO89UPOLCDwGg95hvMHkuOoEyjeSjthyuzvlSR98HzSivT1kaZ5838IHZAkT52mBH%2Bbx23z8mEx7iZYp%2B%2FLDej0K7%2F97rt7Ksu4Femg2LGl3qxbAOfzWDqUL2zmJwrLgpwUh0AdVj%2FfVVw3moUfrgjLK3u75mKm6cwb3tOaFb%2BtxmNCKu2dbZ7or8pj%2BKfwv%2B9W3EfpLdbrZiPxyNIdL7pNGXxdaC%2BrMypKtlpX2DNmCa6hUC5OySh3wDoDC%2FFiy%2Fvx66u5S89UpRu40CXsvg66YBmzu%2BajlBj3eLG9IF2nOVg1W%2FL3XmoPSLJPjJSx7qjWeQl3lFeYgJaFJQOeCwyIXZXsm2s0wbkTKSvpLGUa2AVHx0QfK0j3Cd5uO%2FIqfpL%2Biy5RJvuLYknuAktPLmrkoEWL2o8vxO%2BDpJhx1GAb2tdgTaqa0v2jX7w3X2cwrW4WhetrF9EHpHjGcpHozHFmnmZxUjm162YFqjjhdfc%2BVETC0WVCRVLWZx23U7%2BOVW2eoMOvBncQGOpoBueTkumMZiDPAMXvRYbhl81wvGBT2kGEwCtz%2B6PVHRmXJ52K8PNPnd06tDh6mUscDLb8m9iTel1dfzSN5T%2FkfwE4XCHjC9hE%2BlxWlXRITH9TP6g5I2U3QzS6dCXDy4KumDVa1%2BUGVaijhaN3qNBw41tNoI7U1XZN4W4kkLbhe8YapKggPruk9HnoXcqDjBDqw313ARaoRuOnfNA%3D%3D&Expires=1753704810

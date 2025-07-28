@@ -4,10 +4,10 @@ import { prisma } from '@/lib/db';
 // GET single webinar with all details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const webinarId = params.id;
+    const { id: webinarId } = await params;
 
     const webinar = await prisma.webinar.findUnique({
       where: { id: webinarId },
@@ -47,10 +47,10 @@ export async function GET(
 // PATCH update webinar details
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const webinarId = params.id;
+    const { id: webinarId } = await params;
     const body = await request.json();
 
     const {
@@ -122,10 +122,10 @@ export async function PATCH(
 // DELETE webinar
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const webinarId = params.id;
+    const { id: webinarId } = await params;
 
     // Check if webinar exists
     const webinar = await prisma.webinar.findUnique({
