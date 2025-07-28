@@ -74,11 +74,9 @@ export default function BasicWebinar({
               settings_override: {
                 audio: {
                   mic_default_on: true,
-                  default_device: 'speaker',
                 },
                 video: {
                   camera_default_on: true,
-                  default_device: 'speaker',
                 },
               },
             },

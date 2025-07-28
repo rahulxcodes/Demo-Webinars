@@ -4,9 +4,7 @@ import jwt from 'jsonwebtoken'
 const apiKey = process.env.STREAM_API_KEY!
 const secret = process.env.STREAM_SECRET!
 
-export const streamServerClient = new StreamVideoClient(apiKey, {
-  secret,
-})
+export const streamServerClient = new StreamVideoClient(apiKey)
 
 export async function generateStreamToken(userId: string) {
   try {
@@ -36,11 +34,9 @@ export async function createCall(callId: string, createdByUserId: string) {
         settings_override: {
           audio: {
             mic_default_on: true,
-            default_device: 'speaker',
           },
           video: {
             camera_default_on: true,
-            default_device: 'speaker',
           },
         },
       },
