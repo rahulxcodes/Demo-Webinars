@@ -1,0 +1,90 @@
+Now I can see exactly what's causing the video width issue in your live classes. The diagnostic breakdown clearly shows the double constraint problem:
+
+CSS Grid constraint: 75vw when sidebar is open
+
+Video element constraint: max-width 85% of container
+
+Combined effect: 75% × 85% = ~64% of viewport width (which explains your 60% observation)
+
+Here are the precise prompts to fix this issue:
+
+Prompt 1: Fix the Primary CSS Grid Constraint
+In your CSS file, update the grid layout to give more space to the video area:
+
+Change .zoom-layout-container[data-sidebar="open"] from grid-template-columns: 75vw 320px to grid-template-columns: calc(100vw - 340px) 320px
+
+This gives the video area all available space minus sidebar width (320px + 20px margin)
+
+For smaller screens, add a minimum constraint: grid-template-columns: max(65vw, calc(100vw - 340px)) 320px
+
+This ensures video never gets smaller than 65% of viewport width
+
+Prompt 2: Remove the Secondary Video Element Constraint
+Update the video element sizing in your CSS:
+
+Change .main-video-stage .str-video__participant-view max-width from 85% to 100%
+
+Keep max-height at 90% to maintain some top/bottom padding
+
+Update the rule to: max-width: 100% !important; max-height: 90% !important;
+
+This allows the video to use the full container width instead of being artificially limited
+
+Prompt 3: Add Dynamic Responsive Breakpoints
+Implement responsive grid columns that adapt to screen size:
+
+Desktop (>1200px): grid-template-columns: calc(100vw - 340px) 320px
+
+Laptop (900px-1200px): grid-template-columns: 70vw 320px
+
+Tablet (<900px): Switch to single column with bottom sheet sidebar
+
+Use CSS media queries to implement these breakpoints
+
+This ensures optimal video size across all devices
+
+Prompt 4: Optimize for Both Sidebar States
+Create better spacing for both sidebar open/closed states:
+
+Sidebar closed: Keep grid-template-columns: 1fr 0 (full width)
+
+Sidebar open: Use grid-template-columns: 1fr 320px instead of fixed vw
+
+Add transition smoothing: transition: grid-template-columns 0.3s ease-in-out
+
+This creates a more natural resize behavior
+
+Prompt 5: Implement Smart Minimum Width Protection
+Add protection against video becoming too narrow:
+
+Add min-width: 400px to .main-video-area to prevent cramping
+
+On very small screens, automatically hide sidebar if video would become too narrow
+
+Add JavaScript logic: if viewport width < 768px and sidebar is open, auto-close it
+
+Show a mobile-optimized participants list instead
+
+Prompt 6: Unify Video Sizing Between Live Classes and Recordings
+Apply the same responsive principles from recordings to live classes:
+
+Use similar max-height constraints: max-height: 80vh for the video container
+
+Apply object-cover or object-contain consistently across both contexts
+
+Ensure both use the same responsive breakpoints for consistency
+
+This creates a unified video experience across your entire app
+
+Expected Results After Implementation
+Full-width utilization: Video will use ~90-95% of viewport width when sidebar is open
+
+Seamless transitions: Smooth resizing when toggling sidebar
+
+Consistent experience: Video sizing matches between live classes and recordings
+
+Mobile optimization: Proper responsive behavior on all screen sizes
+
+Professional appearance: Video takes optimal space without artificial constraints
+
+The key fix is changing from 75vw 320px to calc(100vw - 340px) 320px in your grid template, which will immediately solve the 60% width limitation and give your videos the space they deserve for a professional video conferencing experience.

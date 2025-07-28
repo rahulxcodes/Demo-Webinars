@@ -14,13 +14,13 @@
   grid-template-areas: 
     "main sidebar"
     "strip strip";
-  transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: grid-template-columns 0.3s ease-in-out;
   overflow: hidden;
 }
 
-/* Sidebar open state */
+/* Sidebar open state - Dynamic width calculation */
 .zoom-layout-container[data-sidebar="open"] {
-  grid-template-columns: 75vw 320px;
+  grid-template-columns: calc(100vw - 340px) 320px;
 }
 
 /* Main video area */
@@ -32,6 +32,7 @@
   align-items: center;
   justify-content: center;
   min-height: 0;
+  min-width: 400px;
   overflow: hidden;
 }
 
@@ -148,6 +149,7 @@
 .str-video__speaker-layout {
   width: 100% !important;
   height: 100% !important;
+  max-height: 80vh !important;
   background-color: #1f1f23 !important;
 }
 
@@ -175,6 +177,15 @@
 .str-video__participant-view--speaking {
   border-color: #00d4aa !important;
   box-shadow: 0 0 12px rgba(0, 212, 170, 0.3) !important;
+}
+
+/* Main speaker video container - Remove width constraint */
+.main-video-stage .str-video__participant-view {
+  max-width: 100% !important;
+  max-height: 90% !important;
+  width: auto !important;
+  height: auto !important;
+  aspect-ratio: 16/9 !important;
 }
 
 /* Participant strip styling */
@@ -809,14 +820,7 @@
   position: relative;
 }
 
-/* Main speaker video container */
-.main-video-stage .str-video__participant-view {
-  max-width: 85% !important;
-  max-height: 90% !important;
-  width: auto !important;
-  height: auto !important;
-  aspect-ratio: 16/9 !important;
-}
+
 
 /* Ensure video content fits properly */
 .main-video-stage video {
@@ -873,8 +877,20 @@
   /* Settings, End Call */
 }
 
-/* Responsive Behavior */
-@media (max-width: 768px) {
+/* Responsive Grid Layout */
+@media (min-width: 1200px) {
+  .zoom-layout-container[data-sidebar="open"] {
+    grid-template-columns: calc(100vw - 340px) 320px;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1199px) {
+  .zoom-layout-container[data-sidebar="open"] {
+    grid-template-columns: 70vw 320px;
+  }
+}
+
+@media (max-width: 899px) {
   .zoom-layout-container {
     grid-template-rows: 1fr auto auto;
     grid-template-areas: 
@@ -887,6 +903,11 @@
     grid-template-columns: 1fr;
     grid-template-rows: 60vh auto auto;
   }
+  
+  .main-video-area {
+    min-width: 100%;
+  }
+}
   
   .collapsible-sidebar {
     transform: translateY(100%);
@@ -955,7 +976,6 @@
       padding: 8px !important;
     }
   }
-}
 
 /* Modern Video Calling Interface Styles - Legacy */
 .live-class-layout {
