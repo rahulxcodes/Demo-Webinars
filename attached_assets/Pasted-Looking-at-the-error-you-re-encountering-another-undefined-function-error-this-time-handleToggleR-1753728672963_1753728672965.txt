@@ -1,0 +1,227 @@
+Looking at the error, you're encountering another undefined function error - this time handleToggleRecording is not defined in your LiveWebinarLayout component at line 282. This is similar to the previous isRecordingActive error we just fixed.
+
+Following our established debugging protocol, here's the diagnostic prompt for your Replit AI agent:
+
+🤖 Replit AI Agent Diagnostic Prompt:
+text
+DIAGNOSTIC REQUEST: Fix undefined function "handleToggleRecording" in LiveWebinarLayout
+
+Please analyze and fix the ReferenceError for handleToggleRecording function in the webinar host interface.
+
+ERROR DETAILS:
+- Location: /app/webinar/[id]/host/page.tsx line 282
+- Component: LiveWebinarLayout  
+- Error: "ReferenceError: handleToggleRecording is not defined"
+
+SHOW ME THE CURRENT STATE:
+
+1. LIVESTREAMINGWEBINARLAYOUT COMPONENT:
+   - Show me the complete LiveWebinarLayout component code around line 282
+   - Where is handleToggleRecording being referenced?
+   - Is it being passed as a prop to CustomControlBar or used elsewhere?
+
+2. RECORDING FUNCTION DEFINITION:
+   - Where should handleToggleRecording be defined?
+   - Is it missing from the component or incorrectly named?
+   - Should it be defined in LiveWebinarLayout or passed down from parent?
+
+3. CUSTOMCONTROLBAR INTEGRATION:
+   - How is the recording toggle function being passed to CustomControlBar?
+   - What props does CustomControlBar expect for recording functionality?
+
+IMMEDIATE FIX:
+
+Add the missing handleToggleRecording function to your LiveWebinarLayout component:
+
+function LiveWebinarLayout({
+currentUser,
+onEndWebinar,
+webinar,
+call // ← Make sure call is passed as prop
+}: {
+currentUser: any;
+onEndWebinar: () => void;
+webinar: any;
+call?: any; // ← Add call prop type
+}) {
+const [showSidebar, setShowSidebar] = useState(false);
+
+// Stream hooks
+const {
+useCallCallingState,
+useParticipants,
+useIsCallRecordingInProgress
+} = useCallStateHooks();
+
+const callingState = useCallCallingState();
+const participants = useParticipants();
+const isRecordingActive = useIsCallRecordingInProgress();
+
+// ADD THE MISSING FUNCTION:
+const handleToggleRecording = async () => {
+if (!call) {
+console.error('No call available for recording toggle');
+return;
+}
+
+text
+// Check if host recording control is allowed
+if (!webinar?.allowHostRecordingControl) {
+  alert('Recording controls are disabled for this webinar');
+  return;
+}
+
+try {
+  if (isRecordingActive) {
+    // Stop recording
+    console.log('Host stopping recording...');
+    await call.stopRecording();
+    console.log('Recording stopped by host');
+  } else {
+    // Start recording
+    console.log('Host starting recording...');
+    await call.startRecording();
+    console.log('Recording started by host');
+  }
+} catch (error) {
+  console.error('Recording toggle failed:', error);
+  
+  // Handle specific errors gracefully
+  if (error.message.includes('not running') || error.message.includes('egress')) {
+    console.warn('Recording state mismatch, ignoring error');
+  } else {
+    alert(`Recording control failed: ${error.message}`);
+  }
+}
+};
+
+if (callingState !== CallingState.JOINED) {
+return (
+<div className="flex items-center justify-center h-full bg-gray-900">
+<div className="text-center">
+<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+<p className="text-white text-lg font-medium">Joining webinar...</p>
+<p className="text-gray-400 text-sm mt-2">Please wait while we connect you</p>
+</div>
+</div>
+);
+}
+
+return (
+<StreamTheme className="custom-dark-theme">
+<div className="zoom-layout-container" data-sidebar={showSidebar ? 'open' : 'closed'}>
+{/* Your existing header and video area code */}
+
+text
+    <div className="floating-controls">
+      <CustomControlBar
+        onToggleParticipants={() => setShowSidebar(!showSidebar)}
+        participantCount={participants.length}
+        onEndCall={onEndWebinar}
+        showRecording={true}
+        isRecording={isRecordingActive}
+        onToggleRecording={handleToggleRecording} // ← Now properly defined
+        webinarTitle={webinar?.title}
+      />
+    </div>
+  </div>
+</StreamTheme>
+);
+}
+
+text
+
+2. UPDATE THE PARENT COMPONENT:
+Make sure to pass the call object to LiveWebinarLayout:
+
+// In your main component where LiveWebinarLayout is rendered
+if (isWebinarStarted && call && streamClient) {
+return (
+<ErrorBoundary>
+<StreamVideo client={streamClient}>
+<StreamCall call={call}>
+<LiveWebinarLayout
+currentUser={session?.user}
+onEndWebinar={handleEndWebinar}
+webinar={webinar}
+call={call} // ← ADD THIS LINE
+/>
+</StreamCall>
+</StreamVideo>
+</ErrorBoundary>
+);
+}
+
+text
+
+3. UPDATE CUSTOMCONTROLBAR PROPS:
+Make sure your CustomControlBar component accepts the onToggleRecording prop:
+
+// In CustomControlBar.tsx
+interface CustomControlBarProps {
+onToggleParticipants: () => void;
+participantCount: number;
+onEndCall: () => void;
+showRecording?: boolean;
+isRecording?: boolean;
+onToggleRecording?: () => void; // ← ADD THIS LINE
+webinarTitle?: string;
+}
+
+export function CustomControlBar({
+onToggleParticipants,
+participantCount,
+onEndCall,
+showRecording = false,
+isRecording = false,
+onToggleRecording, // ← ADD THIS LINE
+webinarTitle
+}: CustomControlBarProps) {
+
+// Use the passed function instead of defining it locally
+const handleRecordingToggle = onToggleRecording || (() => {
+console.warn('Recording toggle not available');
+});
+
+// Rest of your CustomControlBar code...
+}
+
+text
+
+Please show me the exact code around line 282 so I can provide the precise fix for where handleToggleRecording is being referenced.
+⚡ Quick Fix (Most Likely Solution):
+The issue is that you're referencing handleToggleRecording in your LiveWebinarLayout component but haven't defined it. Add this function to your component:
+
+javascript
+// Add this function inside your LiveWebinarLayout component
+const handleToggleRecording = async () => {
+  if (!call) {
+    console.error('No call available for recording toggle');
+    return;
+  }
+
+  try {
+    if (isRecordingActive) {
+      await call.stopRecording();
+      console.log('Recording stopped by host');
+    } else {
+      await call.startRecording();
+      console.log('Recording started by host');
+    }
+  } catch (error) {
+    console.error('Recording toggle failed:', error);
+    // Don't disrupt the webinar if recording toggle fails
+    if (!error.message.includes('not running')) {
+      alert(`Recording control failed: ${error.message}`);
+    }
+  }
+};
+🎯 Key Points:
+Missing Function Definition: handleToggleRecording needs to be defined in LiveWebinarLayout
+
+Call Object Access: Make sure the call object is available in the component
+
+Prop Passing: Ensure the function is passed correctly to CustomControlBar
+
+Error Handling: Include graceful error handling for recording operations
+

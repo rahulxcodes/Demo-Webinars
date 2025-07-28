@@ -31,11 +31,13 @@ interface HostInterfaceProps {
 function LiveWebinarLayout({
   currentUser,
   onEndWebinar,
-  webinar
+  webinar,
+  call
 }: {
   currentUser: any
   onEndWebinar: () => void
   webinar: any
+  call?: any
 }) {
   const [showSidebar, setShowSidebar] = useState(false)
 
@@ -44,6 +46,43 @@ function LiveWebinarLayout({
   const callingState = useCallCallingState()
   const participants = useParticipants()
   const isRecordingActive = useIsCallRecordingInProgress()
+
+  // ADD THE MISSING FUNCTION: handleToggleRecording
+  const handleToggleRecording = async () => {
+    if (!call) {
+      console.error('No call available for recording toggle')
+      return
+    }
+
+    // Check if host recording control is allowed
+    if (!webinar?.allowHostRecordingControl) {
+      alert('Recording controls are disabled for this webinar')
+      return
+    }
+
+    try {
+      if (isRecordingActive) {
+        // Stop recording
+        console.log('🛑 Host stopping recording...')
+        await call.stopRecording()
+        console.log('✅ Recording stopped by host')
+      } else {
+        // Start recording
+        console.log('🔴 Host starting recording...')
+        await call.startRecording()
+        console.log('✅ Recording started by host')
+      }
+    } catch (error) {
+      console.error('❌ Recording toggle failed:', error)
+      
+      // Handle specific errors gracefully
+      if (error.message.includes('not running') || error.message.includes('egress')) {
+        console.warn('Recording state mismatch, ignoring error')
+      } else {
+        alert(`Recording control failed: ${error.message}`)
+      }
+    }
+  }
 
   if (callingState !== CallingState.JOINED) {
     return (
@@ -350,40 +389,7 @@ export default function HostWebinarPage({ params }: HostInterfaceProps) {
     }
   }
 
-  const handleToggleRecording = async () => {
-    if (!call) return
 
-    // Don't allow recording control if host controls are disabled
-    if (!webinar?.allowHostRecordingControl) {
-      alert('Recording controls are disabled for this webinar')
-      return
-    }
-
-    try {
-      if (isRecordingActive) {
-        // Stop recording gracefully
-        console.log('⏹️ RECORDING FIX: Host stopping recording...')
-        await call.stopRecording()
-        setIsRecordingActive(false)
-        console.log('✅ RECORDING FIX: Recording stopped by host')
-      } else {
-        // Start recording
-        console.log('🔴 RECORDING FIX: Host starting recording...')
-        await call.startRecording()
-        setIsRecordingActive(true)
-        console.log('✅ RECORDING FIX: Recording started by host')
-      }
-    } catch (error) {
-      console.error('❌ RECORDING FIX: Recording toggle failed:', error)
-      
-      // Show user-friendly error without disrupting webinar
-      if (error.message.includes('not running')) {
-        console.warn('Recording was not running, ignoring stop request')
-      } else {
-        alert(`Recording control failed: ${error.message}`)
-      }
-    }
-  }
 
   if (isLoading) {
     return (
@@ -410,7 +416,8 @@ export default function HostWebinarPage({ params }: HostInterfaceProps) {
             <LiveWebinarLayout 
               currentUser={session?.user} 
               onEndWebinar={handleEndWebinar} 
-              webinar={webinar} 
+              webinar={webinar}
+              call={call}
             />
           </StreamCall>
         </StreamVideo>
