@@ -140,7 +140,6 @@ export function CustomControlBar({
             title="Show participants panel"
           >
             <HiUsers className="w-5 h-5" />
-            <span>Participants ({participantCount})</span>
             {participantCount > 1 && (
               <div 
                 className="participant-count-badge"
