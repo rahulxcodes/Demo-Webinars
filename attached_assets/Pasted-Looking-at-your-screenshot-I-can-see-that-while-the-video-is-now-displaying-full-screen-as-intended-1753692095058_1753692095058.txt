@@ -1,0 +1,49 @@
+Looking at your screenshot, I can see that while the video is now displaying full-screen as intended, there's an unwanted text overlay showing "Test Admin" that appears to be floating on top of the video content. This is likely a participant name label or user identification overlay that's now more prominent due to the full-screen video changes we made.
+
+This overlay is probably coming from Stream's default participant labeling system that shows user names on video feeds. Here are the precise prompts to fix this issue:
+
+Prompt 1: Hide Stream's Default Name Overlays
+Remove the participant name overlays that are appearing over the full-screen video:
+
+Add CSS rule to hide name labels: .str-video__participant-details { display: none !important; }
+
+Also target any text overlays: .str-video__participant-name { display: none !important; }
+
+Hide speaking indicators if present: .str-video__speaking-indicator { display: none !important; }
+
+Remove any user badges: .str-video__user-badge { display: none !important; }
+
+Prompt 2: Target Specific Text Overlays in Main Video Area
+Specifically remove text overlays from the main video display area:
+
+Target overlays only in main area: .main-video-area .str-video__participant-details { display: none !important; }
+
+Hide admin/role labels: .main-video-area .str-video__role-indicator { display: none !important; }
+
+Remove any floating text elements: .main-video-area .str-video__overlay-text { display: none !important; }
+
+Keep name labels only in sidebar: .participants-sidebar .str-video__participant-details { display: block !important; }
+
+Prompt 3: Clean Up Stream's UI Overlays
+Remove all unnecessary UI elements that might be layering over the video:
+
+Hide connection status indicators: .str-video__connection-indicator { display: none !important; }
+
+Remove quality indicators: .str-video__quality-indicator { display: none !important; }
+
+Hide any watermarks: .str-video__watermark { display: none !important; }
+
+Clean up any debug text: .str-video__debug-info { display: none !important; }
+
+Prompt 4: Ensure Clean Video Surface
+Create a clean, professional video display without text overlays:
+
+Force clean video rendering: .main-video-area video { position: relative; z-index: 1; }
+
+Hide any positioned text elements: .main-video-area [class*="text"], .main-video-area [class*="label"] { display: none !important; }
+
+Ensure only video content is visible: .main-video-area > * > *:not(video):not(canvas) { display: none !important; }
+
+Maintain video controls accessibility while hiding text overlays
+
+The "Test Admin" text overlay should disappear with these changes, giving you a clean, professional full-screen video experience without any distracting text elements layered on top of the video content.
