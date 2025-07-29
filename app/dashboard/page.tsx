@@ -223,7 +223,7 @@ export default function DashboardPage() {
               <h2 className="text-lg font-semibold text-gray-900">
                 Your Webinars
               </h2>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gray-700 font-medium">
                 {filteredWebinars.length} webinars
               </span>
             </div>
@@ -231,9 +231,9 @@ export default function DashboardPage() {
           <CardBody>
             {filteredWebinars.length === 0 ? (
               <div className="text-center py-12">
-                <VideoCameraIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <VideoCameraIcon className="mx-auto h-12 w-12 text-gray-500" />
                 <h3 className="mt-2 text-sm font-medium text-gray-900">No webinars yet</h3>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-700">
                   Get started by creating your first webinar.
                 </p>
                 <div className="mt-6">

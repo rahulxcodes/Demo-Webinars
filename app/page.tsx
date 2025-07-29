@@ -76,7 +76,7 @@ export default function HomePage() {
                   <VideoCameraIcon className="h-8 w-8 text-primary-600" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">HD Video Quality</h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-gray-700 leading-relaxed">
                   Crystal clear video streaming with adaptive bitrate for smooth presentations across all devices
                 </p>
               </CardBody>
@@ -88,7 +88,7 @@ export default function HomePage() {
                   <UserGroupIcon className="h-8 w-8 text-success-600" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">Interactive Features</h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-gray-700 leading-relaxed">
                   Engage your audience with real-time chat, polls, Q&A sessions, and screen sharing capabilities
                 </p>
               </CardBody>

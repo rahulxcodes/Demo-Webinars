@@ -30,9 +30,9 @@ export const WebinarCard = React.memo(({ webinar, onDelete }: WebinarCardProps) 
           </span>
         </div>
         {webinar.description && (
-          <p className="text-gray-600 mt-1">{webinar.description}</p>
+          <p className="text-gray-700 mt-1">{webinar.description}</p>
         )}
-        <div className="flex items-center text-sm text-gray-500 mt-2">
+        <div className="flex items-center text-sm text-gray-700 mt-2">
           <CalendarIcon className="h-4 w-4 mr-1" />
           {startDate.toLocaleDateString()} at {startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           <ClockIcon className="h-4 w-4 ml-4 mr-1" />

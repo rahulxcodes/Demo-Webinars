@@ -279,7 +279,7 @@ export default function WebinarDetailsPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900">Webinar not found</h2>
-          <p className="text-gray-600">The webinar you're looking for doesn't exist.</p>
+          <p className="text-gray-700">The webinar you're looking for doesn't exist.</p>
         </div>
       </div>
     )
@@ -289,7 +289,7 @@ export default function WebinarDetailsPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
-        <div className="flex items-center space-x-2 text-sm text-gray-600 mb-4">
+        <div className="flex items-center space-x-2 text-sm text-gray-700 mb-4">
           <button 
             onClick={() => router.push('/dashboard')}
             className="flex items-center space-x-1 hover:text-gray-900"
@@ -735,7 +735,7 @@ export default function WebinarDetailsPage() {
                   <div className="text-3xl font-bold text-primary-600">
                     {webinar.registrations?.filter(r => r.status === 'approved').length || 0}
                   </div>
-                  <p className="text-gray-600 text-sm">Approved Registrations</p>
+                  <p className="text-gray-700 text-sm">Approved Registrations</p>
                 </CardBody>
               </Card>
               <Card>
@@ -743,13 +743,13 @@ export default function WebinarDetailsPage() {
                   <div className="text-3xl font-bold text-warning-600">
                     {webinar.registrations?.filter(r => r.status === 'pending').length || 0}
                   </div>
-                  <p className="text-gray-600 text-sm">Pending Approval</p>
+                  <p className="text-gray-700 text-sm">Pending Approval</p>
                 </CardBody>
               </Card>
               <Card>
                 <CardBody className="text-center">
                   <div className="text-3xl font-bold text-gray-600">0</div>
-                  <p className="text-gray-600 text-sm">Attendance Rate</p>
+                  <p className="text-gray-700 text-sm">Attendance Rate</p>
                 </CardBody>
               </Card>
             </div>

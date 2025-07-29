@@ -256,7 +256,7 @@ export function FormBuilder({ initialSchema, onSave, loading = false }: FormBuil
               ))}
 
               {sortedFields.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-gray-700">
                   <p>No fields added yet. Use the buttons above to add fields to your form.</p>
                 </div>
               )}

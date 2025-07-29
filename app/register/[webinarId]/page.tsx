@@ -264,7 +264,7 @@ export default function RegisterPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900">Registration Not Available</h2>
-          <p className="text-gray-600">This webinar is not accepting registrations.</p>
+          <p className="text-gray-700">This webinar is not accepting registrations.</p>
         </div>
       </div>
     )
@@ -313,7 +313,7 @@ export default function RegisterPage() {
             {webinar.description && (
               <p className="text-gray-700 mb-4">{webinar.description}</p>
             )}
-            <div className="flex items-center space-x-6 text-sm text-gray-600">
+            <div className="flex items-center space-x-6 text-sm text-gray-700">
               <div className="flex items-center space-x-2">
                 <CalendarIcon className="h-4 w-4" />
                 <span>{new Date(webinar.startTime).toLocaleDateString()}</span>

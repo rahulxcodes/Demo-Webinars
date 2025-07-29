@@ -78,19 +78,19 @@ export default function StreamDebugPage() {
             <div className="space-y-3 text-sm">
               <div>
                 <strong>1. Check Credentials:</strong>
-                <p className="text-gray-600">Verify your Stream API key and secret are correctly set in environment variables</p>
+                <p className="text-gray-700">Verify your Stream API key and secret are correctly set in environment variables</p>
               </div>
               <div>
                 <strong>2. Stream Dashboard:</strong>
-                <p className="text-gray-600">Make sure your Stream app has Video Calling feature enabled</p>
+                <p className="text-gray-700">Make sure your Stream app has Video Calling feature enabled</p>
               </div>
               <div>
                 <strong>3. Account Status:</strong>
-                <p className="text-gray-600">Check if your Stream trial/subscription is active</p>
+                <p className="text-gray-700">Check if your Stream trial/subscription is active</p>
               </div>
               <div>
                 <strong>4. Network:</strong>
-                <p className="text-gray-600">Ensure your server can reach Stream.io APIs</p>
+                <p className="text-gray-700">Ensure your server can reach Stream.io APIs</p>
               </div>
             </div>
           </CardBody>
