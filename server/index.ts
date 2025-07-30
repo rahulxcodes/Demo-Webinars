@@ -1,11 +1,24 @@
-// DEPRECATED: This bridge script is no longer needed for Next.js deployment
-// Next.js handles server functionality natively
-// For deployment, use: npm run build && npm start
-// This file can be removed once deployment configuration is updated
+// DEPRECATED: This file has been replaced by Next.js native server
+// Moved to backup_replaced_files/ on 2025-01-30
+// Next.js now handles all server functionality natively
 
-console.log("⚠️  DEPRECATION NOTICE: This bridge script is no longer needed.");
-console.log("   Next.js now handles server functionality natively.");
-console.log("   Update deployment to use 'npm run build' and 'npm start' directly.");
-console.log("   This ensures proper Next.js production optimization.");
+console.log("🚀 REDIRECTING TO NEXT.JS: This Express bridge is no longer needed.");
+console.log("   Starting Next.js development server on port 5000...");
+console.log("   All server functionality now handled by Next.js App Router.");
 
-process.exit(1);
+// Start Next.js development server
+import { spawn } from 'child_process';
+
+const nextDev = spawn('npx', ['next', 'dev', '-p', '5000'], {
+  stdio: 'inherit',
+  cwd: process.cwd()
+});
+
+nextDev.on('error', (error) => {
+  console.error('Failed to start Next.js:', error);
+  process.exit(1);
+});
+
+nextDev.on('close', (code) => {
+  process.exit(code);
+});
