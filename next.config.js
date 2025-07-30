@@ -22,9 +22,10 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   
-  // Fix cross-origin warnings for development
+  // Experimental features
   experimental: {
-    allowedDevOrigins: ['127.0.0.1', 'localhost', '.replit.dev'],
+    // allowedDevOrigins is deprecated in Next.js 15.4.4
+    // Cross-origin handling is now automatic
   },
 }
 

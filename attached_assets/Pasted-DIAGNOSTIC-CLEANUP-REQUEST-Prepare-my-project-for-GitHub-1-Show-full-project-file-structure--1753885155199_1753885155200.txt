@@ -1,0 +1,40 @@
+DIAGNOSTIC + CLEANUP REQUEST: Prepare my project for GitHub
+
+1. **Show full project file structure.**
+    - Print a tree of all files and folders at least two levels deep (showing /app, /components, /lib, .next, node_modules, .git, etc.).
+    - Specifically point out which are:
+        - Actual source code (should be kept in git/GitHub)
+        - Build artifacts (like .next/, .cache/) and dependencies (node_modules/) — these should NOT be in GitHub!
+        - Sensitive files (like .env) — these should not be shared.
+
+2. **Review .gitignore, or create/fix it if necessary.**
+    - If .gitignore exists, print its contents and check if it excludes `.next/`, `node_modules/`, `.cache/`, `.env*`, and other large or sensitive stuff.
+    - If .gitignore is missing or wrong, create or fix it with standard Next.js/Node/TypeScript settings.
+
+3. **Check Git tracking for wrong files.**
+    - Tell me if `.next/`, `node_modules/`, or other huge folders are already added/tracked by git (use `git status`).
+    - If so, run the commands to remove them from git tracking **without deleting them locally**, for example:
+      ```
+      git rm -r --cached .next
+      git rm -r --cached node_modules
+      git rm -r --cached .cache
+      git rm --cached .env
+      ```
+
+4. **Stage, commit, and push ONLY the proper code to GitHub.**
+    - Add (git add) only the real app files and .gitignore.
+    - Commit with a clear message, such as:  
+      "Clean repo: remove build and dependency files, add proper .gitignore"
+    - Push to the main branch on GitHub, ensuring it’s set as upstream if this is the first time (`git push --set-upstream origin main`).
+
+5. **Check GitHub for correct upload.**
+    - Ensure only proper source files are in the GitHub repo, not build artifacts or dependencies.
+
+6. **Report to me what was changed and if the push was successful.**
+    - If any errors occurred, show exact error messages and suggest clear next steps.
+
+**Goal:**  
+I want a clean GitHub repository with only the essential code tracked—no unnecessary build, dependency, cached, or sensitive files included.  
+I do not want to type any git commands or code myself; please do all cleaning, pushing, and verification and report back with the results.
+
+If you need any clarifications, ask before proceeding.
