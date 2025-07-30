@@ -1,24 +1,39 @@
-// DEPRECATED: This file has been replaced by Next.js native server
-// Moved to backup_replaced_files/ on 2025-01-30
-// Next.js now handles all server functionality natively
+// NEXT.JS STARTUP SCRIPT - PURE NEXT.JS DEPLOYMENT READY
+// This script ensures clean Next.js startup without Express/Vite dependencies
 
-console.log("🚀 REDIRECTING TO NEXT.JS: This Express bridge is no longer needed.");
-console.log("   Starting Next.js development server on port 5000...");
-console.log("   All server functionality now handled by Next.js App Router.");
-
-// Start Next.js development server
 import { spawn } from 'child_process';
 
+console.log("🚀 STARTING NEXT.JS: Professional webinar platform");
+console.log("   Next.js 15.4.4 development server starting on port 5000...");
+console.log("   Ready for Vercel deployment - no Express/Vite dependencies");
+
+// Start Next.js development server directly
 const nextDev = spawn('npx', ['next', 'dev', '-p', '5000'], {
   stdio: 'inherit',
-  cwd: process.cwd()
+  cwd: process.cwd(),
+  env: { ...process.env, NODE_ENV: 'development' }
 });
 
 nextDev.on('error', (error) => {
-  console.error('Failed to start Next.js:', error);
-  process.exit(1);
+  console.error('❌ Failed to start Next.js:', error);
+  console.log('🔧 Trying alternative startup method...');
+  
+  // Fallback: try with direct next command
+  const fallback = spawn('next', ['dev', '-p', '5000'], {
+    stdio: 'inherit',
+    cwd: process.cwd(),
+    env: { ...process.env, NODE_ENV: 'development' }
+  });
+  
+  fallback.on('error', (fallbackError) => {
+    console.error('❌ Fallback failed:', fallbackError);
+    process.exit(1);
+  });
 });
 
 nextDev.on('close', (code) => {
-  process.exit(code);
+  if (code !== 0) {
+    console.error(`❌ Next.js exited with code ${code}`);
+  }
+  process.exit(code || 0);
 });
