@@ -29,8 +29,7 @@ export async function GET() {
     // Step 2: Initialize Stream client
     console.log('Step 2: Initializing Stream client...')
     const streamClient = new StreamVideoClient({
-      apiKey,
-      secret
+      apiKey
     })
     console.log('Stream client initialized successfully')
 
