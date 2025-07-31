@@ -15,7 +15,8 @@ export default function StreamDebugPage() {
       const result = await response.json()
       setTestResult(result)
     } catch (error) {
-      setTestResult({ error: error.message })
+      const errorMsg = error instanceof Error ? error.message : "Unknown error";
+      setTestResult({ error: errorMsg })
     } finally {
       setLoading(false)
     }

@@ -69,7 +69,7 @@ export async function POST(
     }
 
     // Validate form data
-    const formSchema = registrationForm.formSchema as { fields: FormField[] };
+    const formSchema = registrationForm.formSchema as unknown as { fields: FormField[] };
     const { userName, userEmail, mobileNumber, formResponses } = body;
 
     if (!userName || !userEmail) {

@@ -78,14 +78,20 @@ export async function POST(
       })
     } catch (streamError) {
       console.error('Failed to start Stream call:', streamError)
+      
+      const errorMsg = streamError instanceof Error ? streamError.message : "Unknown stream error";
+      const errorStatus = streamError instanceof Error && 'status' in streamError ? (streamError as any).status : "Unknown";
+      const errorCode = streamError instanceof Error && 'code' in streamError ? (streamError as any).code : "Unknown";
+      const errorDetails = streamError instanceof Error && 'details' in streamError ? (streamError as any).details : "No details";
+      
       console.error('Stream Error Details:', {
-        message: streamError.message,
-        status: streamError.status,
-        code: streamError.code,
-        details: streamError.details
+        message: errorMsg,
+        status: errorStatus,
+        code: errorCode,
+        details: errorDetails
       })
       return NextResponse.json(
-        { error: `Failed to start video stream: ${streamError.message}` },
+        { error: `Failed to start video stream: ${errorMsg}` },
         { status: 500 }
       )
     }

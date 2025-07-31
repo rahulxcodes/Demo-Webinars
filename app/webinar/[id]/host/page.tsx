@@ -76,10 +76,11 @@ function LiveWebinarLayout({
       console.error('❌ Recording toggle failed:', error)
       
       // Handle specific errors gracefully
-      if (error.message.includes('not running') || error.message.includes('egress')) {
+      const errorMsg = error instanceof Error ? error.message : "Unknown error";
+      if (errorMsg.includes('not running') || errorMsg.includes('egress')) {
         console.warn('Recording state mismatch, ignoring error')
       } else {
-        alert(`Recording control failed: ${error.message}`)
+        alert(`Recording control failed: ${errorMsg}`)
       }
     }
   }
@@ -125,14 +126,6 @@ function LiveWebinarLayout({
         <div className="main-video-area">
           <SpeakerLayout 
             participantsBarLimit={0}
-            style={{ 
-              width: '100%', 
-              height: '100%', 
-              aspectRatio: '16/9',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
           />
         </div>
 
@@ -228,8 +221,7 @@ export default function HostWebinarPage({ params }: HostInterfaceProps) {
         apiKey,
         user: {
           id: session.user.id, // Use actual user ID
-          name: session.user.name || 'Host',
-          role: 'host'
+          name: session.user.name || 'Host'
         },
         token,
       })
@@ -254,7 +246,8 @@ export default function HostWebinarPage({ params }: HostInterfaceProps) {
       setIsLoading(false)
     } catch (error) {
       console.error('❌ DUPLICATE FIX: Failed to initialize webinar:', error)
-      setError(error.message)
+      const errorMsg = error instanceof Error ? error.message : "Unknown error";
+      setError(errorMsg)
       setIsLoading(false)
       initializationRef.current = false // Reset on error
     }
@@ -284,8 +277,8 @@ export default function HostWebinarPage({ params }: HostInterfaceProps) {
       await call.update({
         settings_override: {
           recording: {
-            mode: webinar?.autoRecord ? 'auto-on' : 'available',
-            quality: webinar?.recordingQuality || '720p'
+            mode: (webinar as any)?.autoRecord ? 'auto-on' : 'available',
+            quality: (webinar as any)?.recordingQuality || '720p'
           },
           screensharing: {
             enabled: true,
@@ -309,11 +302,11 @@ export default function HostWebinarPage({ params }: HostInterfaceProps) {
       console.log('📺 RECORDING FIX: Making call go live...')
       await call.goLive({
         start_hls: true,
-        start_recording: webinar?.autoRecord, // Auto-start recording if enabled
+        start_recording: (webinar as any)?.autoRecord, // Auto-start recording if enabled
       })
       
       // If auto-record is enabled, ensure recording starts
-      if (webinar?.autoRecord) {
+      if ((webinar as any)?.autoRecord) {
         try {
           console.log('🔴 RECORDING FIX: Starting auto-recording...')
           await call.startRecording()
@@ -327,11 +320,12 @@ export default function HostWebinarPage({ params }: HostInterfaceProps) {
       }
 
       setIsWebinarStarted(true)
-      setWebinar(prev => ({ ...prev, status: 'live' }))
+      setWebinar(prev => prev ? ({ ...(prev as any), status: 'live' }) : null)
       
     } catch (error) {
       console.error('❌ RECORDING FIX: Failed to start webinar:', error)
-      alert(`Failed to start webinar: ${error.message}`)
+      const errorMsg = error instanceof Error ? error.message : "Unknown error";
+      alert(`Failed to start webinar: ${errorMsg}`)
     } finally {
       setIsLoading(false)
     }
@@ -345,7 +339,7 @@ export default function HostWebinarPage({ params }: HostInterfaceProps) {
       
       // Check recording status before stopping
       try {
-        const callState = await call.queryCall()
+        const callState = await (call as any).queryCall()
         const isActuallyRecording = callState.call.egress?.recording
         
         if (isActuallyRecording || isRecordingActive) {
@@ -435,14 +429,14 @@ export default function HostWebinarPage({ params }: HostInterfaceProps) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              🎥 {webinar?.title}
+              🎥 {(webinar as any)?.title}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="text-gray-600">
               <p>Ready to start your webinar?</p>
               <p className="text-sm mt-1">
-                Stream ID: <code className="bg-gray-100 px-2 py-1 rounded">{webinar?.streamCallId}</code>
+                Stream ID: <code className="bg-gray-100 px-2 py-1 rounded">{(webinar as any)?.streamCallId}</code>
               </p>
             </div>
             

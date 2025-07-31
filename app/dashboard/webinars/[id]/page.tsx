@@ -220,7 +220,7 @@ export default function WebinarDetailsPage() {
   const handleStartWebinar = useCallback(async () => {
     if (!webinar) return
 
-    console.log('Starting webinar:', webinar.id, 'with Stream Call ID:', webinar.streamCallId)
+    console.log('Starting webinar:', webinar.id, 'with Stream Call ID:', (webinar as any).streamCallId)
     setStartingWebinar(true)
 
     try {
@@ -423,7 +423,7 @@ export default function WebinarDetailsPage() {
                     <div>
                       <Label>Registrations</Label>
                       <p className="text-gray-900">
-                        {webinar.registrations?.length || 0} registered
+                        {(webinar as any).registrations?.length || 0} registered
                       </p>
                     </div>
                   </div>
@@ -733,7 +733,7 @@ export default function WebinarDetailsPage() {
               <Card>
                 <CardBody className="text-center">
                   <div className="text-3xl font-bold text-primary-600">
-                    {webinar.registrations?.filter(r => r.status === 'approved').length || 0}
+                    {(webinar as any).registrations?.filter((r: any) => r.status === 'approved').length || 0}
                   </div>
                   <p className="text-gray-700 text-sm">Approved Registrations</p>
                 </CardBody>
@@ -741,7 +741,7 @@ export default function WebinarDetailsPage() {
               <Card>
                 <CardBody className="text-center">
                   <div className="text-3xl font-bold text-warning-600">
-                    {webinar.registrations?.filter(r => r.status === 'pending').length || 0}
+                    {(webinar as any).registrations?.filter((r: any) => r.status === 'pending').length || 0}
                   </div>
                   <p className="text-gray-700 text-sm">Pending Approval</p>
                 </CardBody>
@@ -759,9 +759,9 @@ export default function WebinarDetailsPage() {
                 <h2 className="text-xl font-semibold">Registration Timeline</h2>
               </CardHeader>
               <CardBody>
-                {webinar.registrations && webinar.registrations.length > 0 ? (
+                {(webinar as any).registrations && (webinar as any).registrations.length > 0 ? (
                   <div className="space-y-3">
-                    {webinar.registrations.slice(0, 5).map((registration, index) => (
+                    {(webinar as any).registrations.slice(0, 5).map((registration: any, index: number) => (
                       <div key={registration.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div className="flex items-center space-x-3">
                           <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">

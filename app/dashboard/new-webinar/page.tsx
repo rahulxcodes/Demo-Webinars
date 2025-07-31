@@ -100,7 +100,7 @@ export default function NewWebinarPage() {
   if (submitSuccess) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="max-w-md w-full mx-4" variant="elevated">
+        <Card className="max-w-md w-full mx-4">
           <CardBody className="text-center py-12">
             <div className="mx-auto h-16 w-16 rounded-full bg-gradient-to-r from-success-100 to-success-200 flex items-center justify-center mb-6">
               <CheckCircleIcon className="h-8 w-8 text-success-600" />

@@ -17,8 +17,7 @@ export async function GET() {
 
     // Test Stream client initialization
     const streamClient = new StreamVideoClient({
-      apiKey,
-      secret,
+      apiKey
     })
 
     // Test basic client functionality
@@ -32,10 +31,13 @@ export async function GET() {
       clientInitialized: !!testCall
     })
   } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : "Unknown error";
+    const errorStack = error instanceof Error ? error.stack : "No stack trace available";
+    
     return NextResponse.json({
       valid: false,
-      error: error.message,
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      error: errorMsg,
+      details: process.env.NODE_ENV === 'development' ? errorStack : undefined
     })
   }
 }

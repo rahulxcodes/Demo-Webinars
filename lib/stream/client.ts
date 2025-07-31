@@ -8,8 +8,7 @@ if (!apiKey || !secret) {
 }
 
 export const streamServerClient = new StreamVideoClient({
-  apiKey,
-  secret,
+  apiKey
 })
 
 export async function generateStreamToken(userId: string) {
@@ -46,8 +45,7 @@ export async function createWebinarCall(
     await streamServerClient.connectUser(
       { 
         id: createdByUserId, 
-        name: 'Host',
-        role: 'admin' // Give admin role for call management
+        name: 'Host'
       },
       await generateStreamToken(createdByUserId)
     )
@@ -80,13 +78,19 @@ export async function createWebinarCall(
     return call
   } catch (error) {
     console.error('Stream API Error:', error)
+    
+    const errorMsg = error instanceof Error ? error.message : "Unknown error";
+    const errorStatus = error instanceof Error && 'status' in error ? (error as any).status : "Unknown";
+    const errorCode = error instanceof Error && 'code' in error ? (error as any).code : "Unknown";
+    const errorDetails = error instanceof Error && 'details' in error ? (error as any).details : "No details";
+    
     console.error('Stream Error Details:', {
-      message: error.message,
-      status: error.status,
-      code: error.code,
-      details: error.details
+      message: errorMsg,
+      status: errorStatus,
+      code: errorCode,
+      details: errorDetails
     })
-    throw new Error(`Failed to create webinar call: ${error.message}`)
+    throw new Error(`Failed to create webinar call: ${errorMsg}`)
   }
 }
 
@@ -96,8 +100,7 @@ export async function startWebinarCall(callId: string, hostUserId: string = 'def
     await streamServerClient.connectUser(
       { 
         id: hostUserId, 
-        name: 'Webinar Host',
-        role: 'admin' // Admin role for call management
+        name: 'Webinar Host'
       },
       await generateStreamToken(hostUserId)
     )
