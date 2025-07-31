@@ -126,7 +126,8 @@ export async function startWebinarCall(callId: string, hostUserId: string = 'def
     
     return call
   } catch (error) {
-    console.error('Error starting webinar call:', error)
+    const errorMsg = error instanceof Error ? error.message : typeof error === 'string' ? error : 'Unknown error'
+    console.error('Error starting webinar call:', errorMsg)
     throw new Error('Failed to start webinar call')
   }
 }

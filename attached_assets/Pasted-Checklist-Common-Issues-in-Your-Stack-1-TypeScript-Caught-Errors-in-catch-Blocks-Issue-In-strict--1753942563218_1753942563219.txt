@@ -1,0 +1,98 @@
+Checklist: Common Issues in Your Stack
+1. TypeScript-Caught Errors in catch Blocks
+Issue: In strict mode, using .message on an error caught with catch (err) is a build error, since the value is unknown.
+
+Fix: Always narrow the error before accessing its properties:
+
+ts
+catch (err) {
+  const msg =
+    err instanceof Error
+      ? err.message
+      : typeof err === "string"
+      ? err
+      : "Unknown error";
+  // use msg
+}
+Action: Search all catch blocks for direct property access and use the above safe pattern. This already popped up in your debug API and could hide in other API handlers.
+
+2. API Route Handlers in Next.js 15
+Issue: Next.js 15 is strict about what can be exported from an API route. For example:
+
+Only export HTTP methods like GET, POST, etc.
+
+Do NOT export any helper objects or configs (e.g., authOptions) from route handler files.
+
+Fix: Place configuration/objects in a separate file (like lib/auth.ts) and import into routes.
+
+Action: Review all your app/api/**/route.ts files. Ensure only handler functions are exported. Use the pattern:
+
+ts
+import { myOptions } from "@/lib/my-options";
+const handler = myHandler(myOptions);
+export { handler as GET, handler as POST };
+3. Next.js Dynamic API Route Parameter Types
+Issue: For dynamic API routes ([id]/route.ts, etc.), Next.js 15 expects handler signatures:
+
+ts
+export async function GET(
+  req: NextRequest,
+  context: { params: { id: string } }
+) { ... }
+Mismatched types or extra properties (e.g., custom props not recognized by Next.js) will break build.
+
+Action: Audit all dynamic API routes for correct handler signatures. Remove any surplus properties from the handler argument.
+
+4. SDK Usage — Only Allowed Properties
+Issue: Passing undocumented or incorrect properties to SDK method calls (like your Stream Video debug route):
+
+E.g., only pass properties allowed by the SDK types, such as custom, not members or created_by_id if not documented.
+
+Fix: Always reference the latest SDK documentation and autocomplete/type errors.
+
+Action: Audit API route files that use third-party SDKs. If you encounter object literal errors during build, compare your call signatures against the actual package docs.
+
+5. Missing or Misplaced Environment Variables
+Issue: If you reference process.env.SOMETHING in your code, but do not set it in Vercel’s “Environment Variables,” you’ll hit runtime failures even if the build passes.
+
+Action: Double-check your project needs (DATABASE_URL, API keys, etc.), and set each required value in the Vercel dashboard under project → Settings → Environment Variables.
+
+6. Case Sensitivity and Public File Paths
+Issue: Files/folders behave differently between your local machine (especially Mac/Windows, which are case-insensitive) and Vercel’s Linux environment (case-sensitive). A typo in file imports or public asset references may cause runtime 404s.
+
+Action: Audit all file/folder imports, especially in /public and /app, to ensure case consistency.
+
+7. Dependencies and Node.js Version
+Issue: Some older dependencies/dependency conflicts or unsupported Node.js versions (Vercel uses LTS) can break builds silently or cause runtime incompatibilities.
+
+Action:
+
+Use only up-to-date, stable packages.
+
+Remove old devDependencies (like vite, esbuild, tsx) unless strictly needed.
+
+Use "engines" in package.json to specify the Node version (optional).
+
+Summary Table: Pre-Deployment Checks
+Area	Check For	Solution
+TypeScript errors	.message on unknown error, etc.	Safely narrow errors
+API route exports	Only export HTTP methods, no extra exports	Move helpers/configs to a separate file
+Route handler arguments	Proper signature with allowed keys	Use only documented keys/types
+SDK calls	Allowed properties in object literals	Confirm usage in SDK docs
+Environment variables	All expected vars set in Vercel	Add in project settings
+File naming	Case consistency in imports/assets	Standardize filenames/paths
+Dependencies	Unused/legacy/unsupported devDependencies	Remove old packages, check compatibility
+Important: How to Double-Check
+Search your entire repo for catch ( and ensure no property access on "unknown" errors.
+
+Search for all export const ... in your API route files — should only see HTTP methods (GET, POST, etc.).
+
+Audit third-party SDK calls for only using allowed object keys.
+
+Update Vercel env variables for every key your app references.
+
+Use a clean, root-level package.json — no stray/backup package.json in subfolders.
+
+If you’d like a full static analysis or want me to review a specific open-source repo URL directly, please provide the exact repo link to ensure I reference the latest published code.
+
+Following these guidelines will eliminate nearly all common Next.js + TypeScript + Vercel deployment blockers for your project. If you later hit a specific error, you can paste the log here and I’ll give you step-by-step fixes!

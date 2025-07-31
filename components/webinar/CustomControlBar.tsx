@@ -74,7 +74,8 @@ export function CustomControlBar({
     try {
       await camera.toggle()
     } catch (error) {
-      console.error('Failed to toggle camera:', error)
+      const errorMsg = error instanceof Error ? error.message : typeof error === 'string' ? error : 'Unknown error'
+      console.error('Failed to toggle camera:', errorMsg)
     }
   }
 
@@ -82,7 +83,8 @@ export function CustomControlBar({
     try {
       await microphone.toggle()
     } catch (error) {
-      console.error('Failed to toggle microphone:', error)
+      const errorMsg = error instanceof Error ? error.message : typeof error === 'string' ? error : 'Unknown error'
+      console.error('Failed to toggle microphone:', errorMsg)
     }
   }
 
@@ -90,7 +92,8 @@ export function CustomControlBar({
     try {
       await screenShare.toggle()
     } catch (error) {
-      console.error('Failed to toggle screen share:', error)
+      const errorMsg = error instanceof Error ? error.message : typeof error === 'string' ? error : 'Unknown error'
+      console.error('Failed to toggle screen share:', errorMsg)
     }
   }
 
