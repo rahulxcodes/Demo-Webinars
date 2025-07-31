@@ -67,7 +67,6 @@ export async function GET() {
     console.log('Step 4: Creating call with member...')
     const createResult = await call.getOrCreate({
       data: {
-        created_by_id: testUserId,
         custom: {
           call_type: 'debug_test',
           title: 'Debug Test Call'

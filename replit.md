@@ -22,6 +22,8 @@ Preferred communication style: Simple, everyday language.
 - ✅ **BUILD ERROR RESOLVED**: Application now fully compliant with Next.js 15 routing requirements
 - ✅ **STREAM CLIENT CONSTRUCTOR FIX**: Removed secret parameter from StreamVideoClient({ apiKey }) in debug route
 - ✅ **STREAM SDK COMPATIBILITY**: Fixed client-side streaming initialization for proper frontend usage
+- ✅ **STREAM API DATA STRUCTURE FIX**: Removed invalid created_by_id property from call.getOrCreate data object
+- ✅ **PROPER MEMBER REPRESENTATION**: User correctly represented via members array with admin role
 
 ### January 30, 2025 - FIXED APPLICATION STARTUP ISSUE AND VERIFIED NEXT.JS FUNCTIONALITY
 - ✅ **NEXT.JS STARTUP FIXED**: Application now runs correctly on port 5000 with native Next.js dev server
