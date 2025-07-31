@@ -107,6 +107,13 @@ export async function GET() {
     } catch (liveError) {
       console.error('Go live failed:', liveError)
       
+      const liveErrorMsg =
+        liveError instanceof Error
+          ? liveError.message
+          : typeof liveError === "string"
+            ? liveError
+            : "Unknown error";
+      
       // Try to clean up
       try {
         await call.endCall()
@@ -122,26 +129,44 @@ export async function GET() {
           clientInit: 'PASS',
           callCreation: 'PASS',
           goLive: 'FAIL',
-          error: liveError.message,
+          error: liveErrorMsg,
           callId: testCallId
         }
       })
     }
   } catch (error) {
     console.error('Stream test failed:', error)
+    
+    const errorMsg =
+      error instanceof Error
+        ? error.message
+        : typeof error === "string"
+          ? error
+          : "Unknown error";
+    
+    const errorName =
+      error instanceof Error
+        ? error.name
+        : "UnknownError";
+    
+    const errorStack =
+      error instanceof Error
+        ? error.stack
+        : "No stack trace available";
+    
     console.error('Error details:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
+      message: errorMsg,
+      stack: errorStack,
+      name: errorName
     })
     
     return NextResponse.json({
       success: false,
       error: 'Stream test failed',
       details: {
-        message: error.message,
-        name: error.name,
-        stack: error.stack
+        message: errorMsg,
+        name: errorName,
+        stack: errorStack
       }
     })
   }
