@@ -1,0 +1,82 @@
+TASK: Fix NextAuth authentication API route for Next.js 15 production build
+
+1. **Move `authOptions` export out of API route file:**
+
+   - Create a new file at `app/lib/auth.ts` (or appropriate shared utilities folder).
+
+   - In `app/lib/auth.ts`, define and export the NextAuth options (named `authOptions`). For example:
+
+     ```
+     import { NextAuthOptions } from "next-auth";
+     import GoogleProvider from "next-auth/providers/google";
+     import { PrismaAdapter } from "@auth/prisma-adapter";
+     import prisma from "@/lib/prismadb";
+
+     export const authOptions: NextAuthOptions = {
+       adapter: PrismaAdapter(prisma),
+       providers: [
+         GoogleProvider({
+           clientId: process.env.GOOGLE_CLIENT_ID!,
+           clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+         }),
+         // Add other providers if any
+       ],
+       secret: process.env.NEXTAUTH_SECRET,
+       pages: { signIn: "/signin" }
+       // other config options
+     };
+     ```
+
+2. **Update the API route handler file:**
+
+   - Open `app/api/auth/[...nextauth]/route.ts`.
+
+   - Modify it to only import `authOptions` from the new file and export the route handler functions:
+
+     ```
+     import NextAuth from "next-auth";
+     import { authOptions } from "@/app/lib/auth"; // Adjust path as needed
+
+     const handler = NextAuth(authOptions);
+
+     export { handler as GET, handler as POST };
+     ```
+
+   - **Remove any other exports**, especially do not export `authOptions` from this file.
+
+3. **Commit and push the changes:**
+
+   - Stage all modified/added files.
+
+   - Commit with message:  
+     `"fix: restructure NextAuth route for Next.js 15 compliance"`
+
+   - Push changes to your main GitHub branch.
+
+4. **Verify build success on Vercel after redeploy.**
+
+---
+
+**Please perform this update fully and confirm:**
+
+- The new `authOptions` file exists with proper export.
+
+- The route handler file only exports GET and POST as described.
+
+- No `authOptions` export remains in the API route file.
+
+- All changes committed and pushed to GitHub.
+
+- Share any errors if encountered.
+
+---
+
+This aligns your project with Next.js 15 routing requirements and will fix the build error:
+
+> `"authOptions" is not a valid Route export field`
+
+Thank you!
+
+---
+
+Just copy & paste this prompt to your Replit AI agent. It contains all the code snippets and instructions the agent needs to perform the fix automatically for you.
