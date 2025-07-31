@@ -70,14 +70,14 @@ export async function GET() {
         custom: {
           call_type: 'debug_test',
           title: 'Debug Test Call'
-        }
-      },
-      members: [
-        {
-          user_id: testUserId,
-          role: 'admin'
-        }
-      ]
+        },
+        members: [
+          {
+            user_id: testUserId,
+            role: 'admin'
+          }
+        ]
+      }
     })
     console.log('Call created successfully:', createResult.call.id)
 
