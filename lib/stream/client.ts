@@ -1,18 +1,32 @@
 import { StreamVideoClient } from '@stream-io/video-client'
 
-const apiKey = process.env.STREAM_API_KEY
-const secret = process.env.STREAM_SECRET
+// Lazy initialization to avoid build-time errors
+let streamServerClient: StreamVideoClient | null = null
 
-if (!apiKey || !secret) {
-  throw new Error('Stream API credentials are not configured. Please check your environment variables.')
+function getStreamClient(): StreamVideoClient {
+  if (!streamServerClient) {
+    const apiKey = process.env.STREAM_API_KEY
+    const secret = process.env.STREAM_SECRET
+
+    if (!apiKey || !secret) {
+      throw new Error('Stream API credentials are not configured. Please check your environment variables.')
+    }
+
+    streamServerClient = new StreamVideoClient({
+      apiKey
+    })
+  }
+  
+  return streamServerClient
 }
-
-export const streamServerClient = new StreamVideoClient({
-  apiKey
-})
 
 export async function generateStreamToken(userId: string) {
   try {
+    const secret = process.env.STREAM_SECRET
+    if (!secret) {
+      throw new Error('Stream secret is not configured')
+    }
+
     // Import jwt dynamically
     const jwt = await import('jsonwebtoken')
     
@@ -25,7 +39,7 @@ export async function generateStreamToken(userId: string) {
       exp: now + 3600, // Expire in 1 hour
     }
     
-    const token = jwt.sign(payload, secret!, { algorithm: 'HS256' })
+    const token = jwt.sign(payload, secret, { algorithm: 'HS256' })
     return token
   } catch (error) {
     console.error('Failed to generate Stream token:', error)
@@ -41,8 +55,10 @@ export async function createWebinarCall(
   maxParticipants: number = 1000
 ) {
   try {
+    const client = getStreamClient()
+    
     // Connect as the host user with proper role
-    await streamServerClient.connectUser(
+    await client.connectUser(
       { 
         id: createdByUserId, 
         name: 'Host'
@@ -50,7 +66,7 @@ export async function createWebinarCall(
       await generateStreamToken(createdByUserId)
     )
 
-    const call = streamServerClient.call('livestream', callId)
+    const call = client.call('livestream', callId)
     
     const callData = {
       created_by_id: createdByUserId,
@@ -73,7 +89,7 @@ export async function createWebinarCall(
     console.log('Stream call created successfully:', callResponse)
     
     // Disconnect after creating the call
-    await streamServerClient.disconnectUser()
+    await client.disconnectUser()
     
     return call
   } catch (error) {
@@ -96,8 +112,10 @@ export async function createWebinarCall(
 
 export async function startWebinarCall(callId: string, hostUserId: string = 'default-host') {
   try {
+    const client = getStreamClient()
+    
     // Connect as the host user with admin role
-    await streamServerClient.connectUser(
+    await client.connectUser(
       { 
         id: hostUserId, 
         name: 'Webinar Host'
@@ -105,7 +123,7 @@ export async function startWebinarCall(callId: string, hostUserId: string = 'def
       await generateStreamToken(hostUserId)
     )
 
-    const call = streamServerClient.call('livestream', callId)
+    const call = client.call('livestream', callId)
     
     // Update call permissions before going live
     await call.update({
@@ -122,7 +140,7 @@ export async function startWebinarCall(callId: string, hostUserId: string = 'def
     await call.goLive()
     
     // Disconnect after starting the call
-    await streamServerClient.disconnectUser()
+    await client.disconnectUser()
     
     return call
   } catch (error) {
